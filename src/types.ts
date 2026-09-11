@@ -7,7 +7,7 @@ export interface AspectRatioConfig {
   label: string;
 }
 
-export type ModuleType = 'code' | 'kpi' | 'chart' | 'chat' | 'image';
+export type ModuleType = 'code' | 'kpi' | 'chart' | 'chat' | 'image' | 'text';
 
 export type LogoType = 'generic' | 'monogram' | 'text' | 'aleric' | 'custom';
 
@@ -84,6 +84,9 @@ export type ShapeSizeVariant = 'small' | 'medium' | 'large';
 export interface KPICard {
   val: string;
   label: string;
+  prefix?: string;
+  suffix?: string;
+  trend?: 'up' | 'down' | 'none';
   borderTop?: boolean;
 }
 
@@ -111,6 +114,9 @@ export interface PostTemplate {
   companyName: string;
   logoType?: LogoType;
   logoSize?: number;
+  headerShowLogo?: boolean;
+  headerSize?: number;
+  titleFont?: string;
   title: string;
   titleSize?: number;
   titleColor?: TitleColorMode;
@@ -124,6 +130,13 @@ export interface PostTemplate {
   moduleFontSize?: number;
   module?: ModuleType;
   code?: string;
+  codeFilename?: string;
+  codeLanguage?: string;
+  codeShowLineNumbers?: boolean;
+  chatContactName?: string;
+  chatOnlineStatus?: string;
+  contentHighlightText?: string;
+  contentHighlightStyle?: 'card' | 'quote' | 'banner';
   tags: string;
   bgPattern?: PatternType;
   patternScale?: number;
@@ -157,7 +170,15 @@ export interface PostState {
   category: string;
   aspectRatio: AspectRatioKey;
 
-  // Content (Step 1)
+  // Typography & Content (Step 1)
+  titleFont: string;
+
+  // Header in Step 1
+  companyName: string;
+  headerShowLogo: boolean;
+  headerSize: number; // 10 a 24 px
+  logoSize: number; // 24 a 96 px
+
   title: string;
   titleSize: number;
   titleColorMode: TitleColorMode;
@@ -175,27 +196,31 @@ export interface PostState {
   moduleFontSize: number; // 11 a 24 px
   activeModule: ModuleType;
   code: string;
+  codeFilename: string;
+  codeLanguage: string;
+  codeShowLineNumbers: boolean;
   kpis: KPICard[];
   chartBars: ChartBar[];
   chatMessages: ChatMessage[];
+  chatContactName: string;
+  chatOnlineStatus: string;
+  contentHighlightText: string;
+  contentHighlightStyle: 'card' | 'quote' | 'banner';
   images: CustomImage[];
   imageBorderStyle: ImageBorderStyle;
 
-  // Footer text in Step 1
+  // Footer in Step 1
   cta: string;
   handle: string;
   ctaOrder: CtaOrder;
   ctaAlign: CtaAlign;
+  footerSize: number; // 10 a 24 px
 
-  // Style & Branding (Step 2)
-  companyName: string;
+  // Style, Logo & Containers (Step 2)
   logoType: LogoType;
-  logoSize: number; // 24 a 96 px
   customLogoUrl: string | null;
-  titleFont: string;
   headerShape: HeaderShape;
   footerShape: FooterShape;
-  footerSize: number; // 10 a 24 px
 
   // Background, Lights & Perimeter Shapes (Step 3)
   bgPattern: PatternType;

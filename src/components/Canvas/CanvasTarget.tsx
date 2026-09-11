@@ -167,30 +167,60 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
     moduleMinH = 'min-h-[360px]';
   }
 
-  // Altura del logo configurable
+  // Altura del logo y tamaño de fuente de cabecera configurables
   const logoH = state.logoSize || 44;
+  const headerFontSize = state.headerSize || 13;
 
   // Render del logo
   const renderLogoElement = () => {
     const name = state.companyName || 'Aleric Dev';
+
+    // Si el usuario desactiva el logo en la cabecera, mostrar solo el nombre en tipografía destacada
+    if (state.headerShowLogo === false) {
+      return (
+        <div
+          className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'} tracking-tight`}
+          style={{ fontSize: `${Math.round(headerFontSize * 1.55)}px` }}
+        >
+          {name}
+        </div>
+      );
+    }
+
     if (state.logoType === 'custom' && state.customLogoUrl) {
       return (
-        <img
-          src={state.customLogoUrl}
-          alt="Logo"
-          className="object-contain filter drop-shadow-md transition-all"
-          style={{ height: `${logoH}px` }}
-        />
+        <div className="flex items-center gap-3">
+          <img
+            src={state.customLogoUrl}
+            alt="Logo"
+            className="object-contain filter drop-shadow-md transition-all"
+            style={{ height: `${logoH}px` }}
+          />
+          <span
+            className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'} tracking-tight`}
+            style={{ fontSize: `${Math.round(headerFontSize * 1.35)}px` }}
+          >
+            {name}
+          </span>
+        </div>
       );
     }
     if (state.logoType === 'aleric') {
       return (
-        <img
-          src={isLight ? LOGO_DARK : LOGO_WHITE}
-          alt="Aleric Dev"
-          className="object-contain filter drop-shadow-md transition-all"
-          style={{ height: `${logoH}px` }}
-        />
+        <div className="flex items-center gap-3">
+          <img
+            src={isLight ? LOGO_DARK : LOGO_WHITE}
+            alt="Aleric Dev"
+            className="object-contain filter drop-shadow-md transition-all"
+            style={{ height: `${logoH}px` }}
+          />
+          <span
+            className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'} tracking-tight`}
+            style={{ fontSize: `${Math.round(headerFontSize * 1.35)}px` }}
+          >
+            {name}
+          </span>
+        </div>
       );
     }
     if (state.logoType === 'monogram') {
@@ -198,7 +228,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
       return (
         <div className="flex items-center gap-3">
           <div
-            className="rounded-2xl flex items-center justify-center font-mono font-extrabold text-white shadow-lg transition-all"
+            className="rounded-2xl flex items-center justify-center font-mono font-extrabold text-white shadow-lg transition-all shrink-0"
             style={{
               width: `${logoH}px`,
               height: `${logoH}px`,
@@ -211,7 +241,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
           </div>
           <span
             className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'} tracking-tight`}
-            style={{ fontSize: `${Math.round(logoH * 0.55)}px` }}
+            style={{ fontSize: `${Math.round(headerFontSize * 1.35)}px` }}
           >
             {name}
           </span>
@@ -222,7 +252,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
       return (
         <div
           className={`font-mono font-extrabold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}
-          style={{ fontSize: `${Math.round(logoH * 0.65)}px` }}
+          style={{ fontSize: `${Math.round(headerFontSize * 1.6)}px` }}
         >
           {name}<span style={{ color: state.currentColor }}>.</span>
         </div>
@@ -451,11 +481,12 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
 
         <div
           id="view-badge"
-          className="px-5 py-2 rounded-full text-sm font-mono font-bold tracking-wider uppercase flex items-center gap-2.5 transition-all shadow-sm"
+          className="px-5 py-2 rounded-full font-mono font-bold tracking-wider uppercase flex items-center gap-2.5 transition-all shadow-sm shrink-0"
           style={{
             backgroundColor: isLight ? 'rgba(255,255,255,0.9)' : 'rgba(15, 23, 42, 0.85)',
             border: `1.5px solid ${state.currentColor}`,
-            color: isLight ? '#0F172A' : '#FFFFFF'
+            color: isLight ? '#0F172A' : '#FFFFFF',
+            fontSize: `${headerFontSize}px`
           }}
         >
           <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: state.currentColor }} />
@@ -537,49 +568,161 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
               padding: `${Math.round(24 * modScale)}px`
             }}
           >
-            {/* 1. MÓDULO DE CÓDIGO */}
-            {state.activeModule === 'code' && (
-              <div className="flex flex-col h-auto">
-                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3 mb-3.5 transition-all">
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-3.5 h-3.5 rounded-full bg-red-500/80" />
-                    <span className="w-3.5 h-3.5 rounded-full bg-yellow-500/80" />
-                    <span className="w-3.5 h-3.5 rounded-full bg-emerald-500/80" />
-                    <span className="text-xs font-mono text-slate-400 pl-2">architecture/core.py</span>
+            {/* 0. MÓDULO DE TEXTO / GRAN CTA / CITA EDITORIAL */}
+            {state.activeModule === 'text' && (
+              <div className="flex flex-col items-center justify-center text-center p-3 w-full h-auto">
+                {state.contentHighlightStyle === 'quote' ? (
+                  <div className="relative w-full flex flex-col items-center py-4">
+                    <span
+                      className="font-serif font-black select-none pointer-events-none absolute -top-8 left-4 opacity-25"
+                      style={{ fontSize: `${Math.round(96 * modScale)}px`, color: state.currentColor }}
+                    >
+                      “
+                    </span>
+                    <blockquote
+                      className="italic font-medium leading-relaxed z-10 px-8 max-w-[92%]"
+                      style={{
+                        fontSize: `${Math.round(modFontSize * 1.55)}px`,
+                        color: isLight ? '#0F172A' : '#F8FAFC'
+                      }}
+                    >
+                      {state.contentHighlightText || 'Automatiza tus flujos operativos y acelera el crecimiento de tu empresa con software a la medida.'}
+                    </blockquote>
                   </div>
-                  <span className="text-[11px] font-mono text-slate-500">utf-8</span>
+                ) : state.contentHighlightStyle === 'banner' ? (
+                  <div
+                    className="w-full rounded-2xl p-6 flex flex-col items-center justify-center gap-3 border shadow-xl"
+                    style={{
+                      background: `linear-gradient(135deg, rgba(${rgb}, 0.16) 0%, rgba(15, 23, 42, 0.5) 100%)`,
+                      borderColor: `rgba(${rgb}, 0.35)`
+                    }}
+                  >
+                    <span
+                      className="px-4 py-1 rounded-full text-xs font-mono font-bold tracking-widest uppercase shadow-sm"
+                      style={{
+                        backgroundColor: state.currentColor,
+                        color: '#FFFFFF'
+                      }}
+                    >
+                      LLAMADO A LA ACCIÓN
+                    </span>
+                    <p
+                      className="font-extrabold tracking-tight text-center leading-snug px-4"
+                      style={{
+                        fontSize: `${Math.round(modFontSize * 1.55)}px`,
+                        color: isLight ? '#0F172A' : '#FFFFFF'
+                      }}
+                    >
+                      {state.contentHighlightText || '¿Listo para dar el siguiente salto tecnológico? Escríbenos y transformemos tu visión en código.'}
+                    </p>
+                  </div>
+                ) : (
+                  <div
+                    className="w-full rounded-2xl p-6 flex flex-col items-center justify-center gap-3 border"
+                    style={{
+                      backgroundColor: isLight ? 'rgba(255,255,255,0.7)' : 'rgba(15, 23, 42, 0.5)',
+                      borderColor: 'rgba(255, 255, 255, 0.12)',
+                      boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
+                    }}
+                  >
+                    <p
+                      className="font-bold tracking-tight text-center leading-relaxed max-w-[95%]"
+                      style={{
+                        fontSize: `${Math.round(modFontSize * 1.45)}px`,
+                        color: isLight ? '#0F172A' : '#F1F5F9'
+                      }}
+                    >
+                      {state.contentHighlightText || 'Soluciones tecnológicas escalables diseñadas para operaciones de alto rendimiento.'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 1. MÓDULO DE CÓDIGO PROFESIONAL */}
+            {state.activeModule === 'code' && (
+              <div className="flex flex-col h-auto rounded-xl overflow-hidden border border-white/[0.08] bg-slate-950/90 shadow-2xl">
+                <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3 bg-slate-900/80">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#FF5F56] shadow-xs" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#FFBD2E] shadow-xs" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#27C93F] shadow-xs" />
+                    <div className="flex items-center gap-1.5 pl-3 border-l border-white/10">
+                      <span className="text-xs font-mono text-slate-300 font-semibold">
+                        {state.codeFilename || 'system/migrate.ts'}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-mono text-indigo-400 font-bold uppercase px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20">
+                    {state.codeLanguage || 'typescript'}
+                  </span>
                 </div>
+
                 <div
-                  className="font-jetbrains text-emerald-400 font-medium whitespace-pre-wrap transition-all leading-relaxed"
+                  className="p-5 font-jetbrains flex gap-4 leading-relaxed overflow-hidden"
                   style={{
-                    fontSize: `${Math.round(modFontSize * 1.15)}px`
+                    fontSize: `${Math.round(modFontSize * 1.12)}px`
                   }}
                 >
-                  {state.code}
+                  {state.codeShowLineNumbers !== false && (
+                    <div className="select-none text-slate-600 text-right pr-2 border-r border-slate-800/80 flex flex-col font-mono text-xs">
+                      {(state.code || '').split('\n').map((_, i) => (
+                        <span key={i} className="leading-relaxed">{i + 1}</span>
+                      ))}
+                    </div>
+                  )}
+
+                  <pre className="text-emerald-400 font-medium whitespace-pre-wrap flex-1 overflow-x-auto leading-relaxed m-0">
+                    <code>{state.code}</code>
+                  </pre>
                 </div>
               </div>
             )}
 
-            {/* 2. MÓDULO DE KPIS */}
+            {/* 2. MÓDULO DE KPIS ENRIQUECIDOS */}
             {state.activeModule === 'kpi' && (
-              <div className="grid grid-cols-2 gap-4 h-auto">
+              <div className="grid grid-cols-2 gap-4 h-auto w-full">
                 {state.kpis.map((kpi, idx) => (
                   <div
                     key={idx}
-                    className="p-5 rounded-xl bg-slate-900/60 border border-white/10 flex flex-col justify-center transition-all shadow-sm"
+                    className="p-5 rounded-2xl bg-slate-900/60 border border-white/10 flex flex-col justify-center transition-all shadow-md relative overflow-hidden"
                     style={{
-                      borderTopColor: kpi.borderTop ? state.currentColor : undefined,
-                      borderTopWidth: kpi.borderTop ? '3px' : '1px'
+                      borderTopColor: kpi.borderTop !== false ? state.currentColor : undefined,
+                      borderTopWidth: kpi.borderTop !== false ? '4px' : '1px'
                     }}
                   >
+                    <div className="flex items-baseline gap-1.5 flex-wrap">
+                      {kpi.prefix && (
+                        <span className="text-slate-400 font-mono font-bold" style={{ fontSize: `${Math.round(24 * modScale)}px` }}>
+                          {kpi.prefix}
+                        </span>
+                      )}
+                      <span
+                        className="font-mono font-extrabold text-white tracking-tight"
+                        style={{ fontSize: `${Math.round(44 * modScale)}px` }}
+                      >
+                        {kpi.val}
+                      </span>
+                      {kpi.suffix && (
+                        <span className="text-slate-400 font-mono font-bold" style={{ fontSize: `${Math.round(24 * modScale)}px` }}>
+                          {kpi.suffix}
+                        </span>
+                      )}
+
+                      {kpi.trend === 'up' && (
+                        <span className="ml-auto text-[11px] font-mono font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-md flex items-center gap-0.5">
+                          ▲ Crecimiento
+                        </span>
+                      )}
+                      {kpi.trend === 'down' && (
+                        <span className="ml-auto text-[11px] font-mono font-bold text-rose-400 bg-rose-500/15 border border-rose-500/30 px-2 py-0.5 rounded-md flex items-center gap-0.5">
+                          ▼ Reducción
+                        </span>
+                      )}
+                    </div>
+
                     <span
-                      className="font-mono font-extrabold text-white tracking-tight"
-                      style={{ fontSize: `${Math.round(44 * modScale)}px` }}
-                    >
-                      {kpi.val}
-                    </span>
-                    <span
-                      className="font-mono text-slate-400 font-bold uppercase tracking-wider pt-1"
+                      className="font-mono text-slate-400 font-bold uppercase tracking-wider pt-2 truncate"
                       style={{ fontSize: `${Math.max(10, Math.round(modFontSize * 0.85))}px` }}
                     >
                       {kpi.label}
@@ -625,31 +768,95 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
               </div>
             )}
 
-            {/* 4. MÓDULO DE CHAT */}
+            {/* 4. MÓDULO DE CHAT WHATSAPP AUTÉNTICO */}
             {state.activeModule === 'chat' && (
-              <div className="flex flex-col gap-3.5 h-auto w-full">
-                <div className="flex items-center justify-between border-b border-white/[0.08] pb-2 text-xs font-mono text-slate-400">
-                  <span>Chatbot WhatsApp API</span>
-                  <span className="flex items-center gap-1.5 text-emerald-400">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>En línea</span>
-                  </span>
-                </div>
-                <div className="space-y-3 transition-all">
-                  {state.chatMessages.map((msg, idx) => (
+              <div className="flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-white/10 w-full h-auto">
+                {/* Barra de cabecera de contacto WhatsApp */}
+                <div
+                  className="flex items-center justify-between px-5 py-3 border-b border-white/[0.08]"
+                  style={{
+                    backgroundColor: isLight ? '#F0F2F5' : '#1F2C34'
+                  }}
+                >
+                  <div className="flex items-center gap-3">
                     <div
-                      key={idx}
-                      className={
-                        msg.sender === 'client'
-                          ? 'max-w-[85%] bg-slate-800/90 text-slate-200 rounded-2xl rounded-tl-sm px-5 py-3 text-sm leading-relaxed border border-slate-700/50 shadow-sm'
-                          : 'ml-auto max-w-[88%] bg-emerald-950/80 border border-emerald-500/40 text-emerald-100 rounded-2xl rounded-tr-sm px-5 py-3 text-sm leading-relaxed shadow-sm'
-                      }
-                      style={{ fontSize: `${Math.round(modFontSize * 1.05)}px` }}
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-white font-mono font-bold shadow-sm shrink-0"
+                      style={{ backgroundColor: state.currentColor }}
                     >
-                      <p>{msg.text}</p>
-                      <span className="text-[10px] block text-right mt-1 opacity-60">{msg.time}</span>
+                      {(state.chatContactName || 'A').charAt(0).toUpperCase()}
                     </div>
-                  ))}
+                    <div className="flex flex-col">
+                      <span
+                        className={`font-mono font-bold text-sm tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}
+                      >
+                        {state.chatContactName || 'Aleric Dev Bot'}
+                      </span>
+                      <div className="flex items-center gap-1.5 text-xs font-mono">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="text-emerald-400 font-medium">
+                          {state.chatOnlineStatus || 'en línea'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-slate-400">
+                    <svg className="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <svg className="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Fondo de mensajes WhatsApp */}
+                <div
+                  className="p-5 space-y-3"
+                  style={{
+                    backgroundColor: isLight ? '#EFEAE2' : '#0B141A'
+                  }}
+                >
+                  {state.chatMessages.map((msg, idx) => {
+                    const isBot = msg.sender === 'bot';
+                    return (
+                      <div
+                        key={idx}
+                        className={`flex flex-col ${isBot ? 'items-end' : 'items-start'}`}
+                      >
+                        <div
+                          className={`relative max-w-[85%] px-4 py-2.5 rounded-2xl shadow-md transition-all ${
+                            isBot
+                              ? isLight
+                                ? 'bg-[#D9FDD3] text-[#111B21] rounded-tr-xs'
+                                : 'bg-[#005C4B] text-[#E9EDEF] rounded-tr-xs'
+                              : isLight
+                                ? 'bg-[#FFFFFF] text-[#111B21] rounded-tl-xs'
+                                : 'bg-[#202C33] text-[#E9EDEF] rounded-tl-xs'
+                          }`}
+                          style={{ fontSize: `${Math.round(modFontSize * 1.05)}px` }}
+                        >
+                          <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+
+                          <div className="flex items-center justify-end gap-1.5 mt-1 select-none">
+                            <span
+                              className={`text-[10px] font-mono ${
+                                isLight ? 'text-slate-500' : 'text-slate-400'
+                              }`}
+                            >
+                              {msg.time}
+                            </span>
+                            {/* Doble check azul WhatsApp */}
+                            {isBot && (
+                              <svg className="w-4 h-3 text-[#53BDEB]" viewBox="0 0 16 11" fill="currentColor">
+                                <path d="M11.07 0.93a.75.75 0 00-1.06 0L5.75 5.19 4.28 3.72a.75.75 0 00-1.06 1.06l2 2a.75.75 0 001.06 0l4.79-4.79a.75.75 0 000-1.06zM15.07 0.93a.75.75 0 00-1.06 0l-5.79 5.79.53.53a.75.75 0 001.06 0l4.2-4.2a.75.75 0 000-1.06l1.06-1.06z"/>
+                              </svg>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
