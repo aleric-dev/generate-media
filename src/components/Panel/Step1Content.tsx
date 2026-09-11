@@ -1,6 +1,6 @@
 import React from 'react';
-import { PostState, ModuleType, ModuleSize, TitleColorMode } from '../../types';
-import { Sparkles, Type, Layers, Terminal, TrendingUp, BarChart3, MessageSquare, Image, Plus, Trash2 } from 'lucide-react';
+import { PostState, ModuleType, ModuleSize, TitleColorMode, TextAlign, CtaOrder, CtaAlign } from '../../types';
+import { Sparkles, Type, Layers, Terminal, TrendingUp, BarChart3, MessageSquare, Image, Plus, Trash2, AlignLeft, AlignCenter, AlignRight, ArrowDownUp } from 'lucide-react';
 
 interface Step1ContentProps {
   state: PostState;
@@ -114,6 +114,46 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
           placeholder="Escribe aquí el título principal de tu post..."
           className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none leading-relaxed"
         />
+
+        {/* Alineación de Textos (Título, Subtítulo, Badges) */}
+        <div className="space-y-1 pt-1">
+          <label className="text-[11px] text-slate-300 font-medium block">Alineación del Contenido:</label>
+          <div className="grid grid-cols-3 gap-1.5 text-xs font-mono">
+            <button
+              type="button"
+              onClick={() => updateState({ textAlign: 'left' })}
+              className={`py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 transition ${
+                state.textAlign === 'left'
+                  ? 'bg-indigo-600 text-white font-bold'
+                  : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              <AlignLeft className="w-3.5 h-3.5" /> Izquierda
+            </button>
+            <button
+              type="button"
+              onClick={() => updateState({ textAlign: 'center' })}
+              className={`py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 transition ${
+                state.textAlign === 'center'
+                  ? 'bg-indigo-600 text-white font-bold'
+                  : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              <AlignCenter className="w-3.5 h-3.5" /> Centro
+            </button>
+            <button
+              type="button"
+              onClick={() => updateState({ textAlign: 'right' })}
+              className={`py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 transition ${
+                state.textAlign === 'right'
+                  ? 'bg-indigo-600 text-white font-bold'
+                  : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              <AlignRight className="w-3.5 h-3.5" /> Derecha
+            </button>
+          </div>
+        </div>
 
         {/* Slider Tamaño Título */}
         <div className="space-y-1">
@@ -311,9 +351,9 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
             </div>
 
             {/* Selector de Escala / Altura del Módulo */}
-            <div className="p-2.5 bg-slate-950 rounded-xl border border-slate-800 space-y-1.5">
+            <div className="p-2.5 bg-slate-950 rounded-xl border border-slate-800 space-y-2.5">
               <div className="flex items-center justify-between text-[11px] font-mono">
-                <span className="text-slate-300">Escala / Altura del Módulo:</span>
+                <span className="text-slate-300">Preset de Altura del Módulo:</span>
                 <span className="text-indigo-400 font-bold uppercase">{state.moduleSize}</span>
               </div>
               <div className="grid grid-cols-3 gap-1.5 text-xs font-mono">
@@ -331,6 +371,40 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
                     {size === 'compact' ? 'Compacto' : size === 'spacious' ? 'Amplio' : 'Normal'}
                   </button>
                 ))}
+              </div>
+
+              {/* Slider de Escala Interna de Componentes */}
+              <div className="space-y-1 pt-1 border-t border-slate-800/80">
+                <div className="flex justify-between text-[10px] font-mono text-slate-400">
+                  <span>Zoom / Escala interna componentes:</span>
+                  <span className="text-indigo-400 font-bold">{Math.round((state.moduleScale || 1.0) * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={70}
+                  max={140}
+                  step={5}
+                  value={Math.round((state.moduleScale || 1.0) * 100)}
+                  onChange={(e) => updateState({ moduleScale: parseInt(e.target.value, 10) / 100 })}
+                  className="w-full accent-indigo-500 cursor-pointer"
+                />
+              </div>
+
+              {/* Slider de Tamaño de Fuente Interna */}
+              <div className="space-y-1">
+                <div className="flex justify-between text-[10px] font-mono text-slate-400">
+                  <span>Tamaño de fuente interno (código/textos):</span>
+                  <span className="text-indigo-400 font-bold">{state.moduleFontSize || 14} px</span>
+                </div>
+                <input
+                  type="range"
+                  min={11}
+                  max={24}
+                  step={1}
+                  value={state.moduleFontSize || 14}
+                  onChange={(e) => updateState({ moduleFontSize: parseInt(e.target.value, 10) })}
+                  className="w-full accent-indigo-500 cursor-pointer"
+                />
               </div>
             </div>
 
@@ -533,15 +607,77 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
           />
         </div>
 
-        <div>
-          <label className="text-[11px] text-slate-300 font-medium mb-1 block">Handle / Sitio Web Oficial:</label>
-          <input
-            type="text"
-            value={state.handle}
-            onChange={(e) => updateState({ handle: e.target.value })}
-            placeholder="Ej: aleric.dev o tuweb.com"
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
-          />
+        {/* Orden y Alineación del CTA y Handle */}
+        <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800/80 text-xs font-mono">
+          <div>
+            <label className="text-[10px] text-slate-400 block mb-1">Orden de Elementos:</label>
+            <div className="grid grid-cols-2 gap-1">
+              <button
+                type="button"
+                onClick={() => updateState({ ctaOrder: 'cta-first' })}
+                className={`py-1 px-1.5 rounded text-center transition text-[11px] ${
+                  (state.ctaOrder || 'cta-first') === 'cta-first'
+                    ? 'bg-indigo-600 text-white font-bold'
+                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                CTA ➔ Handle
+              </button>
+              <button
+                type="button"
+                onClick={() => updateState({ ctaOrder: 'handle-first' })}
+                className={`py-1 px-1.5 rounded text-center transition text-[11px] ${
+                  state.ctaOrder === 'handle-first'
+                    ? 'bg-indigo-600 text-white font-bold'
+                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                Handle ➔ CTA
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-[10px] text-slate-400 block mb-1">Alineación en Canvas:</label>
+            <div className="grid grid-cols-3 gap-1">
+              <button
+                type="button"
+                onClick={() => updateState({ ctaAlign: 'left' })}
+                className={`py-1 px-1 rounded flex items-center justify-center transition ${
+                  state.ctaAlign === 'left'
+                    ? 'bg-indigo-600 text-white font-bold'
+                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
+                title="Izquierda"
+              >
+                <AlignLeft className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => updateState({ ctaAlign: 'center' })}
+                className={`py-1 px-1 rounded flex items-center justify-center transition ${
+                  (state.ctaAlign || 'center') === 'center'
+                    ? 'bg-indigo-600 text-white font-bold'
+                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
+                title="Centrado"
+              >
+                <AlignCenter className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => updateState({ ctaAlign: 'between' })}
+                className={`py-1 px-1 rounded flex items-center justify-center transition text-[10px] ${
+                  state.ctaAlign === 'between'
+                    ? 'bg-indigo-600 text-white font-bold'
+                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
+                title="Extremos (Separados)"
+              >
+                Extremos
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

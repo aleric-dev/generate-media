@@ -24,14 +24,14 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const stepTitles = {
     1: 'PASO 1: CONTENIDO & MENSAJE',
     2: 'PASO 2: ESTILO VISUAL & MARCA',
-    3: 'PASO 3: FONDOS, LUCES & FORMAS',
+    3: 'PASO 3: BACKGROUND, LUCES & FORMAS',
     4: 'PASO 4: FORMATO & EXPORTACIÓN'
   };
 
   const steps = [
     { id: 1 as const, label: '1. Texto', icon: FileText },
     { id: 2 as const, label: '2. Estilo', icon: Palette },
-    { id: 3 as const, label: '3. Fondos', icon: Sparkles },
+    { id: 3 as const, label: '3. Background', icon: Sparkles },
     { id: 4 as const, label: '4. Export', icon: Download },
   ];
 

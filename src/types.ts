@@ -13,6 +13,12 @@ export type LogoType = 'generic' | 'monogram' | 'text' | 'aleric' | 'custom';
 
 export type TitleColorMode = 'contrast' | 'category' | 'custom';
 
+export type TextAlign = 'left' | 'center' | 'right';
+
+export type CtaOrder = 'cta-first' | 'handle-first';
+
+export type CtaAlign = 'left' | 'center' | 'right' | 'between';
+
 export type SubtitlePos = 'below' | 'above';
 
 export type ModuleSize = 'compact' | 'normal' | 'spacious';
@@ -46,9 +52,8 @@ export type PatternVignette =
   | 'gradient-lateral' 
   | 'mask-center';
 
-export type AccentShape = 'glow' | 'circles' | 'squares' | 'diamonds' | 'lines' | 'none';
-
-export type ShapeSizeVariant = 'small' | 'medium' | 'large';
+// Luces ambientales independientes
+export type LightType = 'glow' | 'spotlight' | 'aurora' | 'dual-beams' | 'none';
 
 export type LightDirection = 
   | 'dual-corners-1' 
@@ -58,6 +63,23 @@ export type LightDirection =
   | 'bottom' 
   | 'sides' 
   | 'center';
+
+// Formas geométricas perimetrales vítreas (solo en los bordes, nada en el centro)
+export type ShapeType = 
+  | 'glass-orbs' 
+  | 'glass-cards' 
+  | 'cyber-brackets' 
+  | 'tech-squares' 
+  | 'mixed-glass' 
+  | 'none';
+
+export type ShapePlacement = 
+  | 'corners' 
+  | 'periphery' 
+  | 'sides' 
+  | 'random-edges';
+
+export type ShapeSizeVariant = 'small' | 'medium' | 'large';
 
 export interface KPICard {
   val: string;
@@ -88,32 +110,43 @@ export interface PostTemplate {
   color: string;
   companyName: string;
   logoType?: LogoType;
+  logoSize?: number;
   title: string;
   titleSize?: number;
   titleColor?: TitleColorMode;
+  textAlign?: TextAlign;
   subtitle: string;
   subtitleSize?: number;
   subtitlePos?: SubtitlePos;
   moduleVisible?: boolean;
   moduleSize?: ModuleSize;
+  moduleScale?: number;
+  moduleFontSize?: number;
   module?: ModuleType;
   code?: string;
   tags: string;
   bgPattern?: PatternType;
   patternScale?: number;
   patternVignette?: PatternVignette;
-  accentShape?: AccentShape;
-  shapeSizeVariant?: ShapeSizeVariant;
+  lightType?: LightType;
   lightDirection?: LightDirection;
   lightIntensity?: number;
+  shapeType?: ShapeType;
+  shapePlacement?: ShapePlacement;
+  shapeSizeVariant?: ShapeSizeVariant;
+  shapeOpacity?: number;
+  accentShape?: string;
   headerShape?: HeaderShape;
   footerShape?: FooterShape;
+  footerSize?: number;
   cta?: string;
   handle?: string;
+  ctaOrder?: CtaOrder;
+  ctaAlign?: CtaAlign;
 }
 
 export interface PostState {
-  // Navigation & View
+  // Navigation & View (2 páginas independientes)
   viewMode: 'welcome' | 'editor';
   activeStep: 1 | 2 | 3 | 4;
   panelOpen: boolean;
@@ -129,14 +162,17 @@ export interface PostState {
   titleSize: number;
   titleColorMode: TitleColorMode;
   titleCustomColor: string;
+  textAlign: TextAlign;
   subtitle: string;
   subtitleSize: number;
   subtitlePos: SubtitlePos;
   tags: string;
   
-  // Central Module
+  // Central Module & Scaling
   moduleVisible: boolean;
   moduleSize: ModuleSize;
+  moduleScale: number; // 0.7 a 1.4
+  moduleFontSize: number; // 11 a 24 px
   activeModule: ModuleType;
   code: string;
   kpis: KPICard[];
@@ -148,24 +184,36 @@ export interface PostState {
   // Footer text in Step 1
   cta: string;
   handle: string;
+  ctaOrder: CtaOrder;
+  ctaAlign: CtaAlign;
 
   // Style & Branding (Step 2)
   companyName: string;
   logoType: LogoType;
+  logoSize: number; // 24 a 96 px
   customLogoUrl: string | null;
   titleFont: string;
   headerShape: HeaderShape;
   footerShape: FooterShape;
+  footerSize: number; // 10 a 24 px
 
-  // Background & Shapes (Step 3)
+  // Background, Lights & Perimeter Shapes (Step 3)
   bgPattern: PatternType;
   patternScale: number;
   patternVignette: PatternVignette;
   customPatternUrl: string | null;
-  accentShape: AccentShape;
-  shapeSizeVariant: ShapeSizeVariant;
+  
+  // Luces
+  lightType: LightType;
   lightDirection: LightDirection;
-  lightIntensity: number;
+  lightIntensity: number; // 0 a 100
+
+  // Formas vítreas (perímetro / bordes)
+  shapeType: ShapeType;
+  shapePlacement: ShapePlacement;
+  shapeSizeVariant: ShapeSizeVariant;
+  shapeOpacity: number; // 10 a 100
+  shapeSeed: number; // semilla para random-edges
 
   // Zoom
   zoomMode: 'fit-height' | 'fit-width' | '100%' | 'manual';

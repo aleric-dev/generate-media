@@ -12,15 +12,21 @@ import html2canvas from 'html2canvas';
 export const App: React.FC = () => {
   // Canvas DOM ref para exportación
   const canvasRef = useRef<HTMLDivElement>(null);
+  // Viewport DOM ref para listener de zoom con Ctrl + Rueda
+  const viewportRef = useRef<HTMLDivElement>(null);
 
   // Modales
   const [templatesModalOpen, setTemplatesModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState('100% idéntico a pantalla');
 
+  // Detección de ruta inicial: / o /editor
+  const initialPath = typeof window !== 'undefined' ? window.location.pathname : '/';
+  const initialViewMode: 'welcome' | 'editor' = initialPath.startsWith('/editor') ? 'editor' : 'welcome';
+
   // Estado maestro del Post Studio v0.3
   const [state, setState] = useState<PostState>({
-    viewMode: 'welcome', // Página 1: 'welcome' | Página 2: 'editor'
+    viewMode: initialViewMode, // Página 1: '/' ('welcome') | Página 2: '/editor' ('editor')
     activeStep: 1,
     panelOpen: true,
 
@@ -33,6 +39,7 @@ export const App: React.FC = () => {
     titleSize: 48,
     titleColorMode: 'contrast',
     titleCustomColor: '#FFFFFF',
+    textAlign: 'center',
     subtitle: 'Centraliza pedidos, inventarios y permisos en una sola plataforma web en la nube sin errores de fórmula.',
     subtitleSize: 24,
     subtitlePos: 'below',
@@ -40,6 +47,8 @@ export const App: React.FC = () => {
 
     moduleVisible: true,
     moduleSize: 'normal',
+    moduleScale: 1.0,
+    moduleFontSize: 14,
     activeModule: 'code',
     code: "system.migrate({ from: 'Inventario_Final_v3.xlsx', to: 'CloudDB' });",
     kpis: [
@@ -61,22 +70,34 @@ export const App: React.FC = () => {
 
     cta: 'Escríbenos y migramos tu operación a la nube.',
     handle: 'aleric.dev',
+    ctaOrder: 'cta-first',
+    ctaAlign: 'between',
 
     companyName: 'Aleric Dev',
     logoType: 'generic',
+    logoSize: 44,
     customLogoUrl: null,
     titleFont: 'font-space-mono',
     headerShape: 'line',
     footerShape: 'line',
+    footerSize: 13,
 
     bgPattern: 'circuit',
     patternScale: 100,
     patternVignette: 'vignette',
     customPatternUrl: null,
-    accentShape: 'glow',
-    shapeSizeVariant: 'medium',
+
+    // Luces
+    lightType: 'glow',
     lightDirection: 'dual-corners-1',
     lightIntensity: 40,
+
+    // Formas perimetrales vítreas
+    shapeType: 'glass-orbs',
+    shapePlacement: 'corners',
+    shapeSizeVariant: 'medium',
+    shapeOpacity: 60,
+    shapeSeed: 12345,
 
     zoomMode: 'fit-height',
     zoomLevel: 0.5,
@@ -86,8 +107,33 @@ export const App: React.FC = () => {
     setState((prev) => ({ ...prev, ...partial }));
   };
 
-  // 1. Empezar de 0 0 (Lienzo Vacío) -> Pasa a Página 2 (Editor)
+  // Enrutador ligero HTML5 History API (/ y /editor)
+  const navigateTo = useCallback((path: '/' | '/editor') => {
+    if (window.location.pathname !== path) {
+      window.history.pushState(null, '', path);
+    }
+    setState((prev) => ({
+      ...prev,
+      viewMode: path === '/editor' ? 'editor' : 'welcome',
+    }));
+  }, []);
+
+  // Listener para navegación con botones Atrás/Adelante del navegador
+  useEffect(() => {
+    const onPopState = () => {
+      const isEditor = window.location.pathname.startsWith('/editor');
+      setState((prev) => ({
+        ...prev,
+        viewMode: isEditor ? 'editor' : 'welcome',
+      }));
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  // 1. Empezar de 0 0 (Lienzo Vacío) -> Pasa a /editor
   const handleStartFromScratch = () => {
+    navigateTo('/editor');
     setState((prev) => ({
       ...prev,
       viewMode: 'editor',
@@ -99,40 +145,60 @@ export const App: React.FC = () => {
       moduleVisible: false,
       activeStep: 1,
       panelOpen: true,
+      textAlign: 'center',
+      ctaOrder: 'cta-first',
+      ctaAlign: 'between',
+      moduleScale: 1.0,
+      moduleFontSize: 14,
+      logoSize: 44,
+      footerSize: 13,
+      shapeType: 'none',
+      lightType: 'glow',
     }));
   };
 
-  // 2. Cargar Plantilla -> Pasa a Página 2 (Editor)
+  // 2. Cargar Plantilla -> Pasa a /editor
   const handleSelectTemplate = (t: PostTemplate) => {
     setTemplatesModalOpen(false);
+    navigateTo('/editor');
     setState((prev) => ({
       ...prev,
       viewMode: 'editor',
       title: t.title,
       titleSize: t.titleSize || 48,
       titleColorMode: t.titleColor || 'contrast',
+      textAlign: t.textAlign || 'center',
       subtitle: t.subtitle,
       subtitleSize: t.subtitleSize || 24,
       subtitlePos: t.subtitlePos || 'below',
       tags: t.tags,
       cta: t.cta || 'Escríbenos y migramos tu operación a la nube.',
       handle: t.handle || 'aleric.dev',
+      ctaOrder: t.ctaOrder || 'cta-first',
+      ctaAlign: t.ctaAlign || 'between',
       companyName: t.companyName || prev.companyName,
       logoType: t.logoType || 'generic',
+      logoSize: t.logoSize || 44,
+      footerSize: t.footerSize || 13,
       color: t.color,
       currentColor: t.color,
       category: t.category,
       bgPattern: t.bgPattern || 'circuit',
       patternScale: t.patternScale || 100,
       patternVignette: t.patternVignette || 'vignette',
-      accentShape: t.accentShape || 'glow',
-      shapeSizeVariant: t.shapeSizeVariant || 'medium',
+      lightType: t.lightType || 'glow',
       lightDirection: t.lightDirection || 'dual-corners-1',
       lightIntensity: t.lightIntensity !== undefined ? t.lightIntensity : 40,
+      shapeType: (t.shapeType || (t.accentShape === 'circles' ? 'glass-orbs' : t.accentShape === 'squares' ? 'tech-squares' : t.accentShape === 'diamonds' ? 'glass-cards' : 'glass-orbs')) as any,
+      shapePlacement: t.shapePlacement || 'corners',
+      shapeSizeVariant: t.shapeSizeVariant || 'medium',
+      shapeOpacity: t.shapeOpacity !== undefined ? t.shapeOpacity : 60,
       headerShape: t.headerShape || 'line',
       footerShape: t.footerShape || 'line',
       moduleVisible: t.moduleVisible !== false,
       moduleSize: t.moduleSize || 'normal',
+      moduleScale: t.moduleScale || 1.0,
+      moduleFontSize: t.moduleFontSize || 14,
       activeModule: t.module || 'code',
       code: t.code || prev.code,
       activeStep: 1,
@@ -188,6 +254,26 @@ export const App: React.FC = () => {
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, [state.zoomMode, calculateZoom]);
+
+  // FIX: Listener nativo no-pasivo para Zoom interactivo con Ctrl + Rueda en el Canvas
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.05 : -0.05;
+        setState((prev) => {
+          const nextLevel = Math.max(0.15, Math.min(2.5, Number((prev.zoomLevel + delta).toFixed(2))));
+          return { ...prev, zoomMode: 'manual', zoomLevel: nextLevel };
+        });
+      }
+    };
+
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, []);
 
   // Exportación PNG 1080p Nativa HQ (Exclusiva de Paso 4)
   const handleExportHQ = async () => {
@@ -290,19 +376,20 @@ export const App: React.FC = () => {
       {/* 2. COLUMNA DERECHA: ÁREA DE TRABAJO Y PREVISUALIZACIÓN */}
       <main className="flex-1 min-w-0 h-full flex flex-col p-3 sm:p-4 bg-gradient-to-b from-[#070A0F] to-[#020408] overflow-hidden">
         
-        {/* TOP NAVBAR (Con selector de aspecto y zoom, sin plantillas) */}
+        {/* TOP NAVBAR (Con selector de aspecto limpio numérico y zoom, sin plantillas) */}
         <TopNavbar
           aspectRatio={state.aspectRatio}
           onAspectRatioChange={(ratio) => updateState({ aspectRatio: ratio })}
           zoomMode={state.zoomMode}
           zoomLevel={state.zoomLevel}
           onZoomChange={handleZoomChange}
-          onGoHome={() => updateState({ viewMode: 'welcome' })}
+          onGoHome={() => navigateTo('/')}
         />
 
         {/* CANVAS VIEWPORT (Centra perfectamente el lienzo con m-auto e items-center) */}
         <div
           id="canvas-viewport"
+          ref={viewportRef}
           className="flex-1 w-full h-full overflow-auto flex items-center justify-center p-4 sm:p-8 bg-[#03060D]/90 rounded-2xl border border-slate-800/60 shadow-inner relative"
         >
           <div

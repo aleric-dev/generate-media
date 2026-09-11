@@ -200,13 +200,21 @@ export const Step2Style: React.FC<Step2StyleProps> = ({
           </div>
         </div>
 
-        {/* Uploader Logo Propio */}
-        <div className="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between">
-          <span className="text-xs text-slate-400">O sube el logo de tu empresa:</span>
-          <label className="px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 text-xs font-mono font-bold cursor-pointer transition flex items-center gap-1.5">
-            <Upload className="w-3.5 h-3.5" /> Subir Logo PNG/SVG
-            <input type="file" accept="image/*" onChange={handleCustomLogo} className="hidden" />
-          </label>
+        {/* Slider Tamaño del Logo */}
+        <div className="space-y-1 pt-1 border-t border-slate-800/80">
+          <div className="flex justify-between text-[10px] font-mono text-slate-400">
+            <span>Tamaño / Altura del Logo:</span>
+            <span className="text-indigo-400 font-bold">{state.logoSize || 44} px</span>
+          </div>
+          <input
+            type="range"
+            min={24}
+            max={96}
+            step={2}
+            value={state.logoSize || 44}
+            onChange={(e) => updateState({ logoSize: parseInt(e.target.value, 10) })}
+            className="w-full accent-indigo-500 cursor-pointer"
+          />
         </div>
       </div>
 
@@ -246,6 +254,23 @@ export const Step2Style: React.FC<Step2StyleProps> = ({
               <option value="accent-bar">Barra Destacada</option>
             </select>
           </div>
+        </div>
+
+        {/* Slider Tamaño de Textos del Footer */}
+        <div className="space-y-1 pt-2 border-t border-slate-800/80">
+          <div className="flex justify-between text-[10px] font-mono text-slate-400">
+            <span>Tamaño de fuente del Footer (CTA & Handle):</span>
+            <span className="text-indigo-400 font-bold">{state.footerSize || 13} px</span>
+          </div>
+          <input
+            type="range"
+            min={10}
+            max={24}
+            step={1}
+            value={state.footerSize || 13}
+            onChange={(e) => updateState({ footerSize: parseInt(e.target.value, 10) })}
+            className="w-full accent-indigo-500 cursor-pointer"
+          />
         </div>
       </div>
 

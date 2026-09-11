@@ -29,10 +29,10 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   else if (zoomMode === '100%') modeLabel = ' (100%)';
 
   const ratios: { id: AspectRatioKey; label: string }[] = [
-    { id: '4:5', label: '4:5 Post' },
-    { id: '1:1', label: '1:1 Cuadrado' },
-    { id: '9:16', label: '9:16 Story' },
-    { id: '16:9', label: '16:9 Banner' },
+    { id: '4:5', label: '4:5' },
+    { id: '1:1', label: '1:1' },
+    { id: '9:16', label: '9:16' },
+    { id: '16:9', label: '16:9' },
   ];
 
   return (
