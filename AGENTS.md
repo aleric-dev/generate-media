@@ -23,16 +23,16 @@ Ejecutar siempre en el directorio raíz de `generate-media/`:
 
 ```bash
 # Servidor de desarrollo local (Vite, por defecto en http://localhost:5173)
-npm run dev
+pnpm dev
 
 # Compilación estática de producción y chequeo estricto de TypeScript
-npm run build
+pnpm run build
 
 # Previsualización del bundle generado en producción
-npm run preview
+pnpm run preview
 ```
 
-> ⚠️ **Regla de Validación Mandatoria**: Antes de finalizar cualquier tarea o responder al usuario sobre un cambio de código, ejecuta siempre `npm run build` para asegurar 0 errores de compilación y 0 fallos de tipado.
+> ⚠️ **Regla de Validación Mandatoria**: Antes de finalizar cualquier tarea o responder al usuario sobre un cambio de código, ejecuta siempre `pnpm run build` para asegurar 0 errores de compilación y 0 fallos de tipado.
 
 ---
 

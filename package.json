@@ -9,6 +9,11 @@
     "preview": "vite preview",
     "deploy": "wrangler pages deploy dist"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
   "dependencies": {
     "html-to-image": "^1.11.11",
     "html2canvas": "^1.4.1",

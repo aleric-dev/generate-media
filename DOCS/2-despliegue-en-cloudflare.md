@@ -14,10 +14,11 @@ Al conectar el repositorio `aleric-dev/generate-media` en Cloudflare Pages, util
 | Configuración | Valor Oficial |
 | :--- | :--- |
 | **Framework preset** | `Vite` |
-| **Build command** | `npm run build` |
+| **Build command** | `pnpm run build` |
 | **Build output directory** | `dist` |
 | **Root directory** | `/` (o raíz del proyecto) |
-| **Variable de entorno Node** | `NODE_VERSION=20` (o superior) |
+| **Package manager** | `pnpm` (detectado automáticamente por `pnpm-lock.yaml`) |
+| **Node.js Version** | `22` (fijado en `.node-version`) |
 
 ---
 
@@ -25,32 +26,29 @@ Al conectar el repositorio `aleric-dev/generate-media` en Cloudflare Pages, util
 
 ### Método A: Conexión Git Continua (Recomendado)
 1. Inicia sesión en el panel de control de [Cloudflare Dashboard](https://dash.cloudflare.com/).
-2. Ve a **Workers & Pages** ➔ **Create application** ➔ **Pages** ➔ **Connect to Git**.
+2. Ve a **Workers & Pages** ➔ **Create application** ➔ **Pages** ➔ **Connect to Git** (o Workers con Static Assets).
 3. Selecciona el repositorio `aleric-dev/generate-media`.
 4. En **Build settings**:
    * Preset: **Vite**
-   * Build command: `npm run build`
+   * Build command: `pnpm run build` (o automático vía `wrangler.json`)
    * Output directory: `dist`
-5. En **Environment variables**, añade:
-   * `NODE_VERSION` = `20`
-6. Haz clic en **Save and Deploy**. Cloudflare compilará la aplicación y asignará un subdominio seguro (ej. `generate-media.pages.dev`).
-
-Cada `git push` a la rama `main` generará un despliegue automático de producción, y los Pull Requests tendrán entornos de vista previa (*Preview Deployments*) aislados.
+5. Cloudflare detecta automáticamente `pnpm-lock.yaml` y `.node-version=22` instalando con `pnpm install` en apenas 2 a 3 segundos.
+6. Haz clic en **Save and Deploy**.
 
 ---
 
 ### Método B: Despliegue por Terminal con Wrangler CLI
 
-Si deseas compilar localmente y desplegar directamente desde tu máquina o desde un pipeline de CI/CD:
+Si deseas compilar y desplegar directamente desde tu máquina local:
 
 ```bash
 # 1. Compilar el proyecto estático
-npm run build
+pnpm run build
 
-# 2. Desplegar el directorio 'dist' a Cloudflare Pages
-npm run deploy
+# 2. Desplegar con Wrangler
+pnpm run deploy
 # o directamente:
-npx wrangler pages deploy dist --project-name=generate-media
+npx wrangler deploy
 ```
 
 ---
