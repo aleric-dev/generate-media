@@ -67,7 +67,6 @@ El proyecto incluye la configuración canónica para Cloudflare (compatible tant
      "compatibility_date": "2025-01-01",
      "assets": {
        "directory": "./dist",
-       "binding": "ASSETS",
        "not_found_handling": "single-page-application"
      }
    }
