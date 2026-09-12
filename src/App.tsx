@@ -1,12 +1,16 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { PostState, PostTemplate } from './types';
 import { aspectRatios } from './constants/templates';
+import { LandingScreen } from './components/LandingScreen';
 import { WelcomeScreen } from './components/WelcomeScreen';
+import { CreationWizardModal } from './components/CreationWizardModal';
 import { TemplatesModal } from './components/TemplatesModal';
 import { TopNavbar } from './components/TopNavbar';
 import { ControlPanel } from './components/Panel/ControlPanel';
 import { CanvasTarget } from './components/Canvas/CanvasTarget';
 import { ExportSuccessModal } from './components/ExportSuccessModal';
+import { PageTransitionLoader } from './components/PageTransitionLoader';
+import { getDefaultBrand } from './utils/brandStorage';
 import * as htmlToImage from 'html-to-image';
 import html2canvas from 'html2canvas';
 
@@ -18,32 +22,47 @@ export const App: React.FC = () => {
 
   // Modales
   const [templatesModalOpen, setTemplatesModalOpen] = useState(false);
+  const [wizardModalOpen, setWizardModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState('100% idéntico a pantalla');
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportedDataUrl, setExportedDataUrl] = useState<string | null>(null);
   const [exportedFilename, setExportedFilename] = useState('');
 
-  // Detección de ruta inicial: / o /editor
-  const initialPath = typeof window !== 'undefined' ? window.location.pathname : '/';
-  const initialViewMode: 'welcome' | 'editor' = initialPath.startsWith('/editor') ? 'editor' : 'welcome';
+  // Transiciones y Loader de Página
+  const [isPageTransitioning, setIsPageTransitioning] = useState(false);
+  const [transitionMessage, setTransitionMessage] = useState('Cargando...');
 
-  // Estado maestro del Post Studio v0.3
+  // Carga de marca por defecto guardada en localStorage si existe
+  const defaultBrand = typeof window !== 'undefined' ? getDefaultBrand() : null;
+
+  // Detección de ruta inicial: /, /landing, /menu, /welcome o /editor
+  const initialPath = typeof window !== 'undefined' ? window.location.pathname : '/';
+  let initialViewMode: 'landing' | 'welcome' | 'editor' = 'landing';
+  if (initialPath.startsWith('/editor')) {
+    initialViewMode = 'editor';
+  } else if (initialPath.startsWith('/menu') || initialPath.startsWith('/welcome')) {
+    initialViewMode = 'welcome';
+  } else {
+    initialViewMode = 'landing';
+  }
+
+  // Estado maestro del Post Studio v1.1
   const [state, setState] = useState<PostState>({
-    viewMode: initialViewMode, // Página 1: '/' ('welcome') | Página 2: '/editor' ('editor')
+    viewMode: initialViewMode,
     activeStep: 1,
     panelOpen: true,
 
     canvasMode: 'dark',
-    currentColor: '#4F46E5',
+    currentColor: defaultBrand?.primaryColor || '#4F46E5',
     category: 'DESARROLLO A LA MEDIDA',
     aspectRatio: '4:5',
 
-    titleFont: 'font-space-mono',
-    subtitleFont: 'font-inter',
+    titleFont: defaultBrand?.titleFont || 'font-space-mono',
+    subtitleFont: defaultBrand?.subtitleFont || 'font-inter',
 
-    companyName: 'Tu Empresa',
-    headerBrandMode: 'icon-text',
+    companyName: defaultBrand?.companyName || 'Tu Empresa',
+    headerBrandMode: defaultBrand?.headerBrandMode || 'icon-text',
     logoAspectRatio: 'square',
     headerShowLogo: true,
     headerSize: 13,
@@ -135,15 +154,15 @@ export const App: React.FC = () => {
     imageBorderStyle: 'none',
 
     cta: 'Escríbenos y migramos tu operación a la nube.',
-    handle: 'tumarca.dev',
+    handle: defaultBrand?.handle || 'tumarca.dev',
     ctaOrder: 'cta-first',
     ctaAlign: 'between',
     footerSize: 13,
 
-    logoType: 'generic',
-    customLogoUrl: null,
-    headerShape: 'line',
-    footerShape: 'line',
+    logoType: defaultBrand?.logoType || 'generic',
+    customLogoUrl: defaultBrand?.customLogoUrl || null,
+    headerShape: defaultBrand?.headerShape || 'line',
+    footerShape: defaultBrand?.footerShape || 'line',
 
     patternEnabled: true,
     bgPattern: 'circuit',
@@ -182,29 +201,72 @@ export const App: React.FC = () => {
     setState((prev) => ({ ...prev, ...partial }));
   };
 
-  // Enrutador ligero HTML5 History API (/ y /editor)
-  const navigateTo = useCallback((path: '/' | '/editor') => {
-    if (window.location.pathname !== path) {
-      window.history.pushState(null, '', path);
-    }
-    setState((prev) => ({
-      ...prev,
-      viewMode: path === '/editor' ? 'editor' : 'welcome',
-    }));
+  // Enrutador ligero HTML5 History API con loader fluido
+  const navigateTo = useCallback((path: '/' | '/landing' | '/menu' | '/welcome' | '/editor') => {
+    setIsPageTransitioning(true);
+    let msg = 'Cargando...';
+    if (path === '/editor') msg = 'Preparando Lienzo Ultra HQ 1080p...';
+    else if (path === '/menu' || path === '/welcome') msg = 'Cargando Menú de Bienvenida...';
+    else msg = 'Cargando Media Studio...';
+    setTransitionMessage(msg);
+
+    setTimeout(() => {
+      if (window.location.pathname !== path) {
+        window.history.pushState(null, '', path);
+      }
+      let mode: 'landing' | 'welcome' | 'editor' = 'landing';
+      if (path === '/editor') mode = 'editor';
+      else if (path === '/menu' || path === '/welcome') mode = 'welcome';
+      else mode = 'landing';
+
+      setState((prev) => ({
+        ...prev,
+        viewMode: mode,
+      }));
+
+      setTimeout(() => {
+        setIsPageTransitioning(false);
+      }, 260);
+    }, 180);
   }, []);
 
   // Listener para navegación con botones Atrás/Adelante del navegador
   useEffect(() => {
     const onPopState = () => {
-      const isEditor = window.location.pathname.startsWith('/editor');
+      const p = window.location.pathname;
+      let mode: 'landing' | 'welcome' | 'editor' = 'landing';
+      if (p.startsWith('/editor')) mode = 'editor';
+      else if (p.startsWith('/menu') || p.startsWith('/welcome')) mode = 'welcome';
+      else mode = 'landing';
+
       setState((prev) => ({
         ...prev,
-        viewMode: isEditor ? 'editor' : 'welcome',
+        viewMode: mode,
       }));
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
+
+  // Manejador del Asistente Wizard Confirmado -> Pasa al editor con loader
+  const handleConfirmWizard = (customized: Partial<PostState>) => {
+    setWizardModalOpen(false);
+    setIsPageTransitioning(true);
+    setTransitionMessage('Ensamblando diseño en el Editor Ultra HQ...');
+    setTimeout(() => {
+      updateState({
+        ...customized,
+        viewMode: 'editor',
+        activeStep: 1,
+      });
+      if (window.location.pathname !== '/editor') {
+        window.history.pushState(null, '', '/editor');
+      }
+      setTimeout(() => {
+        setIsPageTransitioning(false);
+      }, 300);
+    }, 240);
+  };
 
   // 1. Empezar de 0 0 (Lienzo Vacío) -> Pasa a /editor
   const handleStartFromScratch = () => {
@@ -511,14 +573,53 @@ export const App: React.FC = () => {
   const scaledH = Math.round(r.nativeH * state.zoomLevel);
 
   // =========================================================================
-  // PÁGINA 1: BIENVENIDA Y CATÁLOGO DE PLANTILLAS
+  // PÁGINA 1: LANDING PAGE DE PRESENTACIÓN
+  // =========================================================================
+  if (state.viewMode === 'landing') {
+    return (
+      <div className="h-full w-full overflow-hidden bg-[#050811] relative select-none animate-page-enter">
+        <PageTransitionLoader isLoading={isPageTransitioning} message={transitionMessage} />
+
+        <LandingScreen
+          onStartWizard={() => setWizardModalOpen(true)}
+          onOpenTemplates={() => {
+            navigateTo('/menu');
+            setTemplatesModalOpen(true);
+          }}
+          onGoWelcome={() => navigateTo('/menu')}
+        />
+
+        <CreationWizardModal
+          isOpen={wizardModalOpen}
+          onClose={() => setWizardModalOpen(false)}
+          onConfirmAndOpenEditor={handleConfirmWizard}
+          currentState={state}
+        />
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // PÁGINA 2: MENÚ DE BIENVENIDA Y CATÁLOGO DE PLANTILLAS
   // =========================================================================
   if (state.viewMode === 'welcome') {
     return (
-      <div className="h-full w-full overflow-hidden bg-[#070A0F] relative select-none">
+      <div className="h-full w-full overflow-hidden bg-[#070A0F] relative select-none animate-page-enter">
+        <PageTransitionLoader isLoading={isPageTransitioning} message={transitionMessage} />
+
         <WelcomeScreen
           onStartFromScratch={handleStartFromScratch}
           onOpenTemplates={() => setTemplatesModalOpen(true)}
+          onOpenWizard={() => setWizardModalOpen(true)}
+          onGoLanding={() => navigateTo('/landing')}
+          savedBrandName={defaultBrand?.name || defaultBrand?.companyName}
+        />
+
+        <CreationWizardModal
+          isOpen={wizardModalOpen}
+          onClose={() => setWizardModalOpen(false)}
+          onConfirmAndOpenEditor={handleConfirmWizard}
+          currentState={state}
         />
 
         <TemplatesModal
@@ -531,12 +632,11 @@ export const App: React.FC = () => {
   }
 
   // =========================================================================
-  // PÁGINA 2: EDITOR (PANEL LATERAL FIJO EN EL FLUJO + CANVAS CENTRADO)
-  // En esta vista NO se pueden abrir plantillas (solo botón Inicio para volver).
-  // El panel corre naturalmente el canvas para que quede 100% centrado.
+  // PÁGINA 3: EDITOR (PANEL LATERAL FIJO EN EL FLUJO + CANVAS CENTRADO)
   // =========================================================================
   return (
-    <div className="h-full w-full flex overflow-hidden bg-[#070A0F] select-none">
+    <div className="h-full w-full flex overflow-hidden bg-[#070A0F] select-none animate-page-enter">
+      <PageTransitionLoader isLoading={isPageTransitioning} message={transitionMessage} />
       
       {/* 1. COLUMNA IZQUIERDA: PANEL DE CONTROL INTEGRADO */}
       <aside className="w-[460px] xl:w-[500px] h-full flex-shrink-0 flex flex-col bg-[#0B101B] border-r border-slate-800 shadow-2xl z-20">
@@ -552,14 +652,15 @@ export const App: React.FC = () => {
       {/* 2. COLUMNA DERECHA: ÁREA DE TRABAJO Y PREVISUALIZACIÓN */}
       <main className="flex-1 min-w-0 h-full flex flex-col p-3 sm:p-4 bg-gradient-to-b from-[#070A0F] to-[#020408] overflow-hidden">
         
-        {/* TOP NAVBAR (Con selector de aspecto limpio numérico y zoom, sin plantillas) */}
+        {/* TOP NAVBAR */}
         <TopNavbar
           aspectRatio={state.aspectRatio}
           onAspectRatioChange={(ratio) => updateState({ aspectRatio: ratio })}
           zoomMode={state.zoomMode}
           zoomLevel={state.zoomLevel}
           onZoomChange={handleZoomChange}
-          onGoHome={() => navigateTo('/')}
+          onGoHome={() => navigateTo('/menu')}
+          onOpenWizard={() => setWizardModalOpen(true)}
         />
 
         {/* CANVAS VIEWPORT (Centra perfectamente el lienzo con m-auto e items-center) */}
@@ -604,6 +705,14 @@ export const App: React.FC = () => {
         dataUrl={exportedDataUrl}
         filename={exportedFilename}
         resolution={r.px}
+      />
+
+      {/* Modal Asistente de Creación por Pasos Reutilizable desde el Editor */}
+      <CreationWizardModal
+        isOpen={wizardModalOpen}
+        onClose={() => setWizardModalOpen(false)}
+        onConfirmAndOpenEditor={handleConfirmWizard}
+        currentState={state}
       />
 
     </div>

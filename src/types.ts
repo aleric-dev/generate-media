@@ -206,6 +206,9 @@ export interface PostTemplate {
   codeFilename?: string;
   codeLanguage?: string;
   codeShowLineNumbers?: boolean;
+  kpis?: KPICard[];
+  chartBars?: ChartBar[];
+  chatMessages?: ChatMessage[];
   chatContactName?: string;
   chatOnlineStatus?: string;
   contentHighlightText?: string;
@@ -246,9 +249,27 @@ export interface PostTemplate {
   ctaAlign?: CtaAlign;
 }
 
+export interface BrandProfile {
+  id: string;
+  name: string;
+  companyName: string;
+  handle: string;
+  logoType: LogoType;
+  customLogoUrl?: string | null;
+  primaryColor: string;
+  secondaryColor?: string;
+  titleFont?: string;
+  subtitleFont?: string;
+  headerBrandMode?: HeaderBrandMode;
+  headerShape?: HeaderShape;
+  footerShape?: FooterShape;
+  isDefault?: boolean;
+  createdAt: number;
+}
+
 export interface PostState {
-  // Navigation & View (2 páginas independientes)
-  viewMode: 'welcome' | 'editor';
+  // Navigation & View (3 vistas: Landing, Bienvenida/Menú, Editor)
+  viewMode: 'landing' | 'welcome' | 'editor';
   activeStep: 1 | 2 | 3 | 4;
   panelOpen: boolean;
 

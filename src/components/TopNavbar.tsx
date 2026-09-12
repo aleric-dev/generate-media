@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Minus, Plus, ArrowUpDown, ArrowLeftRight } from 'lucide-react';
+import { Home, Minus, Plus, ArrowUpDown, ArrowLeftRight, Sparkles } from 'lucide-react';
 import { aspectRatios } from '../constants/templates';
 import { AspectRatioKey } from '../types';
 
@@ -10,6 +10,7 @@ interface TopNavbarProps {
   zoomLevel: number;
   onZoomChange: (modeOrValue: 'fit-height' | 'fit-width' | 1.0 | number) => void;
   onGoHome: () => void;
+  onOpenWizard?: () => void;
 }
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({
@@ -18,7 +19,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   zoomMode,
   zoomLevel,
   onZoomChange,
-  onGoHome
+  onGoHome,
+  onOpenWizard,
 }) => {
   const currentConfig = aspectRatios[aspectRatio] || aspectRatios['4:5'];
   const pct = Math.round(zoomLevel * 100);
@@ -38,17 +40,29 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   return (
     <header className="w-full flex flex-wrap items-center justify-between gap-3 px-3.5 py-2.5 bg-slate-900/80 border border-slate-800 rounded-xl mb-3 backdrop-blur-md z-20 select-none shrink-0">
       
-      {/* Botón Inicio (con icono Home), Ratios de Aspecto y Resolución Real */}
+      {/* Botón Inicio (con icono Home), Asistente, Ratios de Aspecto y Resolución Real */}
       <div className="flex items-center gap-2.5 flex-wrap">
         <button
           type="button"
           onClick={onGoHome}
-          title="Volver a la pantalla de inicio y catálogo"
+          title="Volver a la pantalla de inicio y menú"
           className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 text-xs font-mono font-medium flex items-center gap-1.5 transition shadow-sm"
         >
           <Home className="w-3.5 h-3.5 text-indigo-400" />
-          <span>Inicio</span>
+          <span>Menú</span>
         </button>
+
+        {onOpenWizard && (
+          <button
+            type="button"
+            onClick={onOpenWizard}
+            title="Abrir asistente de configuración rápida"
+            className="px-2.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 hover:text-white border border-indigo-500/30 text-xs font-mono font-medium flex items-center gap-1.5 transition shadow-sm"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            <span>Asistente</span>
+          </button>
+        )}
 
         <div className="h-4 w-[1px] bg-slate-800" />
 

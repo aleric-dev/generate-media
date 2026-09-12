@@ -7,11 +7,17 @@ import { LINKS } from '../constants/links';
 interface WelcomeScreenProps {
   onStartFromScratch: () => void;
   onOpenTemplates: () => void;
+  onOpenWizard: () => void;
+  onGoLanding: () => void;
+  savedBrandName?: string;
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onStartFromScratch,
-  onOpenTemplates
+  onOpenTemplates,
+  onOpenWizard,
+  onGoLanding,
+  savedBrandName,
 }) => {
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-b from-[#070A0F] via-[#090E1A] to-[#04060A] flex flex-col items-center justify-between p-6 sm:p-10 select-none overflow-y-auto">
@@ -19,12 +25,27 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
       {/* Glow decorativo de fondo */}
       <div className="absolute w-[600px] h-[600px] bg-indigo-600/15 rounded-full blur-[140px] pointer-events-none -top-40 left-1/2 -translate-x-1/2" />
 
-      {/* Espaciador superior */}
-      <div className="w-full shrink-0" />
+      {/* Barra superior sutil */}
+      <div className="w-full max-w-3xl flex items-center justify-between z-10 shrink-0">
+        <button
+          type="button"
+          onClick={onGoLanding}
+          className="text-xs font-mono text-slate-400 hover:text-indigo-300 flex items-center gap-1.5 transition underline underline-offset-4"
+        >
+          <span>← Volver a la Landing de Presentación</span>
+        </button>
 
-      <div className="relative z-10 max-w-2xl w-full text-center space-y-8 my-auto">
+        {savedBrandName && (
+          <span className="text-[11px] font-mono px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-emerald-400 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+            <span>Marca activa: {savedBrandName}</span>
+          </span>
+        )}
+      </div>
+
+      <div className="relative z-10 max-w-3xl w-full text-center space-y-8 my-auto py-6">
         
-        {/* Logo & Versión Rebrandeada a Media Studio v1.0 */}
+        {/* Logo & Versión v1.1 */}
         <div className="space-y-3">
           <div className="flex justify-center pb-1">
             <BrandLogo size="xl" />
@@ -45,37 +66,42 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             Media Studio{' '}
             <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 align-middle shadow-sm">
-              v1.0
+              v1.1
             </span>
           </h1>
           <p className="text-slate-400 text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
-            Generador de contenido visual de alta fidelidad para redes sociales. Diseña y exporta posts en 1080p nativo en segundos.
+            Generador de contenido visual en 1080p nativo. Elige cómo deseas comenzar tu publicación técnica hoy:
           </p>
         </div>
 
-        {/* Las 2 Grandes Opciones de Entrada */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
+        {/* Las 3 Grandes Opciones de Entrada */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-left">
           
-          {/* OPCIÓN 1: EMPEZAR DE 0 */}
+          {/* OPCIÓN 1: ASISTENTE PASO A PASO (DESTACADO) */}
           <button
             type="button"
-            onClick={onStartFromScratch}
-            className="group relative p-6 rounded-2xl bg-[#0B101B]/80 hover:bg-[#0E1524] border border-slate-800 hover:border-emerald-500/60 text-left transition-all duration-300 flex flex-col justify-between space-y-6 shadow-xl hover:shadow-emerald-500/10"
+            onClick={onOpenWizard}
+            className="group relative p-5 rounded-2xl bg-gradient-to-b from-[#0F172A] to-[#0A0F1D] hover:from-[#131D35] hover:to-[#0D1426] border-2 border-indigo-500/60 hover:border-indigo-400 transition-all duration-300 flex flex-col justify-between space-y-5 shadow-xl hover:shadow-indigo-500/20 sm:scale-105 z-10"
           >
-            <div className="space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center justify-center transition-transform group-hover:scale-110">
-                <Sparkles className="w-6 h-6" />
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="w-11 h-11 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  Recomendado
+                </span>
               </div>
-              <h2 className="text-lg font-bold text-white group-hover:text-emerald-300 transition-colors">
-                Empezar de 0
+              <h2 className="text-base font-bold text-white group-hover:text-indigo-200 transition-colors">
+                Asistente Guiado
               </h2>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Inicia con el lienzo completamente limpio y vacío, sin textos de relleno ni módulo predefinido.
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Configura tu marca, fuentes, módulo y fondo paso a paso con previsualizaciones antes de entrar.
               </p>
             </div>
 
-            <span className="text-xs font-mono font-bold text-emerald-400 flex items-center gap-1.5 pt-2">
-              <span>Lienzo en Blanco</span>
+            <span className="text-xs font-mono font-bold text-indigo-300 flex items-center gap-1.5 pt-1">
+              <span>Iniciar Asistente</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </span>
           </button>
@@ -84,22 +110,46 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           <button
             type="button"
             onClick={onOpenTemplates}
-            className="group relative p-6 rounded-2xl bg-[#0B101B]/80 hover:bg-[#0E1524] border border-slate-800 hover:border-indigo-500/60 text-left transition-all duration-300 flex flex-col justify-between space-y-6 shadow-xl hover:shadow-indigo-500/10"
+            className="group relative p-5 rounded-2xl bg-[#0B101B]/80 hover:bg-[#0E1524] border border-slate-800 hover:border-indigo-500/60 text-left transition-all duration-300 flex flex-col justify-between space-y-5 shadow-xl hover:shadow-indigo-500/10"
           >
-            <div className="space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 flex items-center justify-center transition-transform group-hover:scale-110">
-                <LayoutTemplate className="w-6 h-6" />
+            <div className="space-y-2.5">
+              <div className="w-11 h-11 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 flex items-center justify-center transition-transform group-hover:scale-110">
+                <LayoutTemplate className="w-5 h-5" />
               </div>
-              <h2 className="text-lg font-bold text-white group-hover:text-indigo-300 transition-colors">
-                A partir de una Plantilla
+              <h2 className="text-base font-bold text-white group-hover:text-indigo-300 transition-colors">
+                Usar Plantilla
               </h2>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Elige entre más de 24 diseños probados para SaaS, automatización, cloud y desarrollo web.
+                Elige entre más de 24 diseños probados para SaaS, cloud, arquitectura y desarrollo.
               </p>
             </div>
 
-            <span className="text-xs font-mono font-bold text-indigo-400 flex items-center gap-1.5 pt-2">
-              <span>Explorar Catálogo (+24)</span>
+            <span className="text-xs font-mono font-bold text-indigo-400 flex items-center gap-1.5 pt-1">
+              <span>Ver Catálogo (+24)</span>
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            </span>
+          </button>
+
+          {/* OPCIÓN 3: EMPEZAR DE 0 */}
+          <button
+            type="button"
+            onClick={onStartFromScratch}
+            className="group relative p-5 rounded-2xl bg-[#0B101B]/80 hover:bg-[#0E1524] border border-slate-800 hover:border-emerald-500/60 text-left transition-all duration-300 flex flex-col justify-between space-y-5 shadow-xl hover:shadow-emerald-500/10"
+          >
+            <div className="space-y-2.5">
+              <div className="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center justify-center transition-transform group-hover:scale-110">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <h2 className="text-base font-bold text-white group-hover:text-emerald-300 transition-colors">
+                Lienzo en Blanco
+              </h2>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Entra directo al editor con el lienzo limpio, sin textos ni módulos preconfigurados.
+              </p>
+            </div>
+
+            <span className="text-xs font-mono font-bold text-emerald-400 flex items-center gap-1.5 pt-1">
+              <span>Empezar de 0</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </span>
           </button>

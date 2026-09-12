@@ -15,6 +15,7 @@ Bienvenido al centro de documentación técnica y operativa de **Media Studio v1
 | **[2. Despliegue en Cloudflare Pages](./2-despliegue-en-cloudflare.md)** | Instrucciones completas para publicar la aplicación en Cloudflare Pages, parámetros de compilación Vite, routing SPA y Wrangler CLI. |
 | **[3. Público Objetivo y Casos de Uso](./3-publico-objetivo-y-casos-de-uso.md)** | Perfiles ideales (Founders técnicos, agencias de software, arquitectos cloud) y formatos recomendados (LinkedIn, X/Twitter, Instagram, YouTube). |
 | **[4. Roadmap e Ideas a Futuro (v1.1 & v2.0+)](./4-roadmap-e-ideas-a-futuro-v2.md)** | Visión y mejoras prioritarias: Setup inicial de marca, rediseño ergonómico del menú, flujo modular, más plantillas agrupadas, tour Guide-Me y funciones avanzadas (carruseles e IA). |
+| **[5. Arquitectura Técnica y Mapa de Código](./5-arquitectura-tecnica-y-mapa-de-codigo.md)** | Mapa integral de arquitectura de software, ciclo de vida de PostState, pipeline de renderizado 1080p Ultra HQ, módulos centrales y Cheat Sheet de aceleración. |
 
 ---
 

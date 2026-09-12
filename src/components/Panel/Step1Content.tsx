@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   PostState, 
   ModuleType, 
@@ -42,8 +42,10 @@ import {
   Radio,
   Tag,
   Gift,
-  ListOrdered
+  ListOrdered,
+  Quote
 } from 'lucide-react';
+import { AccordionSection } from './AccordionSection';
 
 interface Step1ContentProps {
   state: PostState;
@@ -54,6 +56,19 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
   state,
   updateState
 }) => {
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    header: false,
+    title: true,
+    subtitle: false,
+    intermediate: false,
+    layout: false,
+    module: true,
+    footer: false,
+  });
+
+  const toggleSection = (key: string) => {
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
   const fontOptions = [
     { id: 'font-inter', label: 'Inter UI', desc: 'Limpia, neutra y legible' },
     { id: 'font-montserrat', label: 'Montserrat', desc: 'Geométrica y comercial' },
@@ -221,18 +236,24 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
       {/* ========================================================================= */}
       {/* 1. HEADER DE MARCA (MODO DE MARCA, LOGO, BADGE SUPERIOR) */}
       {/* ========================================================================= */}
-      <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-          <label className="text-xs text-white font-bold flex items-center gap-1.5">
-            <Heading className="w-4 h-4 text-indigo-400" /> Cabecera de Marca (Header)
-          </label>
-          <span className="text-[11px] font-mono text-indigo-400 font-bold">{state.headerSize || 13} px</span>
-        </div>
+      <AccordionSection
+        id="header"
+        title="Cabecera de Marca (Header)"
+        icon={Heading}
+        badge={state.companyName || 'Tu Empresa'}
+        isOpen={openSections.header}
+        onToggle={() => toggleSection('header')}
+      >
+        <div className="space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <span className="text-xs text-slate-400 font-semibold">Ajustes de Cabecera</span>
+            <span className="text-[11px] font-mono text-indigo-400 font-bold">{state.headerSize || 13} px</span>
+          </div>
 
-        {/* Modo de Marca en Cabecera */}
-        <div>
-          <label className="text-[11px] text-slate-400 block mb-1">Composición de Marca:</label>
-          <div className="grid grid-cols-2 gap-1.5 text-xs font-mono">
+          {/* Modo de Marca en Cabecera */}
+          <div>
+            <label className="text-[11px] text-slate-400 block mb-1">Composición de Marca:</label>
+            <div className="grid grid-cols-2 gap-1.5 text-xs font-mono">
             {[
               { id: 'icon-text' as HeaderBrandMode, label: 'Logo + Texto' },
               { id: 'only-logo' as HeaderBrandMode, label: 'Solo Logo' },
@@ -420,27 +441,34 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
             onChange={(e) => updateState({ headerSize: Number(e.target.value) })}
             className="w-full accent-indigo-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
           />
+          </div>
         </div>
-      </div>
+      </AccordionSection>
 
       {/* ========================================================================= */}
       {/* 2. TÍTULO PRINCIPAL (TIPOGRAFÍA, ALINEACIÓN, COLOR) */}
       {/* ========================================================================= */}
-      <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-          <label className="text-xs text-white font-bold flex items-center gap-1.5">
-            <Type className="w-4 h-4 text-indigo-400" /> Título Principal
-          </label>
-          <span className="text-[11px] font-mono text-indigo-400 font-bold">{state.titleSize} px</span>
-        </div>
+      <AccordionSection
+        id="title"
+        title="Título Principal"
+        icon={Type}
+        badge={`${state.titleSize} px`}
+        isOpen={openSections.title}
+        onToggle={() => toggleSection('title')}
+      >
+        <div className="space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <span className="text-xs text-slate-400 font-semibold">Titular y Tipografía</span>
+            <span className="text-[11px] font-mono text-indigo-400 font-bold">{state.titleSize} px</span>
+          </div>
 
-        <textarea
-          rows={2}
-          value={state.title}
-          onChange={(e) => updateState({ title: e.target.value })}
-          placeholder="Escribe aquí el titular principal..."
-          className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none leading-relaxed"
-        />
+          <textarea
+            rows={2}
+            value={state.title}
+            onChange={(e) => updateState({ title: e.target.value })}
+            placeholder="Escribe aquí el titular principal..."
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none leading-relaxed"
+          />
 
         {/* Tipografía Independiente del Título */}
         <div>
@@ -553,17 +581,24 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
           </div>
         </div>
       </div>
+      </AccordionSection>
 
       {/* ========================================================================= */}
       {/* 3. SUBTÍTULO INDEPENDIENTE (FUENTE, COLOR ALTO CONTRASTE, ALINEACIÓN) */}
       {/* ========================================================================= */}
-      <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-          <label className="text-xs text-white font-bold flex items-center gap-1.5">
-            <Type className="w-4 h-4 text-indigo-400" /> Subtítulo / Bajada Descriptiva
-          </label>
-          <span className="text-[11px] font-mono text-indigo-400 font-bold">{state.subtitleSize} px</span>
-        </div>
+      <AccordionSection
+        id="subtitle"
+        title="Subtítulo / Bajada Descriptiva"
+        icon={Type}
+        badge={`${state.subtitleSize} px`}
+        isOpen={openSections.subtitle}
+        onToggle={() => toggleSection('subtitle')}
+      >
+        <div className="space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <span className="text-xs text-slate-400 font-semibold">Bajada y Contraste</span>
+            <span className="text-[11px] font-mono text-indigo-400 font-bold">{state.subtitleSize} px</span>
+          </div>
 
         <textarea
           rows={2}
@@ -683,17 +718,24 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
           </div>
         </div>
       </div>
+      </AccordionSection>
 
       {/* ========================================================================= */}
       {/* 4. GRUPO INTERMEDIO OPCIONAL (BADGES, RATING, AUTOR, SOCIAL-PROOF, ETC.) */}
       {/* ========================================================================= */}
-      <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-          <label className="text-xs text-white font-bold flex items-center gap-1.5">
-            <Tag className="w-4 h-4 text-indigo-400" /> Grupo Intermedio / Badges
-          </label>
-          <button
-            type="button"
+      <AccordionSection
+        id="intermediate"
+        title="Grupo Intermedio / Badges"
+        icon={Tag}
+        badge={state.tagsGroupVisible ? 'Visible' : 'Oculto'}
+        isOpen={openSections.intermediate}
+        onToggle={() => toggleSection('intermediate')}
+      >
+        <div className="space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <span className="text-xs text-slate-400 font-semibold">Configuración de Elemento</span>
+            <button
+              type="button"
             onClick={() => updateState({ tagsGroupVisible: state.tagsGroupVisible === false ? true : false })}
             className={`w-11 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
               state.tagsGroupVisible !== false ? 'bg-indigo-600' : 'bg-slate-800'
@@ -868,17 +910,24 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
             </div>
           </div>
         )}
-      </div>
+        </div>
+      </AccordionSection>
 
       {/* ========================================================================= */}
       {/* 5. DISTRIBUCIÓN DE ESPACIOS & ORDEN JERÁRQUICO (16:9 2 COLUMNAS Y ESPACIADORES) */}
       {/* ========================================================================= */}
-      <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-          <label className="text-xs text-white font-bold flex items-center gap-1.5">
-            <Layers className="w-4 h-4 text-indigo-400" /> Jerarquía y Espaciados Dinámicos
-          </label>
-        </div>
+      <AccordionSection
+        id="layout"
+        title="Jerarquía y Espaciados Dinámicos"
+        icon={Layers}
+        badge="Gaps"
+        isOpen={openSections.layout}
+        onToggle={() => toggleSection('layout')}
+      >
+        <div className="space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <span className="text-xs text-slate-400 font-semibold">Distribución & Separación</span>
+          </div>
 
         {/* Flujo / Orden de Layout (Texto Primero vs Módulo Primero) */}
         <div>
@@ -962,22 +1011,31 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
           </div>
         </div>
       </div>
+      </AccordionSection>
 
       {/* ========================================================================= */}
       {/* 6. MÓDULOS DE CONTENIDO CENTRAL (CÓDIGO, KPIS, STEPS, PROMO, CHAT, ETC.) */}
       {/* ========================================================================= */}
-      <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-          <label className="text-xs text-white font-bold flex items-center gap-1.5">
-            <Sliders className="w-4 h-4 text-indigo-400" /> Módulo Central de Contenido
-          </label>
-          <button
-            type="button"
-            onClick={() => updateState({ moduleVisible: !state.moduleVisible })}
-            className={`w-11 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
-              state.moduleVisible ? 'bg-indigo-600' : 'bg-slate-800'
-            }`}
-          >
+      <AccordionSection
+        id="module"
+        title="Módulo Central de Contenido"
+        icon={Sliders}
+        badge={state.moduleVisible ? `Módulo: ${state.activeModule}` : 'Oculto'}
+        isOpen={openSections.module}
+        onToggle={() => toggleSection('module')}
+      >
+        <div className="space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <label className="text-xs text-white font-bold flex items-center gap-1.5">
+              <Sliders className="w-4 h-4 text-indigo-400" /> Visibilidad del Módulo
+            </label>
+            <button
+              type="button"
+              onClick={() => updateState({ moduleVisible: !state.moduleVisible })}
+              className={`w-11 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
+                state.moduleVisible ? 'bg-indigo-600' : 'bg-slate-800'
+              }`}
+            >
             <span
               className={`w-5 h-5 rounded-full bg-white transition-transform transform ${
                 state.moduleVisible ? 'translate-x-5' : 'translate-x-0'
@@ -991,12 +1049,14 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
             {/* Selector de Tipo de Módulo Central */}
             <div className="grid grid-cols-3 gap-1.5 text-xs font-mono">
               {[
+                { id: 'code' as ModuleType, label: 'Código IDE', icon: Code2 },
                 { id: 'kpi' as ModuleType, label: 'Métricas KPI', icon: TrendingUp },
-                { id: 'chart' as ModuleType, label: 'Gráficos (3 Tipos)', icon: BarChart3 },
-                { id: 'cta' as ModuleType, label: 'Frase Acción (CTA)', icon: Sparkles },
-                { id: 'promo' as ModuleType, label: 'Promo / Cupón', icon: Gift },
+                { id: 'chart' as ModuleType, label: 'Gráficos (3)', icon: BarChart3 },
+                { id: 'chat' as ModuleType, label: 'WhatsApp', icon: MessageSquare },
                 { id: 'steps' as ModuleType, label: 'Pasos / Fases', icon: ListOrdered },
-                { id: 'chat' as ModuleType, label: 'Chat WhatsApp', icon: MessageSquare },
+                { id: 'promo' as ModuleType, label: 'Promo / Cupón', icon: Gift },
+                { id: 'cta' as ModuleType, label: 'Frase Acción', icon: Sparkles },
+                { id: 'text' as ModuleType, label: 'Gran Cita', icon: Quote },
                 { id: 'image' as ModuleType, label: 'Mockup Imagen', icon: Image },
               ].map((m) => {
                 const IconComponent = m.icon;
@@ -1037,6 +1097,106 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
 
             {/* Contenido Específico según Módulo */}
             <div className="p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl space-y-3">
+
+              {/* 6.0 MÓDULO DE CÓDIGO IDE */}
+              {state.activeModule === 'code' && (
+                <div className="space-y-2.5">
+                  <div className="p-2 bg-indigo-950/30 border border-indigo-500/20 rounded-lg text-[11px] text-indigo-300">
+                    💻 <strong>Ventana de Código IDE</strong>: Renderiza un snippet con semáforo estilo macOS, pestaña de archivo, lenguaje y números de línea.
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] text-slate-400 block mb-1 font-mono">Nombre de Archivo:</label>
+                      <input
+                        type="text"
+                        value={state.codeFilename || 'server/pipeline.ts'}
+                        onChange={(e) => updateState({ codeFilename: e.target.value })}
+                        placeholder="server/pipeline.ts"
+                        className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-slate-400 block mb-1 font-mono">Lenguaje:</label>
+                      <input
+                        type="text"
+                        value={state.codeLanguage || 'TypeScript'}
+                        onChange={(e) => updateState({ codeLanguage: e.target.value })}
+                        placeholder="TypeScript, Python, SQL..."
+                        className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <input
+                      type="checkbox"
+                      id="toggleLineNumbers"
+                      checked={state.codeShowLineNumbers !== false}
+                      onChange={(e) => updateState({ codeShowLineNumbers: e.target.checked })}
+                      className="accent-indigo-500 rounded cursor-pointer"
+                    />
+                    <label htmlFor="toggleLineNumbers" className="text-xs font-mono text-slate-300 cursor-pointer">
+                      Mostrar Números de Línea
+                    </label>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-slate-400 block mb-1 font-mono">Código Fuente:</label>
+                    <textarea
+                      rows={5}
+                      value={state.code || "system.migrate({ from: 'Inventario.xlsx', to: 'CloudDB' });"}
+                      onChange={(e) => updateState({ code: e.target.value })}
+                      placeholder="Escribe aquí tu código..."
+                      className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white font-mono leading-relaxed"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* 6.H MÓDULO DE TEXTO / GRAN CITA / BANNER */}
+              {state.activeModule === 'text' && (
+                <div className="space-y-2.5">
+                  <div className="p-2 bg-indigo-950/30 border border-indigo-500/20 rounded-lg text-[11px] text-indigo-300">
+                    ✍️ <strong>Cita o Frase de Impacto</strong>: Destaca una reflexión, estadística o afirmación contundente.
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-slate-400 block mb-1 font-mono">Estilo Visual:</label>
+                    <div className="grid grid-cols-3 gap-1.5 font-mono text-xs">
+                      {[
+                        { id: 'quote', label: 'Cita con Comillas' },
+                        { id: 'banner', label: 'Banner de Impacto' },
+                        { id: 'card', label: 'Tarjeta Glass' },
+                      ].map((st) => (
+                        <button
+                          key={st.id}
+                          type="button"
+                          onClick={() => updateState({ contentHighlightStyle: st.id as any })}
+                          className={`py-1.5 px-2 rounded-lg text-center transition ${
+                            (state.contentHighlightStyle || 'card') === st.id
+                              ? 'bg-indigo-600 text-white font-bold'
+                              : 'bg-slate-900 text-slate-400 border border-slate-800'
+                          }`}
+                        >
+                          <span className="text-[10px]">{st.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-slate-400 block mb-1 font-mono">Texto de la Cita / Frase:</label>
+                    <textarea
+                      rows={3}
+                      value={state.contentHighlightText || 'Automatiza tu operación y escala sin límites con software a la medida.'}
+                      onChange={(e) => updateState({ contentHighlightText: e.target.value })}
+                      placeholder="Escribe la frase de impacto..."
+                      className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white font-mono"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* 6.A FRASE DE ACCIÓN (CALL TO ACTION DIRECTO) */}
               {state.activeModule === 'cta' && (
@@ -1451,18 +1611,25 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
             </div>
           </div>
         )}
-      </div>
+        </div>
+      </AccordionSection>
 
       {/* ========================================================================= */}
       {/* 7. FOOTER (TEXTOS, TAMAÑOS, ORDEN Y ALINEACIÓN) */}
       {/* ========================================================================= */}
-      <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-          <label className="text-xs text-white font-bold flex items-center gap-1.5">
-            <MessageSquare className="w-4 h-4 text-indigo-400" /> Pie de Imagen (Footer & CTA)
-          </label>
-          <span className="text-[11px] font-mono text-indigo-400 font-bold">{state.footerSize || 13} px</span>
-        </div>
+      <AccordionSection
+        id="footer"
+        title="Pie de Imagen (Footer & CTA)"
+        icon={MessageSquare}
+        badge={state.handle || '@tuempresa'}
+        isOpen={openSections.footer}
+        onToggle={() => toggleSection('footer')}
+      >
+        <div className="space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <span className="text-xs text-slate-400 font-semibold">Configuración de Pie</span>
+            <span className="text-[11px] font-mono text-indigo-400 font-bold">{state.footerSize || 13} px</span>
+          </div>
 
         <div>
           <label className="text-[11px] text-slate-400 block mb-1">Texto del CTA (Llamado a la Acción):</label>
@@ -1574,7 +1741,8 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      </AccordionSection>
 
     </div>
   );
