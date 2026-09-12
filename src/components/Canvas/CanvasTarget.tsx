@@ -1,7 +1,7 @@
 import React, { forwardRef, useMemo } from 'react';
-import { PostState, ShapePlacement } from '../../types';
+import { PostState, ShapePlacement, ShapeStyleVariant, ShapeGeometry, ShapeProximity, BackgroundLayerOrder } from '../../types';
 import { aspectRatios } from '../../constants/templates';
-import { LOGO_WHITE, LOGO_DARK } from '../../constants/logos';
+import { Star, CheckCircle2, Radio, User, Sparkles, Tag, ArrowRight } from 'lucide-react';
 
 interface CanvasTargetProps {
   state: PostState;
@@ -10,6 +10,7 @@ interface CanvasTargetProps {
 export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ state }, ref) => {
   const r = aspectRatios[state.aspectRatio] || aspectRatios['4:5'];
   const isLight = state.canvasMode === 'light';
+  const isWidescreen = state.aspectRatio === '16:9';
 
   // Cálculo de color RGB para iluminaciones y formas
   const cleanColor = (state.currentColor || '#4F46E5').replace('#', '');
@@ -19,6 +20,14 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
   const blue = bigint & 255;
   const rgb = `${red}, ${green}, ${blue}`;
 
+  // Duotono RGB
+  const duotoneClean = (state.shapeDuotoneColor || '#06b6d4').replace('#', '');
+  const duoInt = parseInt(duotoneClean, 16) || 0x06b6d4;
+  const dRed = (duoInt >> 16) & 255;
+  const dGreen = (duoInt >> 8) & 255;
+  const dBlue = duoInt & 255;
+  const duoRgb = `${dRed}, ${dGreen}, ${dBlue}`;
+
   // Factores de iluminación
   const lightFactor = (state.lightIntensity ?? 40) / 100;
   const lightA1 = (lightFactor * (isLight ? 0.35 : 0.65)).toFixed(3);
@@ -27,7 +36,9 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
   // Background glow según estilo de luz y dirección
   let glowBg = 'none';
   const lightType = state.lightType || 'glow';
-  if (lightType !== 'none' && lightFactor > 0) {
+  const lightsEnabled = state.lightsEnabled !== false;
+
+  if (lightsEnabled && lightType !== 'none' && lightFactor > 0) {
     if (lightType === 'spotlight') {
       glowBg = `
         radial-gradient(circle at 100% 0%, rgba(${rgb}, ${lightA1}) 0%, transparent 60%),
@@ -76,61 +87,84 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
     }
   }
 
-  // Multiplicadores de Formas Vítreas
+  // Multiplicadores de Formas
   const shapeSizeMult = state.shapeSizeVariant === 'small' ? 0.65 : (state.shapeSizeVariant === 'large' ? 1.45 : 1.0);
   const shapeOpacity = (state.shapeOpacity ?? 60) / 100;
+  const shapesEnabled = state.shapesEnabled !== false && state.shapeType !== 'none';
 
-  // Generador determinista de posiciones perimetrales (BORDES ÚNICAMENTE, NADA EN EL CENTRO)
+  // Desplazamiento según Proximidad ('edges', 'balanced', 'close')
+  const proximityOffset = state.shapeProximity === 'edges' ? -60 : (state.shapeProximity === 'close' ? 10 : -25);
+
+  // Generador procedimental de posiciones perimetrales (BORDES ÚNICAMENTE, CENTRO 100% LIMPIO)
   const perimeterPositions = useMemo(() => {
-    const placement: ShapePlacement = state.shapePlacement || 'corners';
-    if (placement === 'corners') {
-      return [
-        { top: '-40px', right: '-40px', size: 360, rot: 12 },
-        { bottom: '-50px', left: '-50px', size: 320, rot: -14 },
-        { top: '30px', left: '-30px', size: 220, rot: -8 },
-        { bottom: '40px', right: '-30px', size: 240, rot: 18 },
-      ];
-    }
-    if (placement === 'sides') {
-      return [
-        { top: '22%', left: '-50px', size: 280, rot: -10 },
-        { top: '65%', left: '-40px', size: 240, rot: 15 },
-        { top: '30%', right: '-50px', size: 300, rot: 12 },
-        { top: '72%', right: '-40px', size: 260, rot: -15 },
-      ];
-    }
-    if (placement === 'periphery') {
-      return [
-        { top: '-30px', left: '15%', size: 260, rot: -12 },
-        { top: '-40px', right: '18%', size: 300, rot: 15 },
-        { top: '45%', left: '-50px', size: 240, rot: 8 },
-        { top: '50%', right: '-50px', size: 270, rot: -14 },
-        { bottom: '-40px', left: '20%', size: 280, rot: 10 },
-        { bottom: '-50px', right: '15%', size: 320, rot: -16 },
-      ];
-    }
-    // 'random-edges': Pseudoaleatorio asegurando que X o Y estén estrictamente en el perímetro
     const seed = state.shapeSeed || 12345;
+    const count = Math.max(4, Math.min(14, state.shapeCount || 6));
+    const off = proximityOffset;
+
+    // Generador pseudoaleatorio determinista por semilla
     const rng = (s: number) => {
       const x = Math.sin(s) * 10000;
       return x - Math.floor(x);
     };
 
-    const slots = [
-      { edge: 'top-left', top: `${Math.round(rng(seed + 1) * 8 - 4)}%`, left: `${Math.round(rng(seed + 2) * 12 - 4)}%`, size: 280 + rng(seed + 3) * 120, rot: rng(seed + 4) * 30 - 15 },
-      { edge: 'top-right', top: `${Math.round(rng(seed + 5) * 10 - 5)}%`, right: `${Math.round(rng(seed + 6) * 12 - 4)}%`, size: 300 + rng(seed + 7) * 100, rot: rng(seed + 8) * 30 - 15 },
-      { edge: 'bottom-left', bottom: `${Math.round(rng(seed + 9) * 10 - 4)}%`, left: `${Math.round(rng(seed + 10) * 14 - 5)}%`, size: 260 + rng(seed + 11) * 120, rot: rng(seed + 12) * 30 - 15 },
-      { edge: 'bottom-right', bottom: `${Math.round(rng(seed + 13) * 8 - 4)}%`, right: `${Math.round(rng(seed + 14) * 12 - 4)}%`, size: 320 + rng(seed + 15) * 110, rot: rng(seed + 16) * 30 - 15 },
-      { edge: 'mid-right', top: `${Math.round(35 + rng(seed + 17) * 30)}%`, right: `${Math.round(rng(seed + 18) * 6 - 5)}%`, size: 220 + rng(seed + 19) * 80, rot: rng(seed + 20) * 30 - 15 },
-    ];
-    return slots;
-  }, [state.shapePlacement, state.shapeSeed]);
+    const placement: ShapePlacement = state.shapePlacement || 'random-edges';
+
+    if (placement === 'corners') {
+      return [
+        { top: `${off}px`, right: `${off}px`, size: 340, rot: 12 },
+        { bottom: `${off}px`, left: `${off}px`, size: 300, rot: -14 },
+        { top: `${Math.max(10, off + 50)}px`, left: `${off}px`, size: 230, rot: -8 },
+        { bottom: `${Math.max(10, off + 60)}px`, right: `${off}px`, size: 250, rot: 18 },
+      ];
+    }
+
+    if (placement === 'sides') {
+      return [
+        { top: '20%', left: `${off}px`, size: 270, rot: -10 },
+        { top: '68%', left: `${off}px`, size: 240, rot: 15 },
+        { top: '28%', right: `${off}px`, size: 290, rot: 12 },
+        { top: '74%', right: `${off}px`, size: 260, rot: -15 },
+      ];
+    }
+
+    // Procedural distribution: reparte orgánicamente entre los 4 bordes (top, right, bottom, left)
+    const positions = [];
+    const edges = ['top', 'right', 'bottom', 'left'];
+
+    for (let i = 0; i < count; i++) {
+      const s = seed + i * 17 + 1;
+      const edge = edges[i % 4];
+      const sizeBase = 200 + rng(s + 1) * 150;
+      const rot = Math.round(rng(s + 2) * 120 - 60);
+
+      if (edge === 'top') {
+        const leftPct = 6 + rng(s + 3) * 84;
+        const topOff = off + Math.round((rng(s + 4) - 0.5) * 35);
+        positions.push({ top: `${topOff}px`, left: `${leftPct.toFixed(1)}%`, size: sizeBase, rot });
+      } else if (edge === 'bottom') {
+        const leftPct = 6 + rng(s + 3) * 84;
+        const bottomOff = off + Math.round((rng(s + 4) - 0.5) * 35);
+        positions.push({ bottom: `${bottomOff}px`, left: `${leftPct.toFixed(1)}%`, size: sizeBase, rot });
+      } else if (edge === 'left') {
+        const topPct = 12 + rng(s + 3) * 74;
+        const leftOff = off + Math.round((rng(s + 4) - 0.5) * 35);
+        positions.push({ top: `${topPct.toFixed(1)}%`, left: `${leftOff}px`, size: sizeBase, rot });
+      } else {
+        const topPct = 12 + rng(s + 3) * 74;
+        const rightOff = off + Math.round((rng(s + 4) - 0.5) * 35);
+        positions.push({ top: `${topPct.toFixed(1)}%`, right: `${rightOff}px`, size: sizeBase, rot });
+      }
+    }
+
+    return positions;
+  }, [state.shapePlacement, state.shapeSeed, state.shapeCount, proximityOffset]);
 
   // Clase de viñeta para la textura
   const vignetteClass = `vignette-${state.patternVignette || 'vignette'}`;
 
   // Clase del patrón
-  const patternClass = state.bgPattern === 'none' 
+  const patternEnabled = state.patternEnabled !== false && state.bgPattern !== 'none';
+  const patternClass = !patternEnabled 
     ? 'pattern-none' 
     : (state.bgPattern === 'custom' ? '' : `pattern-${state.bgPattern}${isLight ? '-light' : ''}`);
 
@@ -142,10 +176,29 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
     titleColor = state.titleCustomColor;
   }
 
-  // Alineación de textos (Título, Subtítulo, Badges)
-  const textAlign = state.textAlign || 'center';
-  const textAlignmentClass = textAlign === 'left' ? 'text-left items-start' : (textAlign === 'right' ? 'text-right items-end' : 'text-center items-center');
-  const tagsJustifyClass = textAlign === 'left' ? 'justify-start' : (textAlign === 'right' ? 'justify-end' : 'justify-center');
+  // Color del subtítulo (con alto contraste en fondo claro)
+  let subtitleColor = isLight ? '#334155' : '#CBD5E1';
+  if (state.subtitleColorMode === 'contrast') {
+    subtitleColor = isLight ? '#1E293B' : '#F1F5F9';
+  } else if (state.subtitleColorMode === 'dimmed') {
+    subtitleColor = isLight ? '#64748B' : '#94A3B8';
+  } else if (state.subtitleColorMode === 'custom') {
+    subtitleColor = state.subtitleCustomColor || '#94A3B8';
+  }
+
+  // Alineaciones Independientes
+  const titleAlign = state.titleAlign || state.textAlign || 'center';
+  const subtitleAlign = state.subtitleAlign || state.textAlign || 'center';
+
+  const getAlignClasses = (al: string) => {
+    if (al === 'left') return 'text-left items-start';
+    if (al === 'right') return 'text-right items-end';
+    return 'text-center items-center';
+  };
+
+  const titleAlignClass = getAlignClasses(titleAlign);
+  const subtitleAlignClass = getAlignClasses(subtitleAlign);
+  const tagsJustifyClass = titleAlign === 'left' ? 'justify-start' : (titleAlign === 'right' ? 'justify-end' : 'justify-center');
 
   // Badges de Tecnologías
   const tagsList = (state.tags || '').split(',').map(t => t.trim()).filter(Boolean);
@@ -154,29 +207,41 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
   const imgBorderClass = `img-border-${state.imageBorderStyle || 'none'}`;
 
   // Escala interna y tamaño de fuente del módulo
-  const modScale = state.moduleScale || 1.0;
+  const modScale = (state.moduleScale || 100) / 100;
   const modFontSize = state.moduleFontSize || 14;
 
   let modulePad = 'p-6';
-  let moduleMinH = 'min-h-[280px]';
+  let moduleMinH = isWidescreen ? 'min-h-[220px]' : 'min-h-[280px]';
   if (state.moduleSize === 'compact') {
     modulePad = 'p-4';
-    moduleMinH = 'min-h-[200px]';
+    moduleMinH = isWidescreen ? 'min-h-[160px]' : 'min-h-[200px]';
   } else if (state.moduleSize === 'spacious') {
     modulePad = 'p-8';
-    moduleMinH = 'min-h-[360px]';
+    moduleMinH = isWidescreen ? 'min-h-[280px]' : 'min-h-[360px]';
   }
 
-  // Altura del logo y tamaño de fuente de cabecera configurables
+  // Altura del logo y tamaño de fuente de cabecera
   const logoH = state.logoSize || 44;
   const headerFontSize = state.headerSize || 13;
 
-  // Render del logo
-  const renderLogoElement = () => {
-    const name = state.companyName || 'Aleric Dev';
+  // Proporción de aspecto del logo
+  const logoRatio = state.logoAspectRatio || 'auto';
+  let logoRatioStyle: React.CSSProperties = { height: `${logoH}px` };
+  if (logoRatio === 'square') {
+    logoRatioStyle = { width: `${logoH}px`, height: `${logoH}px`, objectFit: 'contain' };
+  } else if (logoRatio === 'horizontal') {
+    logoRatioStyle = { height: `${logoH}px`, maxWidth: `${Math.round(logoH * 3.2)}px`, objectFit: 'contain' };
+  } else if (logoRatio === 'vertical') {
+    logoRatioStyle = { height: `${logoH}px`, maxWidth: `${Math.round(logoH * 0.75)}px`, objectFit: 'contain' };
+  }
 
-    // Si el usuario desactiva el logo en la cabecera, mostrar solo el nombre en tipografía destacada
-    if (state.headerShowLogo === false) {
+  // Render del logo y de la identidad de marca según HeaderBrandMode
+  const renderLogoElement = () => {
+    const name = state.companyName || 'Tu Empresa';
+    const brandMode = state.headerBrandMode || 'icon-text';
+
+    // 1. Solo texto de la empresa
+    if (brandMode === 'only-text' || state.headerShowLogo === false) {
       return (
         <div
           className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'} tracking-tight`}
@@ -187,68 +252,35 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
       );
     }
 
-    if (state.logoType === 'custom' && state.customLogoUrl) {
-      return (
-        <div className="flex items-center gap-3">
-          <img
-            src={state.customLogoUrl}
-            alt="Logo"
-            className="object-contain filter drop-shadow-md transition-all"
-            style={{ height: `${logoH}px` }}
-          />
-          <span
-            className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'} tracking-tight`}
-            style={{ fontSize: `${Math.round(headerFontSize * 1.35)}px` }}
-          >
-            {name}
-          </span>
-        </div>
+    // Isotipo o imagen de logo
+    let logoImgOrIcon: React.ReactNode = null;
+
+    if (state.customLogoUrl) {
+      logoImgOrIcon = (
+        <img
+          src={state.customLogoUrl}
+          alt="Logo"
+          className="filter drop-shadow-md transition-all"
+          style={logoRatioStyle}
+        />
       );
-    }
-    if (state.logoType === 'aleric') {
-      return (
-        <div className="flex items-center gap-3">
-          <img
-            src={isLight ? LOGO_DARK : LOGO_WHITE}
-            alt="Aleric Dev"
-            className="object-contain filter drop-shadow-md transition-all"
-            style={{ height: `${logoH}px` }}
-          />
-          <span
-            className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'} tracking-tight`}
-            style={{ fontSize: `${Math.round(headerFontSize * 1.35)}px` }}
-          >
-            {name}
-          </span>
-        </div>
-      );
-    }
-    if (state.logoType === 'monogram') {
+    } else if (state.logoType === 'monogram') {
       const initial = name.charAt(0).toUpperCase();
-      return (
-        <div className="flex items-center gap-3">
-          <div
-            className="rounded-2xl flex items-center justify-center font-mono font-extrabold text-white shadow-lg transition-all shrink-0"
-            style={{
-              width: `${logoH}px`,
-              height: `${logoH}px`,
-              fontSize: `${Math.round(logoH * 0.45)}px`,
-              background: `linear-gradient(135deg, ${state.currentColor}, #1E1B4B)`,
-              border: '1.5px solid rgba(255,255,255,0.2)'
-            }}
-          >
-            {initial}
-          </div>
-          <span
-            className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'} tracking-tight`}
-            style={{ fontSize: `${Math.round(headerFontSize * 1.35)}px` }}
-          >
-            {name}
-          </span>
+      logoImgOrIcon = (
+        <div
+          className="rounded-2xl flex items-center justify-center font-mono font-extrabold text-white shadow-lg transition-all shrink-0"
+          style={{
+            width: `${logoH}px`,
+            height: `${logoH}px`,
+            fontSize: `${Math.round(logoH * 0.45)}px`,
+            background: `linear-gradient(135deg, ${state.currentColor}, #1E1B4B)`,
+            border: '1.5px solid rgba(255,255,255,0.2)'
+          }}
+        >
+          {initial}
         </div>
       );
-    }
-    if (state.logoType === 'text') {
+    } else if (state.logoType === 'text') {
       return (
         <div
           className={`font-mono font-extrabold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}
@@ -257,12 +289,11 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
           {name}<span style={{ color: state.currentColor }}>.</span>
         </div>
       );
-    }
-    // 'generic': Logo Vectorial Tech
-    return (
-      <div className="flex items-center gap-3">
+    } else {
+      // 'generic': Logo Vectorial Tech
+      logoImgOrIcon = (
         <div
-          className="rounded-xl flex items-center justify-center shadow-lg transition-all"
+          className="rounded-xl flex items-center justify-center shadow-lg transition-all shrink-0"
           style={{
             width: `${logoH}px`,
             height: `${logoH}px`,
@@ -282,26 +313,135 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
             <path d="M2 12L12 17L22 12" stroke={state.currentColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <div className="flex flex-col">
-          <span
-            className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'} tracking-tight`}
-            style={{ fontSize: `${Math.round(logoH * 0.52)}px` }}
-          >
-            {name}
-          </span>
-          <span
-            className="font-mono tracking-widest uppercase opacity-70"
-            style={{ color: state.currentColor, fontSize: `${Math.max(9, Math.round(logoH * 0.22))}px` }}
-          >
-            ENTERPRISE CLOUD
-          </span>
+      );
+    }
+
+    // 2. Solo Logo
+    if (brandMode === 'only-logo') {
+      return (
+        <div className="flex items-center shrink-0">
+          {logoImgOrIcon}
         </div>
+      );
+    }
+
+    // 3. Logo + Texto
+    return (
+      <div className="flex items-center gap-3">
+        {logoImgOrIcon}
+        <span
+          className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'} tracking-tight`}
+          style={{ fontSize: `${Math.round(headerFontSize * 1.35)}px` }}
+        >
+          {name}
+        </span>
       </div>
     );
   };
 
-  // Header class según estilo
-  let headerClass = 'relative z-10 flex items-center justify-between transition-all gap-6 w-full';
+  // Badge Superior Estilos
+  const badgeStyle = state.headerBadgeStyle || 'pill';
+  const badgeColorMode = state.headerBadgeColorMode || 'inherit';
+  let badgeColor = state.currentColor;
+  if (badgeColorMode === 'contrast') {
+    badgeColor = isLight ? '#0F172A' : '#FFFFFF';
+  } else if (badgeColorMode === 'custom' && state.headerBadgeCustomColor) {
+    badgeColor = state.headerBadgeCustomColor;
+  }
+
+  const renderHeaderBadge = () => {
+    if (!state.category) return null;
+
+    if (badgeStyle === 'bracket') {
+      return (
+        <div
+          id="view-badge"
+          className="font-mono font-bold tracking-widest uppercase flex items-center gap-1.5 transition-all shrink-0"
+          style={{
+            color: badgeColor,
+            fontSize: `${headerFontSize}px`
+          }}
+        >
+          <span className="text-slate-500 font-normal">[</span>
+          <span>{state.category}</span>
+          <span className="text-slate-500 font-normal">]</span>
+        </div>
+      );
+    }
+
+    if (badgeStyle === 'neon') {
+      return (
+        <div
+          id="view-badge"
+          className="px-5 py-2 rounded-full font-mono font-bold tracking-wider uppercase flex items-center gap-2.5 transition-all shrink-0"
+          style={{
+            backgroundColor: isLight ? 'rgba(255,255,255,0.95)' : 'rgba(15, 23, 42, 0.9)',
+            border: `2px solid ${badgeColor}`,
+            boxShadow: `0 0 16px ${badgeColor}66`,
+            color: badgeColor,
+            fontSize: `${headerFontSize}px`
+          }}
+        >
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: badgeColor }} />
+          <span>{state.category}</span>
+        </div>
+      );
+    }
+
+    if (badgeStyle === 'glass') {
+      return (
+        <div
+          id="view-badge"
+          className="px-5 py-2 rounded-xl font-mono font-bold tracking-wider uppercase flex items-center gap-2.5 transition-all shrink-0 backdrop-blur-md"
+          style={{
+            backgroundColor: isLight ? 'rgba(255,255,255,0.65)' : 'rgba(255, 255, 255, 0.08)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            color: isLight ? '#0F172A' : '#FFFFFF',
+            fontSize: `${headerFontSize}px`
+          }}
+        >
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: badgeColor }} />
+          <span>{state.category}</span>
+        </div>
+      );
+    }
+
+    if (badgeStyle === 'minimal-dot') {
+      return (
+        <div
+          id="view-badge"
+          className="font-mono font-semibold tracking-wider uppercase flex items-center gap-2 transition-all shrink-0"
+          style={{
+            color: isLight ? '#334155' : '#CBD5E1',
+            fontSize: `${headerFontSize}px`
+          }}
+        >
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: badgeColor }} />
+          <span>{state.category}</span>
+        </div>
+      );
+    }
+
+    // Default 'pill'
+    return (
+      <div
+        id="view-badge"
+        className="px-5 py-2 rounded-full font-mono font-bold tracking-wider uppercase flex items-center gap-2.5 transition-all shadow-sm shrink-0"
+        style={{
+          backgroundColor: isLight ? 'rgba(255,255,255,0.9)' : 'rgba(15, 23, 42, 0.85)',
+          border: `1.5px solid ${badgeColor}`,
+          color: isLight ? '#0F172A' : '#FFFFFF',
+          fontSize: `${headerFontSize}px`
+        }}
+      >
+        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: badgeColor }} />
+        <span>{state.category}</span>
+      </div>
+    );
+  };
+
+  // Header class y estilo de contenedor
+  let headerClass = 'relative z-10 flex items-center justify-between transition-all gap-6 w-full shrink-0';
   const headerInlineStyle: React.CSSProperties = {};
   if (state.headerShape === 'pill') {
     headerClass += ' bg-slate-900/70 backdrop-blur-md border border-white/10 rounded-full px-6 py-3.5';
@@ -310,14 +450,23 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
   } else if (state.headerShape === 'accent-bar') {
     headerClass += ' border-t-4 border-b border-white/10 py-4';
     headerInlineStyle.borderTopColor = state.currentColor;
+  } else if (state.headerShape === 'floating-dock') {
+    headerClass += ' bg-slate-900/80 backdrop-blur-xl border border-white/15 rounded-2xl px-6 py-3.5 shadow-2xl';
+  } else if (state.headerShape === 'bracket-frame') {
+    headerClass += ' border-l-4 border-r-4 border-white/20 px-4 py-3';
+    headerInlineStyle.borderLeftColor = state.currentColor;
+    headerInlineStyle.borderRightColor = state.currentColor;
+  } else if (state.headerShape === 'neon-glow') {
+    headerClass += ' rounded-2xl p-4 border border-indigo-500/50 bg-slate-950/60';
+    headerInlineStyle.boxShadow = `0 0 25px rgba(${rgb}, 0.3)`;
   } else if (state.headerShape === 'minimal') {
     headerClass += ' pb-4';
   } else {
     headerClass += ' border-b border-white/[0.08] pb-6';
   }
 
-  // Footer class según estilo
-  let footerClass = 'relative z-10 flex items-center transition-all gap-6 w-full';
+  // Footer class y estilo de contenedor
+  let footerClass = 'relative z-10 flex items-center transition-all gap-6 w-full shrink-0';
   const footerInlineStyle: React.CSSProperties = {};
   if (state.footerShape === 'pill') {
     footerClass += ' bg-slate-900/70 backdrop-blur-md border border-white/10 rounded-full px-6 py-3';
@@ -326,6 +475,15 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
   } else if (state.footerShape === 'accent-bar') {
     footerClass += ' border-b-4 border-t border-white/10 py-4';
     footerInlineStyle.borderBottomColor = state.currentColor;
+  } else if (state.footerShape === 'floating-dock') {
+    footerClass += ' bg-slate-900/80 backdrop-blur-xl border border-white/15 rounded-2xl px-6 py-3 shadow-2xl';
+  } else if (state.footerShape === 'bracket-frame') {
+    footerClass += ' border-l-4 border-r-4 border-white/20 px-4 py-3';
+    footerInlineStyle.borderLeftColor = state.currentColor;
+    footerInlineStyle.borderRightColor = state.currentColor;
+  } else if (state.footerShape === 'neon-glow') {
+    footerClass += ' rounded-2xl p-4 border border-indigo-500/50 bg-slate-950/60';
+    footerInlineStyle.boxShadow = `0 0 25px rgba(${rgb}, 0.3)`;
   } else if (state.footerShape === 'minimal') {
     footerClass += ' pt-4';
   } else {
@@ -342,6 +500,902 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
 
   const footerSize = state.footerSize || 13;
 
+  // Render del Grupo Intermedio (Badges, Rating, Autor, Social Proof, Status Pill)
+  const renderIntermediateGroup = () => {
+    if (state.tagsGroupVisible === false) return null;
+    const groupType = state.tagsGroupType || 'badges';
+
+    if (groupType === 'rating') {
+      return (
+        <div className={`flex items-center gap-2.5 pt-1 ${tagsJustifyClass}`}>
+          <div className="flex items-center text-amber-400 gap-0.5">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+            ))}
+          </div>
+          <span className={`font-mono font-bold text-sm ${isLight ? 'text-slate-900' : 'text-white'}`}>
+            {state.ratingScore || '4.9/5.0'}
+          </span>
+          <span className={`text-xs font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+            • {state.ratingCount || '+500 Clientes'}
+          </span>
+        </div>
+      );
+    }
+
+    if (groupType === 'author') {
+      return (
+        <div className={`flex items-center gap-3 pt-1 ${tagsJustifyClass}`}>
+          {state.authorAvatar ? (
+            <img src={state.authorAvatar} alt="Autor" className="w-9 h-9 rounded-full object-cover border border-white/20 shadow-sm" />
+          ) : (
+            <div
+              className="w-9 h-9 rounded-full flex items-center justify-center font-mono font-bold text-white text-xs shadow-sm"
+              style={{ backgroundColor: state.currentColor }}
+            >
+              {(state.authorName || 'R').charAt(0).toUpperCase()}
+            </div>
+          )}
+          <div className="flex flex-col text-left">
+            <span className={`font-bold text-xs tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
+              {state.authorName || 'Ricardo Zapata'}
+            </span>
+            <span className={`text-[11px] font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+              {state.authorRole || 'Lead Software Architect'}
+            </span>
+          </div>
+        </div>
+      );
+    }
+
+    if (groupType === 'social-proof') {
+      return (
+        <div className={`flex items-center gap-2 pt-1 ${tagsJustifyClass}`}>
+          <div
+            className="px-4 py-1.5 rounded-full font-mono text-xs font-semibold flex items-center gap-2 shadow-sm"
+            style={{
+              backgroundColor: isLight ? 'rgba(255,255,255,0.9)' : 'rgba(15, 23, 42, 0.75)',
+              border: `1px solid ${state.currentColor}40`,
+              color: isLight ? '#0F172A' : '#F1F5F9'
+            }}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5" style={{ color: state.currentColor }} />
+            <span>{state.socialProofText || '⚡ Confiado por más de 120 startups en Latam'}</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (groupType === 'status-pill') {
+      return (
+        <div className={`flex items-center gap-2 pt-1 ${tagsJustifyClass}`}>
+          <div
+            className="px-3.5 py-1 rounded-full font-mono text-[11px] font-bold tracking-wider uppercase flex items-center gap-2"
+            style={{
+              backgroundColor: `${state.currentColor}20`,
+              border: `1.5px solid ${state.currentColor}`,
+              color: isLight ? '#0F172A' : '#FFFFFF'
+            }}
+          >
+            <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: state.currentColor }} />
+            <span>{state.statusPillText || 'EN VIVO • NUEVA VERSIÓN'}</span>
+          </div>
+        </div>
+      );
+    }
+
+    // Default 'badges'
+    if (tagsList.length === 0) return null;
+    return (
+      <div id="view-tags-container" className={`flex flex-wrap gap-2.5 pt-1 ${tagsJustifyClass}`}>
+        {tagsList.map((tag, idx) => (
+          <span
+            key={idx}
+            className={`px-4 py-1.5 rounded-lg text-sm font-mono font-medium tracking-wide ${
+              isLight
+                ? 'bg-slate-100/95 border border-slate-300/90 text-slate-800 shadow-xs'
+                : 'bg-white/5 border border-white/10 text-slate-200'
+            }`}
+          >
+            {tag}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
+  // Render del Bloque de Texto (Título, Subtítulo y Grupo Intermedio)
+  const renderTextBlock = () => {
+    const tagsPos = state.tagsPosition || 'below-subtitle';
+    const gapTitleSub = state.gapTitleSubtitle || 12;
+    const gapTextTags = state.gapTextToTags || 16;
+
+    return (
+      <div id="block-text" className="flex flex-col w-full">
+        {/* Grupo Intermedio arriba del título si está configurado */}
+        {tagsPos === 'above-title' && (
+          <div style={{ marginBottom: `${gapTextTags}px` }}>
+            {renderIntermediateGroup()}
+          </div>
+        )}
+
+        {/* Subtítulo Arriba si subtitlePos === 'above' */}
+        {state.subtitlePos === 'above' && state.subtitle && (
+          <div className={subtitleAlignClass} style={{ marginBottom: `${gapTitleSub}px` }}>
+            <p
+              className={`font-normal leading-relaxed transition-all ${state.subtitleFont || state.titleFont || 'font-inter'}`}
+              style={{
+                fontSize: `${state.subtitleSize}px`,
+                color: subtitleColor
+              }}
+            >
+              {state.subtitle}
+            </p>
+          </div>
+        )}
+
+        {/* Título Principal */}
+        <div className={titleAlignClass}>
+          <h2
+            className={`font-extrabold leading-[1.22] tracking-tight drop-shadow-lg transition-all ${state.titleFont || 'font-inter'}`}
+            style={{
+              fontSize: `${state.titleSize}px`,
+              color: titleColor
+            }}
+          >
+            {state.title || 'Escribe aquí tu título principal...'}
+          </h2>
+        </div>
+
+        {/* Subtítulo Abajo si subtitlePos === 'below' */}
+        {state.subtitlePos !== 'above' && state.subtitle && (
+          <div className={subtitleAlignClass} style={{ marginTop: `${gapTitleSub}px` }}>
+            <p
+              className={`font-normal leading-relaxed transition-all ${state.subtitleFont || state.titleFont || 'font-inter'}`}
+              style={{
+                fontSize: `${state.subtitleSize}px`,
+                color: subtitleColor
+              }}
+            >
+              {state.subtitle}
+            </p>
+          </div>
+        )}
+
+        {/* Grupo Intermedio abajo del subtítulo si está configurado */}
+        {tagsPos === 'below-subtitle' && (
+          <div style={{ marginTop: `${gapTextTags}px` }}>
+            {renderIntermediateGroup()}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Render del Módulo Central
+  const renderModuleBlock = () => {
+    if (!state.moduleVisible) return null;
+
+    return (
+      <div
+        id="block-module"
+        className={`${isLight ? 'glass-card-light' : 'glass-card-clean'} rounded-2xl ${modulePad} ${moduleMinH} transition-all w-full flex flex-col justify-center h-auto`}
+        style={{
+          padding: `${Math.round(24 * modScale)}px`
+        }}
+      >
+        {/* 0. MÓDULO DE TEXTO / GRAN CITA */}
+        {state.activeModule === 'text' && (
+          <div className="flex flex-col items-center justify-center text-center p-3 w-full h-auto">
+            {state.contentHighlightStyle === 'quote' ? (
+              <div className="relative w-full flex flex-col items-center py-4">
+                <span
+                  className="font-serif font-black select-none pointer-events-none absolute -top-8 left-4 opacity-25"
+                  style={{ fontSize: `${Math.round(96 * modScale)}px`, color: state.currentColor }}
+                >
+                  “
+                </span>
+                <blockquote
+                  className="italic font-medium leading-relaxed z-10 px-8 max-w-[92%]"
+                  style={{
+                    fontSize: `${Math.round(modFontSize * 1.55)}px`,
+                    color: isLight ? '#0F172A' : '#F8FAFC'
+                  }}
+                >
+                  {state.contentHighlightText || 'Automatiza tus flujos operativos y acelera el crecimiento de tu empresa con software a la medida.'}
+                </blockquote>
+              </div>
+            ) : state.contentHighlightStyle === 'banner' ? (
+              <div
+                className="w-full rounded-2xl p-6 flex flex-col items-center justify-center gap-3 border shadow-xl"
+                style={{
+                  background: `linear-gradient(135deg, rgba(${rgb}, 0.16) 0%, rgba(15, 23, 42, 0.5) 100%)`,
+                  borderColor: `rgba(${rgb}, 0.35)`
+                }}
+              >
+                <span
+                  className="px-4 py-1 rounded-full text-xs font-mono font-bold tracking-widest uppercase shadow-sm"
+                  style={{
+                    backgroundColor: state.currentColor,
+                    color: '#FFFFFF'
+                  }}
+                >
+                  LLAMADO A LA ACCIÓN
+                </span>
+                <p
+                  className="font-extrabold tracking-tight text-center leading-snug px-4"
+                  style={{
+                    fontSize: `${Math.round(modFontSize * 1.55)}px`,
+                    color: isLight ? '#0F172A' : '#FFFFFF'
+                  }}
+                >
+                  {state.contentHighlightText || '¿Listo para dar el siguiente salto tecnológico? Escríbenos y transformemos tu visión en código.'}
+                </p>
+              </div>
+            ) : (
+              <div
+                className="w-full rounded-2xl p-6 flex flex-col items-center justify-center gap-3 border"
+                style={{
+                  backgroundColor: isLight ? 'rgba(255,255,255,0.7)' : 'rgba(15, 23, 42, 0.5)',
+                  borderColor: 'rgba(255, 255, 255, 0.12)',
+                  boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
+                }}
+              >
+                <p
+                  className="font-bold tracking-tight text-center leading-relaxed max-w-[95%]"
+                  style={{
+                    fontSize: `${Math.round(modFontSize * 1.45)}px`,
+                    color: isLight ? '#0F172A' : '#F1F5F9'
+                  }}
+                >
+                  {state.contentHighlightText || 'Soluciones tecnológicas escalables diseñadas para operaciones de alto rendimiento.'}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 1. MÓDULO DE CALL TO ACTION / FRASE DE ACCIÓN (PROBLEMA ➔ ACCIÓN) */}
+        {state.activeModule === 'cta' && (
+          <div
+            className="w-full rounded-2xl p-7 flex flex-col items-center justify-center text-center gap-4 border shadow-2xl relative overflow-hidden"
+            style={{
+              background: isLight 
+                ? `linear-gradient(135deg, rgba(${rgb}, 0.12) 0%, rgba(255, 255, 255, 0.95) 100%)`
+                : `linear-gradient(135deg, rgba(${rgb}, 0.25) 0%, rgba(15, 23, 42, 0.85) 100%)`,
+              borderColor: `rgba(${rgb}, 0.45)`
+            }}
+          >
+            <span
+              className="px-4 py-1.5 rounded-full text-xs font-mono font-bold tracking-widest uppercase shadow-md flex items-center gap-1.5"
+              style={{
+                backgroundColor: state.currentColor,
+                color: '#FFFFFF'
+              }}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{state.ctaActionBadge || '⚡ SOLUCIÓN DIRECTA'}</span>
+            </span>
+
+            <p
+              className="font-extrabold tracking-tight leading-snug px-3"
+              style={{
+                fontSize: `${Math.round(25 * modScale)}px`,
+                color: isLight ? '#0F172A' : '#FFFFFF'
+              }}
+            >
+              {state.ctaActionPhrase || 'Migra hoy tus procesos a la nube y reduce tiempos de respuesta en un 60%.'}
+            </p>
+
+            <div className="flex flex-col items-center gap-2 pt-1 w-full max-w-[85%]">
+              <div
+                className="px-6 py-2.5 rounded-xl font-mono font-bold text-xs text-white shadow-lg flex items-center justify-center gap-2 transition"
+                style={{
+                  backgroundColor: state.currentColor,
+                  boxShadow: `0 8px 25px rgba(${rgb}, 0.35)`
+                }}
+              >
+                <span>{state.ctaActionButtonText || 'Solicitar Diagnóstico Técnico ➔'}</span>
+              </div>
+              {state.ctaActionBenefit && (
+                <span
+                  className="text-[11px] font-mono text-slate-400 text-center pt-0.5"
+                  style={{ fontSize: `${Math.max(10, Math.round(modFontSize * 0.85))}px` }}
+                >
+                  {state.ctaActionBenefit}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 2. MÓDULO DE KPIS OPTIMIZADO */}
+        {state.activeModule === 'kpi' && (
+          <div className={`grid ${state.kpis.length === 3 ? 'grid-cols-3' : (state.kpis.length >= 4 ? 'grid-cols-2' : 'grid-cols-2')} gap-4 h-auto w-full`}>
+            {state.kpis.map((kpi, idx) => (
+              <div
+                key={idx}
+                className="p-5 rounded-2xl bg-slate-900/70 border border-white/10 flex flex-col justify-center transition-all shadow-md relative overflow-hidden backdrop-blur-md"
+                style={{
+                  borderTopColor: kpi.borderTop !== false ? state.currentColor : undefined,
+                  borderTopWidth: kpi.borderTop !== false ? '4px' : '1px'
+                }}
+              >
+                <div className="flex items-baseline gap-1.5 flex-wrap">
+                  {kpi.prefix && (
+                    <span className="text-slate-400 font-mono font-bold" style={{ fontSize: `${Math.round(22 * modScale)}px` }}>
+                      {kpi.prefix}
+                    </span>
+                  )}
+                  <span
+                    className="font-mono font-extrabold text-white tracking-tight"
+                    style={{ fontSize: `${Math.round(42 * modScale)}px` }}
+                  >
+                    {kpi.val}
+                  </span>
+                  {kpi.suffix && (
+                    <span className="text-slate-400 font-mono font-bold" style={{ fontSize: `${Math.round(22 * modScale)}px` }}>
+                      {kpi.suffix}
+                    </span>
+                  )}
+
+                  {kpi.trend === 'up' && (
+                    <span className="ml-auto text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-md flex items-center gap-0.5">
+                      ▲ Crecimiento
+                    </span>
+                  )}
+                  {kpi.trend === 'down' && (
+                    <span className="ml-auto text-[10px] font-mono font-bold text-rose-400 bg-rose-500/15 border border-rose-500/30 px-2 py-0.5 rounded-md flex items-center gap-0.5">
+                      ▼ Reducción
+                    </span>
+                  )}
+                </div>
+
+                <span
+                  className="font-mono text-slate-400 font-bold uppercase tracking-wider pt-2 truncate"
+                  style={{ fontSize: `${Math.max(10, Math.round(modFontSize * 0.85))}px` }}
+                >
+                  {kpi.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 3. MÓDULO STEPS / FASES */}
+        {state.activeModule === 'steps' && (
+          <div className="grid grid-cols-2 gap-3.5 w-full">
+            {(state.stepsData || []).map((st, idx) => (
+              <div
+                key={idx}
+                className="p-4 rounded-xl bg-slate-900/70 border border-white/10 flex flex-col gap-1.5 relative overflow-hidden"
+              >
+                <div className="flex items-center justify-between">
+                  <span
+                    className="w-6 h-6 rounded-full flex items-center justify-center font-mono font-bold text-xs text-white"
+                    style={{ backgroundColor: state.currentColor }}
+                  >
+                    {st.stepNumber}
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-500 uppercase">FASE 0{st.stepNumber}</span>
+                </div>
+                <h4 className={`font-bold text-sm text-white ${state.titleFont || 'font-inter'}`}>{st.title}</h4>
+                <p className="text-xs text-slate-400 leading-relaxed line-clamp-2">{st.description}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 4. MÓDULO PROMO CON TEXTO AMPLIADO */}
+        {state.activeModule === 'promo' && (
+          <div
+            className="w-full rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-3 border shadow-2xl relative overflow-hidden"
+            style={{
+              background: `linear-gradient(135deg, rgba(${rgb}, 0.22) 0%, rgba(15, 23, 42, 0.8) 100%)`,
+              borderColor: `rgba(${rgb}, 0.45)`
+            }}
+          >
+            <span
+              className="px-4 py-1 rounded-full text-xs font-mono font-bold tracking-widest uppercase shadow-sm"
+              style={{
+                backgroundColor: state.currentColor,
+                color: '#FFFFFF'
+              }}
+            >
+              {state.promoData?.badge || state.promo?.badge || 'OFERTA LIMITADA'}
+            </span>
+
+            <h3
+              className="font-extrabold tracking-tight text-white leading-tight"
+              style={{ fontSize: `${Math.round(28 * modScale)}px` }}
+            >
+              {state.promoData?.title || state.promo?.title || state.promoData?.headline || state.promo?.headline || '50% OFF en Tu Primer Despliegue'}
+            </h3>
+
+            {(state.promoData?.subtitle || state.promo?.subheadline) && (
+              <p className="text-xs font-semibold text-indigo-200/90 max-w-[90%]">
+                {state.promoData?.subtitle || state.promo?.subheadline}
+              </p>
+            )}
+
+            <p className="text-xs text-slate-300 max-w-[90%] leading-relaxed">
+              {state.promoData?.description || state.promo?.description || 'Válido para nuevos clientes en desarrollo cloud, microservicios y modernización de plataformas.'}
+            </p>
+
+            <div className="flex items-center gap-3 pt-1">
+              <div
+                className="px-4 py-1.5 rounded-xl border border-dashed font-mono font-bold text-xs tracking-wider"
+                style={{
+                  borderColor: state.currentColor,
+                  color: state.currentColor,
+                  backgroundColor: 'rgba(0,0,0,0.3)'
+                }}
+              >
+                {state.promoData?.coupon || state.promoData?.code || state.promo?.code || 'OFERTA2026'}
+              </div>
+              <div
+                className="px-4 py-1.5 rounded-xl font-mono font-bold text-xs text-white shadow-sm flex items-center gap-1.5"
+                style={{ backgroundColor: state.currentColor }}
+              >
+                <span>{state.promoData?.cta || state.promo?.cta || 'Reclamar'}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </div>
+            </div>
+
+            {(state.promoData?.finePrint || state.promo?.finePrint) && (
+              <span className="text-[10px] font-mono text-slate-400 pt-0.5">
+                {state.promoData?.finePrint || state.promo?.finePrint}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* 5. MÓDULO DE CHAT WHATSAPP */}
+        {state.activeModule === 'chat' && (
+          <div className="flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-white/10 w-full h-auto">
+            <div
+              className="flex items-center justify-between px-5 py-3 border-b border-white/[0.08]"
+              style={{
+                backgroundColor: isLight ? '#F0F2F5' : '#1F2C34'
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-white font-mono font-bold shadow-sm shrink-0"
+                  style={{ backgroundColor: state.currentColor }}
+                >
+                  {(state.chatContactName || 'A').charAt(0).toUpperCase()}
+                </div>
+                <div className="flex flex-col">
+                  <span
+                    className={`font-mono font-bold text-sm tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}
+                  >
+                    {state.chatContactName || 'Asistente Virtual'}
+                  </span>
+                  <div className="flex items-center gap-1.5 text-xs font-mono">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-emerald-400 font-medium">
+                      {state.chatOnlineStatus || 'en línea'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              className="p-5 space-y-3"
+              style={{
+                backgroundColor: isLight ? '#EFEAE2' : '#0B141A'
+              }}
+            >
+              {state.chatMessages.map((msg, idx) => {
+                const isBot = msg.sender === 'bot';
+                return (
+                  <div
+                    key={idx}
+                    className={`flex flex-col ${isBot ? 'items-end' : 'items-start'}`}
+                  >
+                    <div
+                      className={`relative max-w-[85%] px-4 py-2.5 rounded-2xl shadow-md transition-all ${
+                        isBot
+                          ? isLight
+                            ? 'bg-[#D9FDD3] text-[#111B21] rounded-tr-xs'
+                            : 'bg-[#005C4B] text-[#E9EDEF] rounded-tr-xs'
+                          : isLight
+                            ? 'bg-[#FFFFFF] text-[#111B21] rounded-tl-xs'
+                            : 'bg-[#202C33] text-[#E9EDEF] rounded-tl-xs'
+                      }`}
+                      style={{ fontSize: `${Math.round(modFontSize * 1.05)}px` }}
+                    >
+                      <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+
+                      <div className="flex items-center justify-end gap-1.5 mt-1 select-none">
+                        <span
+                          className={`text-[10px] font-mono ${
+                            isLight ? 'text-slate-500' : 'text-slate-400'
+                          }`}
+                        >
+                          {msg.time}
+                        </span>
+                        {isBot && (
+                          <svg className="w-4 h-3 text-[#53BDEB]" viewBox="0 0 16 11" fill="currentColor">
+                            <path d="M11.07 0.93a.75.75 0 00-1.06 0L5.75 5.19 4.28 3.72a.75.75 0 00-1.06 1.06l2 2a.75.75 0 001.06 0l4.79-4.79a.75.75 0 000-1.06zM15.07 0.93a.75.75 0 00-1.06 0l-5.79 5.79.53.53a.75.75 0 001.06 0l4.2-4.2a.75.75 0 000-1.06l1.06-1.06z"/>
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 6. MÓDULO DE GRÁFICOS (BARRAS HORIZONTALES, PASTEL/DONUT Y LÍNEAS) */}
+        {state.activeModule === 'chart' && (
+          <div className="flex flex-col gap-4 h-auto w-full">
+            {/* Gráfico 1: BARRAS HORIZONTALES (POR DEFECTO) */}
+            {(!state.chartType || state.chartType === 'horizontal-bars') && (
+              <div className="flex flex-col gap-3.5 w-full py-1">
+                {state.chartBars.map((bar, idx) => (
+                  <div key={idx} className="flex flex-col gap-1.5 w-full">
+                    <div className="flex justify-between items-center text-xs font-mono">
+                      <span className={`font-semibold ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                        {bar.label}
+                      </span>
+                      <span
+                        className="font-bold text-white px-2 py-0.5 rounded-md text-[11px] shadow-xs"
+                        style={{ backgroundColor: bar.color || state.currentColor }}
+                      >
+                        {bar.pct}%
+                      </span>
+                    </div>
+                    <div className="w-full h-3.5 bg-slate-800/80 rounded-full overflow-hidden p-0.5 border border-white/10 shadow-inner">
+                      <div
+                        className="h-full rounded-full transition-all duration-700 shadow-sm"
+                        style={{
+                          width: `${Math.min(100, Math.max(0, bar.pct))}%`,
+                          background: `linear-gradient(90deg, ${(bar.color || state.currentColor)}cc, ${bar.color || state.currentColor})`
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Gráfico 2: PASTEL / DONUT CIRCULAR */}
+            {state.chartType === 'pie' && (() => {
+              const totalPct = state.chartBars.reduce((acc, b) => acc + (b.pct || 0), 0) || 100;
+              const circumference = 251.32; // 2 * pi * 40
+              let accumulatedPct = 0;
+              const defaultPalette = [state.currentColor, '#06B6D4', '#10B981', '#F59E0B', '#EC4899', '#8B5CF6'];
+
+              return (
+                <div className="flex items-center justify-around gap-6 w-full py-2">
+                  <div className="relative w-44 h-44 shrink-0 flex items-center justify-center">
+                    <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 110 110">
+                      <circle
+                        cx="55"
+                        cy="55"
+                        r="40"
+                        stroke="rgba(255,255,255,0.08)"
+                        strokeWidth="16"
+                        fill="transparent"
+                      />
+                      {state.chartBars.map((bar, idx) => {
+                        const slicePct = (bar.pct / totalPct);
+                        const strokeDasharray = `${(slicePct * circumference).toFixed(2)} ${circumference.toFixed(2)}`;
+                        const strokeDashoffset = `${(-(accumulatedPct / totalPct) * circumference).toFixed(2)}`;
+                        accumulatedPct += bar.pct;
+                        const sliceColor = bar.color || defaultPalette[idx % defaultPalette.length];
+
+                        return (
+                          <circle
+                            key={idx}
+                            cx="55"
+                            cy="55"
+                            r="40"
+                            stroke={sliceColor}
+                            strokeWidth="16"
+                            strokeDasharray={strokeDasharray}
+                            strokeDashoffset={strokeDashoffset}
+                            strokeLinecap="round"
+                            fill="transparent"
+                            className="transition-all duration-700"
+                          />
+                        );
+                      })}
+                    </svg>
+                    <div className="absolute flex flex-col items-center justify-center text-center">
+                      <span className="font-mono font-extrabold text-lg text-white">
+                        {state.chartBars[0]?.pct || 100}%
+                      </span>
+                      <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider">
+                        Líder
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Leyenda del Pastel */}
+                  <div className="flex flex-col gap-2 flex-1 max-w-[55%]">
+                    {state.chartBars.map((bar, idx) => {
+                      const defaultPalette = [state.currentColor, '#06B6D4', '#10B981', '#F59E0B', '#EC4899', '#8B5CF6'];
+                      const sliceColor = bar.color || defaultPalette[idx % defaultPalette.length];
+                      return (
+                        <div key={idx} className="flex items-center justify-between gap-2 text-xs font-mono">
+                          <div className="flex items-center gap-2 truncate">
+                            <span className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs" style={{ backgroundColor: sliceColor }} />
+                            <span className={`truncate text-[11px] ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>{bar.label}</span>
+                          </div>
+                          <span className="font-bold text-white shrink-0 text-[11px]">{bar.pct}%</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Gráfico 3: LÍNEAS / TENDENCIA */}
+            {state.chartType === 'line' && (() => {
+              const bars = state.chartBars.length > 0 ? state.chartBars : [{ label: 'Q1', pct: 40 }, { label: 'Q2', pct: 85 }];
+              const svgW = 440;
+              const svgH = 150;
+              const padX = 40;
+              const padY = 25;
+              const maxPct = Math.max(...bars.map(b => b.pct), 100);
+
+              const points = bars.map((b, idx) => {
+                const x = padX + (idx / Math.max(1, bars.length - 1)) * (svgW - 2 * padX);
+                const y = svgH - padY - (b.pct / maxPct) * (svgH - 2 * padY);
+                return { x, y, ...b };
+              });
+
+              const pathD = points.reduce((acc, pt, i) => `${acc} ${i === 0 ? 'M' : 'L'} ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`, '');
+              const areaD = `${pathD} L ${points[points.length - 1].x.toFixed(1)} ${(svgH - padY).toFixed(1)} L ${points[0].x.toFixed(1)} ${(svgH - padY).toFixed(1)} Z`;
+
+              return (
+                <div className="w-full flex flex-col items-center py-1">
+                  <svg className="w-full h-36 overflow-visible" viewBox={`0 0 ${svgW} ${svgH}`}>
+                    <defs>
+                      <linearGradient id="chartLineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor={state.currentColor} stopOpacity="0.45" />
+                        <stop offset="100%" stopColor={state.currentColor} stopOpacity="0.0" />
+                      </linearGradient>
+                    </defs>
+
+                    {/* Guías horizontales */}
+                    <line x1={padX} y1={padY} x2={svgW - padX} y2={padY} stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />
+                    <line x1={padX} y1={svgH / 2} x2={svgW - padX} y2={svgH / 2} stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />
+                    <line x1={padX} y1={svgH - padY} x2={svgW - padX} y2={svgH - padY} stroke="rgba(255,255,255,0.15)" />
+
+                    {/* Área de relleno */}
+                    <path d={areaD} fill="url(#chartLineGrad)" />
+
+                    {/* Línea de tendencia */}
+                    <path
+                      d={pathD}
+                      fill="none"
+                      stroke={state.currentColor}
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+
+                    {/* Puntos y Etiquetas */}
+                    {points.map((pt, idx) => (
+                      <g key={idx}>
+                        <circle
+                          cx={pt.x}
+                          cy={pt.y}
+                          r="5.5"
+                          fill={state.currentColor}
+                          stroke="#FFFFFF"
+                          strokeWidth="2.5"
+                          className="shadow-md"
+                        />
+                        <text
+                          x={pt.x}
+                          y={pt.y - 10}
+                          textAnchor="middle"
+                          fill="#FFFFFF"
+                          fontSize="11"
+                          fontFamily="monospace"
+                          fontWeight="bold"
+                        >
+                          {pt.pct}%
+                        </text>
+                        <text
+                          x={pt.x}
+                          y={svgH - padY + 16}
+                          textAnchor="middle"
+                          fill="#94A3B8"
+                          fontSize="10"
+                          fontFamily="monospace"
+                        >
+                          {pt.label}
+                        </text>
+                      </g>
+                    ))}
+                  </svg>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
+        {/* 7. MÓDULO DE IMÁGENES (CON SOPORTE PARA SIN BORDES / PNG TRANSPARENTE) */}
+        {state.activeModule === 'image' && (
+          <div className="flex flex-col gap-3 h-auto w-full">
+            <div className="w-full flex items-center justify-center transition-all">
+              {state.images.map((img, idx) => {
+                const isRaw = state.imageBorderStyle === 'raw';
+
+                return (
+                  <div
+                    key={idx}
+                    className={`w-full flex items-center justify-center transition-all ${
+                      isRaw ? 'p-0 bg-transparent border-0 shadow-none' : `overflow-hidden ${imgBorderClass}`
+                    }`}
+                    style={{ maxHeight: `${Math.round(360 * modScale)}px` }}
+                  >
+                    <img
+                      src={img.url}
+                      alt={img.caption || 'Preview'}
+                      className={`w-full h-full transition-all ${
+                        isRaw ? 'object-contain filter drop-shadow-2xl' : 'object-cover rounded-xl'
+                      }`}
+                      style={{ maxHeight: `${Math.round(360 * modScale)}px` }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Render de Capas de Fondo según Layer Depth Order
+  const renderBackgroundLayers = () => {
+    const order: BackgroundLayerOrder = state.backgroundLayerOrder || 'pattern-lights-shapes';
+
+    const patternEl = patternEnabled ? (
+      <div
+        key="pattern"
+        id="pattern-layer"
+        className={`absolute inset-0 pointer-events-none transition-all ${patternClass} ${vignetteClass}`}
+        style={{
+          opacity: (state.patternOpacity ?? 70) / 100,
+          backgroundSize: `${state.patternScale}px ${state.patternScale}px`,
+          backgroundImage: state.bgPattern === 'custom' && state.customPatternUrl
+            ? `url('${state.customPatternUrl}')`
+            : undefined
+        }}
+      />
+    ) : null;
+
+    const lightsEl = lightsEnabled && glowBg !== 'none' ? (
+      <div
+        key="lights"
+        id="glow-layer"
+        className="absolute inset-0 pointer-events-none transition-all duration-500 overflow-hidden"
+        style={{ background: glowBg }}
+      />
+    ) : null;
+
+    const shapesEl = shapesEnabled ? (
+      <div
+        key="shapes"
+        id="shapes-layer"
+        className="absolute inset-0 pointer-events-none overflow-hidden"
+        style={{ opacity: shapeOpacity }}
+      >
+        {perimeterPositions.map((pos, idx) => {
+          const finalSize = Math.round(pos.size * shapeSizeMult);
+          const styleProps: React.CSSProperties = {
+            position: 'absolute',
+            top: (pos as any).top,
+            bottom: (pos as any).bottom,
+            left: (pos as any).left,
+            right: (pos as any).right,
+            transform: `rotate(${pos.rot}deg)`,
+            pointerEvents: 'none',
+            transition: 'all 0.5s ease-out',
+          };
+
+          const finish: ShapeStyleVariant = state.shapeStyleVariant || 'glass';
+          const geo: ShapeGeometry = state.shapeGeometry || 'orbs';
+
+          // Geometría Radius
+          let radius = '9999px';
+          if (geo === 'squares') radius = '24px';
+          else if (geo === 'diamonds') radius = '12px';
+          else if (geo === 'triangles') radius = '6px';
+
+          // Acabado Finish
+          let finishStyle: React.CSSProperties = {};
+          if (finish === 'flat') {
+            finishStyle = {
+              background: `rgba(${rgb}, 0.22)`,
+              border: `1px solid rgba(${rgb}, 0.4)`
+            };
+          } else if (finish === 'pastel') {
+            finishStyle = {
+              background: `rgba(${rgb}, 0.12)`,
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.15)'
+            };
+          } else if (finish === 'neon-outline') {
+            finishStyle = {
+              background: 'transparent',
+              border: `2px solid rgba(${rgb}, 0.8)`,
+              boxShadow: `0 0 25px rgba(${rgb}, 0.5)`
+            };
+          } else if (finish === 'duotone') {
+            finishStyle = {
+              background: `linear-gradient(135deg, rgba(${rgb}, 0.35) 0%, rgba(${duoRgb}, 0.25) 100%)`,
+              border: `1.5px solid rgba(${duoRgb}, 0.4)`,
+              backdropFilter: 'blur(14px)',
+              boxShadow: `0 20px 40px rgba(0,0,0,0.4)`
+            };
+          } else {
+            // 'glass' standard
+            finishStyle = {
+              background: `radial-gradient(circle at 35% 35%, rgba(255,255,255,0.4) 0%, rgba(${rgb}, 0.28) 45%, rgba(6,182,212,0.18) 75%, transparent 100%)`,
+              border: '1.5px solid rgba(255, 255, 255, 0.25)',
+              backdropFilter: 'blur(14px)',
+              boxShadow: `0 20px 50px rgba(0,0,0,0.5), inset 0 0 25px rgba(${rgb}, 0.3)`
+            };
+          }
+
+          if (geo === 'tech-code') {
+            return (
+              <div
+                key={idx}
+                className="font-mono font-bold tracking-widest flex items-center justify-center"
+                style={{
+                  ...styleProps,
+                  fontSize: `${Math.round(finalSize * 0.16)}px`,
+                  color: `rgba(${rgb}, 0.75)`,
+                  textShadow: `0 0 20px rgba(${rgb}, 0.8)`,
+                  padding: '8px 16px',
+                  borderRadius: '12px',
+                  border: `1px solid rgba(${rgb}, 0.3)`,
+                  background: 'rgba(15, 23, 42, 0.5)',
+                  backdropFilter: 'blur(8px)',
+                }}
+              >
+                {idx % 2 === 0 ? '<Media Studio />' : '{ v1.0 }'}
+              </div>
+            );
+          }
+
+          return (
+            <div
+              key={idx}
+              style={{
+                ...styleProps,
+                width: `${finalSize}px`,
+                height: `${finalSize}px`,
+                borderRadius: radius,
+                ...finishStyle
+              }}
+            />
+          );
+        })}
+      </div>
+    ) : null;
+
+    // Orden de capas de fondo limpio y óptimo: Formas de fondo ➔ Patrón de textura ➔ Luces ambientales
+    return <>{shapesEl}{patternEl}{lightsEl}</>;
+  };
+
+  // Separación / Gap entre el bloque de texto y el módulo central
+  const gapTagsToModule = state.gapTagsToModule || 24;
+
   return (
     <div
       ref={ref}
@@ -352,552 +1406,92 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
       style={{
         width: `${r.nativeW}px`,
         height: `${r.nativeH}px`,
-        padding: '56px 64px 72px 64px',
+        padding: isWidescreen ? '44px 56px 44px 56px' : '56px 64px 64px 64px',
         boxSizing: 'border-box'
       }}
     >
-      {/* 1. Capa de Textura / Patrón con Soporte para Máscaras */}
-      <div
-        id="pattern-layer"
-        className={`absolute inset-0 pointer-events-none transition-all ${patternClass} ${vignetteClass}`}
-        style={{
-          backgroundSize: `${state.patternScale}px ${state.patternScale}px`,
-          backgroundImage: state.bgPattern === 'custom' && state.customPatternUrl
-            ? `url('${state.customPatternUrl}')`
-            : undefined
-        }}
-      />
+      {/* CAPAS DE FONDO INTERACTIVAS (PATRÓN, LUCES Y FORMAS) */}
+      {renderBackgroundLayers()}
 
-      {/* 2. Capa de Iluminación Neón Independiente */}
-      <div
-        id="glow-layer"
-        className="absolute inset-0 pointer-events-none transition-all duration-500 overflow-hidden"
-        style={{ background: glowBg }}
-      />
-
-      {/* 3. Capa de Formas Vítreas Perimetrales (Solo en los bordes, centro 100% limpio) */}
-      {state.shapeType && state.shapeType !== 'none' && (
-        <div id="shapes-layer" className="absolute inset-0 pointer-events-none overflow-hidden" style={{ opacity: shapeOpacity }}>
-          {perimeterPositions.map((pos, idx) => {
-            const finalSize = Math.round(pos.size * shapeSizeMult);
-            const styleProps: React.CSSProperties = {
-              position: 'absolute',
-              top: (pos as any).top,
-              bottom: (pos as any).bottom,
-              left: (pos as any).left,
-              right: (pos as any).right,
-              transform: `rotate(${pos.rot}deg)`,
-              pointerEvents: 'none',
-              transition: 'all 0.5s ease-out',
-            };
-
-            // 1. Orbes Vítreos con Blur Suave (como en la imagen de referencia)
-            if (state.shapeType === 'glass-orbs' || (state.shapeType === 'mixed-glass' && idx % 2 === 0)) {
-              return (
-                <div
-                  key={idx}
-                  style={{
-                    ...styleProps,
-                    width: `${finalSize}px`,
-                    height: `${finalSize}px`,
-                    borderRadius: '9999px',
-                    background: `radial-gradient(circle at 35% 35%, rgba(255,255,255,0.4) 0%, rgba(${rgb}, 0.28) 45%, rgba(6,182,212,0.18) 75%, transparent 100%)`,
-                    border: '1.5px solid rgba(255, 255, 255, 0.25)',
-                    backdropFilter: 'blur(12px)',
-                    boxShadow: `0 20px 50px rgba(0,0,0,0.5), inset 0 0 25px rgba(${rgb}, 0.3)`,
-                  }}
-                />
-              );
-            }
-
-            // 2. Tarjetas Diagonales de Cristal Glassmorphism
-            if (state.shapeType === 'glass-cards' || (state.shapeType === 'mixed-glass' && idx === 1)) {
-              return (
-                <div
-                  key={idx}
-                  style={{
-                    ...styleProps,
-                    width: `${Math.round(finalSize * 1.1)}px`,
-                    height: `${Math.round(finalSize * 0.7)}px`,
-                    borderRadius: '28px',
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 100%)',
-                    border: '1.5px solid rgba(255, 255, 255, 0.22)',
-                    backdropFilter: 'blur(16px)',
-                    boxShadow: '0 25px 50px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.3)',
-                  }}
-                />
-              );
-            }
-
-            // 3. Cyber Brackets (< >, ../>)
-            if (state.shapeType === 'cyber-brackets' || (state.shapeType === 'mixed-glass' && idx >= 2)) {
-              const symbol = idx % 2 === 0 ? '<Aleric Dev>' : '</>';
-              return (
-                <div
-                  key={idx}
-                  className="font-space-mono font-bold tracking-widest flex items-center justify-center"
-                  style={{
-                    ...styleProps,
-                    fontSize: `${Math.round(finalSize * 0.16)}px`,
-                    color: `rgba(${rgb}, 0.65)`,
-                    textShadow: `0 0 20px rgba(${rgb}, 0.8)`,
-                    padding: '8px 16px',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    background: 'rgba(15, 23, 42, 0.4)',
-                    backdropFilter: 'blur(8px)',
-                  }}
-                >
-                  {symbol}
-                </div>
-              );
-            }
-
-            // 4. Cuadrados / Prismas Tech
-            return (
-              <div
-                key={idx}
-                style={{
-                  ...styleProps,
-                  width: `${finalSize}px`,
-                  height: `${finalSize}px`,
-                  borderRadius: '20px',
-                  border: `2px solid rgba(${rgb}, 0.4)`,
-                  background: `rgba(${rgb}, 0.05)`,
-                  backdropFilter: 'blur(10px)',
-                  boxShadow: `0 0 30px rgba(${rgb}, 0.25)`,
-                }}
-              />
-            );
-          })}
-        </div>
-      )}
-
-      {/* 4. Header Oficial */}
+      {/* CABECERA (HEADER OFICIAL) */}
       <header className={headerClass} style={headerInlineStyle}>
         <div id="view-logo-box" className="flex items-center shrink-0 max-w-[55%]">
           {renderLogoElement()}
         </div>
 
-        <div
-          id="view-badge"
-          className="px-5 py-2 rounded-full font-mono font-bold tracking-wider uppercase flex items-center gap-2.5 transition-all shadow-sm shrink-0"
-          style={{
-            backgroundColor: isLight ? 'rgba(255,255,255,0.9)' : 'rgba(15, 23, 42, 0.85)',
-            border: `1.5px solid ${state.currentColor}`,
-            color: isLight ? '#0F172A' : '#FFFFFF',
-            fontSize: `${headerFontSize}px`
-          }}
-        >
-          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: state.currentColor }} />
-          <span>{state.category}</span>
-        </div>
+        {renderHeaderBadge()}
       </header>
 
-      {/* 5. Espaciador Superior Dinámico */}
-      <div
-        id="canvas-spacer-top"
-        className="w-full transition-all pointer-events-none"
-        style={{
-          flex: state.moduleVisible ? '4 1 0%' : '10 1 0%',
-          minHeight: state.moduleVisible ? '60px' : '160px'
-        }}
-      />
-
-      {/* 6. Contenedor Central de Contenido */}
-      <div id="content-container" className={`relative z-10 flex flex-col gap-6 w-full shrink-0 ${textAlignmentClass}`}>
-        
-        {/* BLOQUE DE TEXTO */}
-        <div id="block-text" className={`flex flex-col gap-4 w-full ${textAlignmentClass}`}>
-          {/* Subtítulo Kicker Arriba */}
-          {state.subtitlePos === 'above' && state.subtitle && (
-            <p
-              className={`text-slate-300 font-normal leading-relaxed transition-all ${state.titleFont}`}
-              style={{ fontSize: `${state.subtitleSize}px` }}
-            >
-              {state.subtitle}
-            </p>
-          )}
-
-          {/* Título Principal */}
-          <h2
-            className={`font-extrabold leading-[1.22] tracking-tight drop-shadow-lg transition-all ${state.titleFont}`}
-            style={{
-              fontSize: `${state.titleSize}px`,
-              color: titleColor
-            }}
-          >
-            {state.title || 'Escribe aquí tu título principal...'}
-          </h2>
-
-          {/* Subtítulo Abajo */}
-          {state.subtitlePos === 'below' && state.subtitle && (
-            <p
-              className={`text-slate-300 font-normal leading-relaxed transition-all ${state.titleFont}`}
-              style={{ fontSize: `${state.subtitleSize}px` }}
-            >
-              {state.subtitle}
-            </p>
-          )}
-
-          {/* Badges de Tecnologías */}
-          {tagsList.length > 0 && (
-            <div id="view-tags-container" className={`flex flex-wrap gap-2.5 pt-2 ${tagsJustifyClass}`}>
-              {tagsList.map((tag, idx) => (
-                <span
-                  key={idx}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-mono font-medium tracking-wide ${
-                    isLight
-                      ? 'bg-slate-100/95 border border-slate-300/90 text-slate-800 shadow-xs'
-                      : 'bg-white/5 border border-white/10 text-slate-200'
-                  }`}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
+      {/* ÁREA CENTRAL PRINCIPAL: 16:9 2 COLUMNAS VS FORMATO VERTICAL */}
+      {isWidescreen ? (
+        <div
+          id="content-container"
+          className="relative z-10 grid grid-cols-2 gap-10 items-center w-full h-full my-auto flex-1"
+        >
+          {state.layoutFlow === 'content-first' ? (
+            <>
+              <div className="flex items-center justify-center w-full">
+                {renderModuleBlock()}
+              </div>
+              <div className="flex flex-col justify-center w-full">
+                {renderTextBlock()}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex flex-col justify-center w-full">
+                {renderTextBlock()}
+              </div>
+              <div className="flex items-center justify-center w-full">
+                {renderModuleBlock()}
+              </div>
+            </>
           )}
         </div>
-
-        {/* MÓDULO CENTRAL (RENDERIZADO CONDICIONAL SEGÚN TOGGLE) */}
-        {state.moduleVisible && (
+      ) : (
+        <>
+          {/* Espaciador Superior Dinámico para vertical / cuadrado */}
           <div
-            id="block-module"
-            className={`${isLight ? 'glass-card-light' : 'glass-card-clean'} rounded-2xl ${modulePad} ${moduleMinH} transition-all self-center w-full flex flex-col h-auto`}
+            id="canvas-spacer-top"
+            className="w-full transition-all pointer-events-none"
             style={{
-              padding: `${Math.round(24 * modScale)}px`
+              flex: state.moduleVisible ? '4 1 0%' : '10 1 0%',
+              minHeight: state.moduleVisible ? '40px' : '140px'
             }}
+          />
+
+          {/* Contenedor Vertical con Prioridad layoutFlow */}
+          <div
+            id="content-container"
+            className="relative z-10 flex flex-col w-full shrink-0"
+            style={{ gap: `${gapTagsToModule}px` }}
           >
-            {/* 0. MÓDULO DE TEXTO / GRAN CTA / CITA EDITORIAL */}
-            {state.activeModule === 'text' && (
-              <div className="flex flex-col items-center justify-center text-center p-3 w-full h-auto">
-                {state.contentHighlightStyle === 'quote' ? (
-                  <div className="relative w-full flex flex-col items-center py-4">
-                    <span
-                      className="font-serif font-black select-none pointer-events-none absolute -top-8 left-4 opacity-25"
-                      style={{ fontSize: `${Math.round(96 * modScale)}px`, color: state.currentColor }}
-                    >
-                      “
-                    </span>
-                    <blockquote
-                      className="italic font-medium leading-relaxed z-10 px-8 max-w-[92%]"
-                      style={{
-                        fontSize: `${Math.round(modFontSize * 1.55)}px`,
-                        color: isLight ? '#0F172A' : '#F8FAFC'
-                      }}
-                    >
-                      {state.contentHighlightText || 'Automatiza tus flujos operativos y acelera el crecimiento de tu empresa con software a la medida.'}
-                    </blockquote>
-                  </div>
-                ) : state.contentHighlightStyle === 'banner' ? (
-                  <div
-                    className="w-full rounded-2xl p-6 flex flex-col items-center justify-center gap-3 border shadow-xl"
-                    style={{
-                      background: `linear-gradient(135deg, rgba(${rgb}, 0.16) 0%, rgba(15, 23, 42, 0.5) 100%)`,
-                      borderColor: `rgba(${rgb}, 0.35)`
-                    }}
-                  >
-                    <span
-                      className="px-4 py-1 rounded-full text-xs font-mono font-bold tracking-widest uppercase shadow-sm"
-                      style={{
-                        backgroundColor: state.currentColor,
-                        color: '#FFFFFF'
-                      }}
-                    >
-                      LLAMADO A LA ACCIÓN
-                    </span>
-                    <p
-                      className="font-extrabold tracking-tight text-center leading-snug px-4"
-                      style={{
-                        fontSize: `${Math.round(modFontSize * 1.55)}px`,
-                        color: isLight ? '#0F172A' : '#FFFFFF'
-                      }}
-                    >
-                      {state.contentHighlightText || '¿Listo para dar el siguiente salto tecnológico? Escríbenos y transformemos tu visión en código.'}
-                    </p>
-                  </div>
-                ) : (
-                  <div
-                    className="w-full rounded-2xl p-6 flex flex-col items-center justify-center gap-3 border"
-                    style={{
-                      backgroundColor: isLight ? 'rgba(255,255,255,0.7)' : 'rgba(15, 23, 42, 0.5)',
-                      borderColor: 'rgba(255, 255, 255, 0.12)',
-                      boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
-                    }}
-                  >
-                    <p
-                      className="font-bold tracking-tight text-center leading-relaxed max-w-[95%]"
-                      style={{
-                        fontSize: `${Math.round(modFontSize * 1.45)}px`,
-                        color: isLight ? '#0F172A' : '#F1F5F9'
-                      }}
-                    >
-                      {state.contentHighlightText || 'Soluciones tecnológicas escalables diseñadas para operaciones de alto rendimiento.'}
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* 1. MÓDULO DE CÓDIGO PROFESIONAL */}
-            {state.activeModule === 'code' && (
-              <div className="flex flex-col h-auto rounded-xl overflow-hidden border border-white/[0.08] bg-slate-950/90 shadow-2xl">
-                <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3 bg-slate-900/80">
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#FF5F56] shadow-xs" />
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#FFBD2E] shadow-xs" />
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#27C93F] shadow-xs" />
-                    <div className="flex items-center gap-1.5 pl-3 border-l border-white/10">
-                      <span className="text-xs font-mono text-slate-300 font-semibold">
-                        {state.codeFilename || 'system/migrate.ts'}
-                      </span>
-                    </div>
-                  </div>
-                  <span className="text-[11px] font-mono text-indigo-400 font-bold uppercase px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20">
-                    {state.codeLanguage || 'typescript'}
-                  </span>
-                </div>
-
-                <div
-                  className="p-5 font-jetbrains flex gap-4 leading-relaxed overflow-hidden"
-                  style={{
-                    fontSize: `${Math.round(modFontSize * 1.12)}px`
-                  }}
-                >
-                  {state.codeShowLineNumbers !== false && (
-                    <div className="select-none text-slate-600 text-right pr-2 border-r border-slate-800/80 flex flex-col font-mono text-xs">
-                      {(state.code || '').split('\n').map((_, i) => (
-                        <span key={i} className="leading-relaxed">{i + 1}</span>
-                      ))}
-                    </div>
-                  )}
-
-                  <pre className="text-emerald-400 font-medium whitespace-pre-wrap flex-1 overflow-x-auto leading-relaxed m-0">
-                    <code>{state.code}</code>
-                  </pre>
-                </div>
-              </div>
-            )}
-
-            {/* 2. MÓDULO DE KPIS ENRIQUECIDOS */}
-            {state.activeModule === 'kpi' && (
-              <div className="grid grid-cols-2 gap-4 h-auto w-full">
-                {state.kpis.map((kpi, idx) => (
-                  <div
-                    key={idx}
-                    className="p-5 rounded-2xl bg-slate-900/60 border border-white/10 flex flex-col justify-center transition-all shadow-md relative overflow-hidden"
-                    style={{
-                      borderTopColor: kpi.borderTop !== false ? state.currentColor : undefined,
-                      borderTopWidth: kpi.borderTop !== false ? '4px' : '1px'
-                    }}
-                  >
-                    <div className="flex items-baseline gap-1.5 flex-wrap">
-                      {kpi.prefix && (
-                        <span className="text-slate-400 font-mono font-bold" style={{ fontSize: `${Math.round(24 * modScale)}px` }}>
-                          {kpi.prefix}
-                        </span>
-                      )}
-                      <span
-                        className="font-mono font-extrabold text-white tracking-tight"
-                        style={{ fontSize: `${Math.round(44 * modScale)}px` }}
-                      >
-                        {kpi.val}
-                      </span>
-                      {kpi.suffix && (
-                        <span className="text-slate-400 font-mono font-bold" style={{ fontSize: `${Math.round(24 * modScale)}px` }}>
-                          {kpi.suffix}
-                        </span>
-                      )}
-
-                      {kpi.trend === 'up' && (
-                        <span className="ml-auto text-[11px] font-mono font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-md flex items-center gap-0.5">
-                          ▲ Crecimiento
-                        </span>
-                      )}
-                      {kpi.trend === 'down' && (
-                        <span className="ml-auto text-[11px] font-mono font-bold text-rose-400 bg-rose-500/15 border border-rose-500/30 px-2 py-0.5 rounded-md flex items-center gap-0.5">
-                          ▼ Reducción
-                        </span>
-                      )}
-                    </div>
-
-                    <span
-                      className="font-mono text-slate-400 font-bold uppercase tracking-wider pt-2 truncate"
-                      style={{ fontSize: `${Math.max(10, Math.round(modFontSize * 0.85))}px` }}
-                    >
-                      {kpi.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* 3. MÓDULO DE GRÁFICOS */}
-            {state.activeModule === 'chart' && (
-              <div className="flex flex-col gap-4 h-auto w-full">
-                <div
-                  className="flex items-end justify-around gap-6 pt-6 transition-all"
-                  style={{ height: `${Math.round(180 * modScale)}px` }}
-                >
-                  {state.chartBars.map((bar, idx) => (
-                    <div key={idx} className="flex-1 flex flex-col items-center gap-2.5 h-full justify-end">
-                      <span
-                        className="font-mono font-extrabold text-white"
-                        style={{ fontSize: `${Math.round(modFontSize * 1.1)}px` }}
-                      >
-                        {bar.pct}%
-                      </span>
-                      <div className="w-full bg-slate-800/80 rounded-t-xl overflow-hidden h-full flex items-end">
-                        <div
-                          className="w-full rounded-t-xl transition-all duration-500 shadow-lg"
-                          style={{
-                            height: `${bar.pct}%`,
-                            backgroundColor: bar.color || state.currentColor
-                          }}
-                        />
-                      </div>
-                      <span
-                        className="font-mono text-slate-400 font-semibold truncate max-w-[140px] text-center"
-                        style={{ fontSize: `${Math.round(modFontSize * 0.9)}px` }}
-                      >
-                        {bar.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* 4. MÓDULO DE CHAT WHATSAPP AUTÉNTICO */}
-            {state.activeModule === 'chat' && (
-              <div className="flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-white/10 w-full h-auto">
-                {/* Barra de cabecera de contacto WhatsApp */}
-                <div
-                  className="flex items-center justify-between px-5 py-3 border-b border-white/[0.08]"
-                  style={{
-                    backgroundColor: isLight ? '#F0F2F5' : '#1F2C34'
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-9 h-9 rounded-full flex items-center justify-center text-white font-mono font-bold shadow-sm shrink-0"
-                      style={{ backgroundColor: state.currentColor }}
-                    >
-                      {(state.chatContactName || 'A').charAt(0).toUpperCase()}
-                    </div>
-                    <div className="flex flex-col">
-                      <span
-                        className={`font-mono font-bold text-sm tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}
-                      >
-                        {state.chatContactName || 'Aleric Dev Bot'}
-                      </span>
-                      <div className="flex items-center gap-1.5 text-xs font-mono">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                        <span className="text-emerald-400 font-medium">
-                          {state.chatOnlineStatus || 'en línea'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-slate-400">
-                    <svg className="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    <svg className="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                  </div>
-                </div>
-
-                {/* Fondo de mensajes WhatsApp */}
-                <div
-                  className="p-5 space-y-3"
-                  style={{
-                    backgroundColor: isLight ? '#EFEAE2' : '#0B141A'
-                  }}
-                >
-                  {state.chatMessages.map((msg, idx) => {
-                    const isBot = msg.sender === 'bot';
-                    return (
-                      <div
-                        key={idx}
-                        className={`flex flex-col ${isBot ? 'items-end' : 'items-start'}`}
-                      >
-                        <div
-                          className={`relative max-w-[85%] px-4 py-2.5 rounded-2xl shadow-md transition-all ${
-                            isBot
-                              ? isLight
-                                ? 'bg-[#D9FDD3] text-[#111B21] rounded-tr-xs'
-                                : 'bg-[#005C4B] text-[#E9EDEF] rounded-tr-xs'
-                              : isLight
-                                ? 'bg-[#FFFFFF] text-[#111B21] rounded-tl-xs'
-                                : 'bg-[#202C33] text-[#E9EDEF] rounded-tl-xs'
-                          }`}
-                          style={{ fontSize: `${Math.round(modFontSize * 1.05)}px` }}
-                        >
-                          <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
-
-                          <div className="flex items-center justify-end gap-1.5 mt-1 select-none">
-                            <span
-                              className={`text-[10px] font-mono ${
-                                isLight ? 'text-slate-500' : 'text-slate-400'
-                              }`}
-                            >
-                              {msg.time}
-                            </span>
-                            {/* Doble check azul WhatsApp */}
-                            {isBot && (
-                              <svg className="w-4 h-3 text-[#53BDEB]" viewBox="0 0 16 11" fill="currentColor">
-                                <path d="M11.07 0.93a.75.75 0 00-1.06 0L5.75 5.19 4.28 3.72a.75.75 0 00-1.06 1.06l2 2a.75.75 0 001.06 0l4.79-4.79a.75.75 0 000-1.06zM15.07 0.93a.75.75 0 00-1.06 0l-5.79 5.79.53.53a.75.75 0 001.06 0l4.2-4.2a.75.75 0 000-1.06l1.06-1.06z"/>
-                              </svg>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* 5. MÓDULO DE IMÁGENES */}
-            {state.activeModule === 'image' && (
-              <div className="flex flex-col gap-3 h-auto w-full">
-                <div className="w-full flex items-center justify-center transition-all">
-                  {state.images.map((img, idx) => (
-                    <div
-                      key={idx}
-                      className={`overflow-hidden w-full flex items-center justify-center ${imgBorderClass}`}
-                      style={{ maxHeight: `${Math.round(360 * modScale)}px` }}
-                    >
-                      <img
-                        src={img.url}
-                        alt={img.caption || 'Preview'}
-                        className="w-full h-full object-cover rounded-xl"
-                        style={{ maxHeight: `${Math.round(360 * modScale)}px` }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
+            {state.layoutFlow === 'content-first' ? (
+              <>
+                {renderModuleBlock()}
+                {renderTextBlock()}
+              </>
+            ) : (
+              <>
+                {renderTextBlock()}
+                {renderModuleBlock()}
+              </>
             )}
           </div>
-        )}
 
-      </div>
+          {/* Espaciador Inferior Dinámico para vertical / cuadrado */}
+          <div
+            id="canvas-spacer-bottom"
+            className="w-full transition-all pointer-events-none"
+            style={{
+              flex: state.moduleVisible ? '6 1 0%' : '12 1 0%',
+              minHeight: state.moduleVisible ? '50px' : '160px'
+            }}
+          />
+        </>
+      )}
 
-      {/* 7. Espaciador Inferior Dinámico */}
-      <div
-        id="canvas-spacer-bottom"
-        className="w-full transition-all pointer-events-none"
-        style={{
-          flex: state.moduleVisible ? '6 1 0%' : '12 1 0%',
-          minHeight: state.moduleVisible ? '80px' : '180px'
-        }}
-      />
-
-      {/* 8. Footer Oficial con Orden y Tamaño Configurable */}
+      {/* PIE DE IMAGEN (FOOTER OFICIAL) */}
       <footer className={footerClass} style={footerInlineStyle}>
         {(state.ctaOrder || 'cta-first') === 'cta-first' ? (
           <>
@@ -914,7 +1508,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
               className="font-mono font-bold text-white tracking-wide shrink-0 transition-all"
               style={{ fontSize: `${footerSize * 1.55}px` }}
             >
-              {state.handle || 'aleric.dev'}
+              {state.handle || 'tumarca.dev'}
             </div>
           </>
         ) : (
@@ -923,7 +1517,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
               className="font-mono font-bold text-white tracking-wide shrink-0 transition-all"
               style={{ fontSize: `${footerSize * 1.55}px` }}
             >
-              {state.handle || 'aleric.dev'}
+              {state.handle || 'tumarca.dev'}
             </div>
             <div className="flex items-center gap-2.5 shrink min-w-0">
               <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: state.currentColor }} />

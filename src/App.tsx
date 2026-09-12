@@ -6,6 +6,7 @@ import { TemplatesModal } from './components/TemplatesModal';
 import { TopNavbar } from './components/TopNavbar';
 import { ControlPanel } from './components/Panel/ControlPanel';
 import { CanvasTarget } from './components/Canvas/CanvasTarget';
+import { ExportSuccessModal } from './components/ExportSuccessModal';
 import * as htmlToImage from 'html-to-image';
 import html2canvas from 'html2canvas';
 
@@ -19,6 +20,9 @@ export const App: React.FC = () => {
   const [templatesModalOpen, setTemplatesModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState('100% idéntico a pantalla');
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exportedDataUrl, setExportedDataUrl] = useState<string | null>(null);
+  const [exportedFilename, setExportedFilename] = useState('');
 
   // Detección de ruta inicial: / o /editor
   const initialPath = typeof window !== 'undefined' ? window.location.pathname : '/';
@@ -36,53 +40,102 @@ export const App: React.FC = () => {
     aspectRatio: '4:5',
 
     titleFont: 'font-space-mono',
-    companyName: 'Aleric Dev',
+    subtitleFont: 'font-inter',
+
+    companyName: 'Tu Empresa',
+    headerBrandMode: 'icon-text',
+    logoAspectRatio: 'square',
     headerShowLogo: true,
     headerSize: 13,
     logoSize: 44,
+    badgeStyle: 'pill',
+    badgeColorMode: 'inherit',
+    badgeCustomColor: '#4F46E5',
 
     title: '¿Tu empresa ya superó a Excel? 3 señales de que necesitas un panel propio',
     titleSize: 48,
     titleColorMode: 'contrast',
     titleCustomColor: '#FFFFFF',
+    titleAlign: 'center',
     textAlign: 'center',
     subtitle: 'Centraliza pedidos, inventarios y permisos en una sola plataforma web en la nube sin errores de fórmula.',
     subtitleSize: 24,
     subtitlePos: 'below',
+    subtitleColorMode: 'muted',
+    subtitleCustomColor: '#94A3B8',
+    subtitleAlign: 'center',
+
+    tagsGroupVisible: true,
+    tagsGroupType: 'badges',
+    tagsPosition: 'below-subtitle',
     tags: 'PostgreSQL, Next.js, FastAPI, Roles Seguros',
+    ratingValue: 5.0,
+    ratingCount: '+500 clientes satisfechos',
+    authorName: 'Ricardo Zapata',
+    authorRole: 'Lead Cloud Architect',
+    authorAvatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+    socialProofText: '👥 +10,000 usuarios activos',
+    statusPillText: '🟢 v1.0 Production Ready',
+
+    layoutFlow: 'text-first',
+    gapTitleSubtitle: 16,
+    gapTextToTags: 20,
+    gapTagsToModule: 24,
 
     moduleVisible: true,
     moduleSize: 'normal',
     moduleScale: 1.0,
     moduleFontSize: 14,
-    activeModule: 'code',
+    activeModule: 'kpi',
+    chartType: 'horizontal-bars',
     code: "system.migrate({ from: 'Inventario_Final_v3.xlsx', to: 'CloudDB' });",
     codeFilename: 'system/migrate.ts',
     codeLanguage: 'typescript',
     codeShowLineNumbers: true,
     kpis: [
-      { val: '99/100', label: 'GOOGLE LIGHTHOUSE SPEED', prefix: '', suffix: '', trend: 'up', borderTop: true },
-      { val: '< 0.4s', label: 'TIEMPO DE CARGA TOTAL', prefix: '', suffix: '', trend: 'down', borderTop: true },
+      { val: '99/100', label: 'OPTIMIZACIÓN & RENDIMIENTO', prefix: '', suffix: '', trend: 'up', borderTop: true },
+      { val: '< 0.4s', label: 'TIEMPO DE RESPUESTA CLOUD', prefix: '', suffix: '', trend: 'down', borderTop: true },
     ],
     chartBars: [
-      { label: 'WordPress Estándar', pct: 28, color: '#EF4444' },
-      { label: 'Plataforma Aleric Dev', pct: 99, color: '#10B981' },
+      { label: 'Procesamiento Manual', pct: 28, color: '#EF4444' },
+      { label: 'Arquitectura Automatizada', pct: 98, color: '#10B981' },
+      { label: 'Disponibilidad Cloud SLA', pct: 99, color: '#6366F1' },
     ],
     chatMessages: [
       { sender: 'client', text: 'Hola, ¿cuánto cuesta desarrollar una plataforma para gestionar pedidos y clientes?', time: '10:14 AM' },
-      { sender: 'bot', text: '¡Hola! En Aleric diseñamos arquitecturas web escalables y a la medida. ¿Manejas actualmente tu operación en Excel?', time: '10:14 AM' },
+      { sender: 'bot', text: '¡Hola! Diseñamos arquitecturas web escalables y a la medida de tu operación.', time: '10:14 AM' },
     ],
-    chatContactName: 'Aleric Dev Bot',
+    chatContactName: 'Asistente Digital',
     chatOnlineStatus: 'en línea',
     contentHighlightText: 'Automatiza tu operación y escala sin límites con software diseñado a tu medida.',
     contentHighlightStyle: 'card',
+    ctaActionBadge: '⚡ SOLUCIÓN DIRECTA',
+    ctaActionPhrase: 'Migra hoy tus procesos manuales a la nube y reduce tiempos de respuesta en un 60%.',
+    ctaActionButtonText: 'Solicitar Sesión de Arquitectura ➔',
+    ctaActionBenefit: 'Diagnóstico inicial sin costo • Despliegue en producción garantizado',
+    steps: [
+      { step: '01', title: 'Auditoría & Diagnóstico', desc: 'Identificamos cuellos de botella en tu operación actual.' },
+      { step: '02', title: 'Arquitectura Cloud', desc: 'Diseñamos sistemas escalables en microservicios y bases seguras.' },
+      { step: '03', title: 'Despliegue & Soporte', desc: 'Lanzamiento a producción con monitoreo en tiempo real.' },
+    ],
+    promo: {
+      badge: 'OFERTA DE LANZAMIENTO',
+      headline: 'Migración a la Nube con 30% OFF',
+      subheadline: 'Acelera tu operación antes de cerrar el trimestre con infraestructura lista para escalar.',
+      description: 'Arquitectura en microservicios, bases de datos PostgreSQL de alta disponibilidad y soporte técnico dedicado durante el primer mes.',
+      code: 'CLOUD30',
+      coupon: 'CLOUD30',
+      discount: '30% OFF',
+      cta: 'Reclamar Oferta',
+      finePrint: 'Válido para proyectos contratados durante este mes.',
+    },
     images: [
       { url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1000&auto=format&fit=crop&q=80', caption: 'Dashboard Analítico Cloud' },
     ],
     imageBorderStyle: 'none',
 
     cta: 'Escríbenos y migramos tu operación a la nube.',
-    handle: 'aleric.dev',
+    handle: 'tumarca.dev',
     ctaOrder: 'cta-first',
     ctaAlign: 'between',
     footerSize: 13,
@@ -92,22 +145,34 @@ export const App: React.FC = () => {
     headerShape: 'line',
     footerShape: 'line',
 
+    patternEnabled: true,
     bgPattern: 'circuit',
     patternScale: 100,
+    patternOpacity: 100,
     patternVignette: 'vignette',
     customPatternUrl: null,
 
     // Luces
+    lightEnabled: true,
     lightType: 'glow',
     lightDirection: 'dual-corners-1',
     lightIntensity: 40,
 
-    // Formas perimetrales vítreas
+    // Formas decorativas enriquecidas
+    shapeEnabled: true,
     shapeType: 'glass-orbs',
-    shapePlacement: 'corners',
+    shapeCount: 6,
+    shapeStyleVariant: 'glass',
+    shapeGeometry: 'orbs',
+    shapePlacement: 'random-edges',
+    shapeProximity: 'edges',
     shapeSizeVariant: 'medium',
     shapeOpacity: 60,
-    shapeSeed: 12345,
+    shapeSeed: 48192,
+    shapeSecondaryColor: '#06B6D4',
+
+    // Orden de Capas
+    backgroundLayerOrder: 'pattern-lights-shapes',
 
     zoomMode: 'fit-height',
     zoomLevel: 0.5,
@@ -155,19 +220,38 @@ export const App: React.FC = () => {
       moduleVisible: false,
       activeStep: 1,
       panelOpen: true,
+      titleAlign: 'center',
+      subtitleAlign: 'center',
       textAlign: 'center',
       ctaOrder: 'cta-first',
       ctaAlign: 'between',
       moduleScale: 1.0,
       moduleFontSize: 14,
       logoSize: 44,
+      headerBrandMode: 'icon-text',
+      logoAspectRatio: 'square',
       headerShowLogo: true,
       headerSize: 13,
+      badgeStyle: 'pill',
+      badgeColorMode: 'inherit',
+      badgeCustomColor: '#4F46E5',
       footerSize: 13,
+      tagsGroupVisible: false,
+      tagsGroupType: 'badges',
+      tagsPosition: 'below-subtitle',
+      layoutFlow: 'text-first',
+      gapTitleSubtitle: 16,
+      gapTextToTags: 20,
+      gapTagsToModule: 24,
+      patternEnabled: true,
+      patternOpacity: 100,
+      lightEnabled: true,
+      shapeEnabled: false,
       shapeType: 'none',
       lightType: 'glow',
       contentHighlightText: '',
       contentHighlightStyle: 'card',
+      backgroundLayerOrder: 'pattern-lights-shapes',
     }));
   };
 
@@ -181,35 +265,69 @@ export const App: React.FC = () => {
       title: t.title,
       titleSize: t.titleSize || 48,
       titleColorMode: t.titleColor || 'contrast',
+      titleCustomColor: t.titleCustomColor || '#FFFFFF',
+      titleAlign: t.titleAlign || t.textAlign || 'center',
+      subtitleAlign: t.subtitleAlign || t.textAlign || 'center',
       textAlign: t.textAlign || 'center',
       subtitle: t.subtitle,
       subtitleSize: t.subtitleSize || 24,
       subtitlePos: t.subtitlePos || 'below',
+      subtitleColorMode: t.subtitleColorMode || 'muted',
+      subtitleCustomColor: t.subtitleCustomColor || '#94A3B8',
+      tagsGroupVisible: t.tagsGroupVisible !== false,
+      tagsGroupType: t.tagsGroupType || 'badges',
+      tagsPosition: t.tagsPosition || 'below-subtitle',
       tags: t.tags,
+      ratingValue: t.ratingValue || 5.0,
+      ratingCount: t.ratingCount || '+500 clientes satisfechos',
+      authorName: t.authorName || 'Ricardo Zapata',
+      authorRole: t.authorRole || 'Lead Cloud Architect',
+      authorAvatarUrl: t.authorAvatarUrl || prev.authorAvatarUrl,
+      socialProofText: t.socialProofText || '👥 +10,000 usuarios activos',
+      statusPillText: t.statusPillText || '🟢 v1.0 Production Ready',
+      layoutFlow: t.layoutFlow || 'text-first',
+      gapTitleSubtitle: t.gapTitleSubtitle || 16,
+      gapTextToTags: t.gapTextToTags || 20,
+      gapTagsToModule: t.gapTagsToModule || 24,
       cta: t.cta || 'Escríbenos y migramos tu operación a la nube.',
-      handle: t.handle || 'aleric.dev',
+      handle: t.handle || '@tuempresa',
       ctaOrder: t.ctaOrder || 'cta-first',
       ctaAlign: t.ctaAlign || 'between',
       companyName: t.companyName || prev.companyName,
+      headerBrandMode: t.headerBrandMode || 'icon-text',
+      logoAspectRatio: t.logoAspectRatio || 'square',
       logoType: t.logoType || 'generic',
       logoSize: t.logoSize || 44,
       headerShowLogo: t.headerShowLogo !== undefined ? t.headerShowLogo : true,
       headerSize: t.headerSize || 13,
+      badgeStyle: t.badgeStyle || 'pill',
+      badgeColorMode: t.badgeColorMode || 'inherit',
+      badgeCustomColor: t.badgeCustomColor || t.color || '#4F46E5',
       footerSize: t.footerSize || 13,
       titleFont: t.titleFont || prev.titleFont,
+      subtitleFont: t.subtitleFont || prev.subtitleFont,
       color: t.color,
       currentColor: t.color,
       category: t.category,
+      patternEnabled: t.patternEnabled !== false,
       bgPattern: t.bgPattern || 'circuit',
       patternScale: t.patternScale || 100,
+      patternOpacity: t.patternOpacity !== undefined ? t.patternOpacity : 100,
       patternVignette: t.patternVignette || 'vignette',
+      lightEnabled: t.lightEnabled !== false,
       lightType: t.lightType || 'glow',
       lightDirection: t.lightDirection || 'dual-corners-1',
       lightIntensity: t.lightIntensity !== undefined ? t.lightIntensity : 40,
+      shapeEnabled: t.shapeEnabled !== false,
       shapeType: (t.shapeType || (t.accentShape === 'circles' ? 'glass-orbs' : t.accentShape === 'squares' ? 'tech-squares' : t.accentShape === 'diamonds' ? 'glass-cards' : 'glass-orbs')) as any,
+      shapeStyleVariant: t.shapeStyleVariant || 'glass',
+      shapeGeometry: t.shapeGeometry || 'orbs',
       shapePlacement: t.shapePlacement || 'corners',
+      shapeProximity: t.shapeProximity || 'edges',
       shapeSizeVariant: t.shapeSizeVariant || 'medium',
       shapeOpacity: t.shapeOpacity !== undefined ? t.shapeOpacity : 60,
+      shapeSecondaryColor: t.shapeSecondaryColor || '#06B6D4',
+      backgroundLayerOrder: t.backgroundLayerOrder || 'pattern-lights-shapes',
       headerShape: t.headerShape || 'line',
       footerShape: t.footerShape || 'line',
       moduleVisible: t.moduleVisible !== false,
@@ -225,59 +343,85 @@ export const App: React.FC = () => {
       chatOnlineStatus: t.chatOnlineStatus || prev.chatOnlineStatus,
       contentHighlightText: t.contentHighlightText || prev.contentHighlightText,
       contentHighlightStyle: t.contentHighlightStyle || prev.contentHighlightStyle,
+      steps: t.steps || prev.steps,
+      promo: t.promo || prev.promo,
       activeStep: 1,
       panelOpen: true,
     }));
   };
 
-  // Motor de Zoom
+  // Medición del espacio disponible real en el viewport del Canvas
+  const getRealAvailable = useCallback(() => {
+    const el = viewportRef.current;
+    if (!el) {
+      const panelWidth = window.innerWidth >= 1280 ? 500 : 460;
+      return {
+        w: Math.max(window.innerWidth - panelWidth - 96, 240),
+        h: Math.max(window.innerHeight - 170, 240),
+      };
+    }
+    // Medición exacta del DOM: clientWidth y clientHeight reales
+    const padding = window.innerWidth < 640 ? 24 : 48;
+    return {
+      w: Math.max(el.clientWidth - padding, 200),
+      h: Math.max(el.clientHeight - padding, 200),
+    };
+  }, []);
+
+  // Motor de Zoom con dimensiones reales
   const calculateZoom = useCallback((modeOrVal: 'fit-height' | 'fit-width' | '100%' | 'manual' | number) => {
     const r = aspectRatios[state.aspectRatio] || aspectRatios['4:5'];
-    const padX = window.innerWidth < 640 ? 24 : 64;
-    const padY = window.innerWidth < 640 ? 24 : 64;
-    const panelWidth = 480;
-    const availW = Math.max(window.innerWidth - panelWidth - padX, 240);
-    const availH = Math.max(window.innerHeight - 90 - padY, 240);
+    const { w: availW, h: availH } = getRealAvailable();
 
     const scaleW = availW / r.nativeW;
     const scaleH = availH / r.nativeH;
 
     if (modeOrVal === 'fit-height') {
-      return { mode: 'fit-height' as const, level: Math.min(scaleH, 1.5) };
+      return { mode: 'fit-height' as const, level: Number(scaleH.toFixed(3)) };
     }
     if (modeOrVal === 'fit-width') {
-      return { mode: 'fit-width' as const, level: Math.min(scaleW, 1.5) };
+      return { mode: 'fit-width' as const, level: Number(scaleW.toFixed(3)) };
     }
     if (modeOrVal === '100%' || modeOrVal === 1.0) {
       return { mode: '100%' as const, level: 1.0 };
     }
     if (typeof modeOrVal === 'number') {
-      return { mode: 'manual' as const, level: Math.max(0.15, Math.min(2.0, modeOrVal)) };
+      return { mode: 'manual' as const, level: Math.max(0.15, Math.min(2.5, Number(modeOrVal.toFixed(3)))) };
     }
-    return { mode: 'fit-height' as const, level: scaleH };
-  }, [state.aspectRatio]);
+    return { mode: 'fit-height' as const, level: Number(scaleH.toFixed(3)) };
+  }, [state.aspectRatio, getRealAvailable]);
 
   const handleZoomChange = (modeOrVal: 'fit-height' | 'fit-width' | '100%' | 'manual' | number) => {
     const res = calculateZoom(modeOrVal);
     setState((prev) => ({ ...prev, zoomMode: res.mode, zoomLevel: res.level }));
   };
 
+  // Recalcular zoom cuando cambia la proporción de aspecto
   useEffect(() => {
     const res = calculateZoom(state.zoomMode);
     setState((prev) => ({ ...prev, zoomLevel: res.level }));
   }, [state.aspectRatio, calculateZoom]);
 
-  // Listener para redimensionamiento de ventana
+  // Observer reactivo para que siempre se adapte al espacio disponible real
   useEffect(() => {
-    const onResize = () => {
-      if (state.zoomMode === 'fit-height' || state.zoomMode === 'fit-width') {
-        const res = calculateZoom(state.zoomMode);
-        setState((prev) => ({ ...prev, zoomLevel: res.level }));
-      }
-    };
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, [state.zoomMode, calculateZoom]);
+    const el = viewportRef.current;
+    if (!el) return;
+
+    const observer = new ResizeObserver(() => {
+      setState((prev) => {
+        if (prev.zoomMode === 'fit-height' || prev.zoomMode === 'fit-width') {
+          const res = calculateZoom(prev.zoomMode);
+          if (Math.abs(res.level - prev.zoomLevel) > 0.005) {
+            return { ...prev, zoomLevel: res.level };
+          }
+        }
+        return prev;
+      });
+    });
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [calculateZoom]);
 
   // FIX: Listener nativo no-pasivo para Zoom interactivo con Ctrl + Rueda en el Canvas
   useEffect(() => {
@@ -297,7 +441,7 @@ export const App: React.FC = () => {
 
     el.addEventListener('wheel', handleWheel, { passive: false });
     return () => el.removeEventListener('wheel', handleWheel);
-  }, []);
+  }, [state.viewMode]);
 
   // Exportación PNG 1080p Nativa HQ (Exclusiva de Paso 4)
   const handleExportHQ = async () => {
@@ -324,6 +468,10 @@ export const App: React.FC = () => {
       link.click();
       document.body.removeChild(link);
 
+      setExportedDataUrl(dataUrl);
+      setExportedFilename(filename);
+      setExportModalOpen(true);
+
       setExportStatus(`¡Descargada con éxito! (${r.nativeW}x${r.nativeH})`);
       setTimeout(() => setExportStatus('100% idéntico a pantalla'), 4000);
     } catch (err) {
@@ -342,6 +490,10 @@ export const App: React.FC = () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+
+        setExportedDataUrl(dataUrl);
+        setExportedFilename(filename);
+        setExportModalOpen(true);
 
         setExportStatus('¡Descargada (Fallback)!');
         setTimeout(() => setExportStatus('100% idéntico a pantalla'), 4000);
@@ -444,6 +596,15 @@ export const App: React.FC = () => {
           <span className="text-emerald-400 font-semibold">Previsualización en Base 1080p Nativa</span>
         </div>
       </main>
+
+      {/* Modal de Éxito de Exportación y Apoyo Ko-fi */}
+      <ExportSuccessModal
+        isOpen={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        dataUrl={exportedDataUrl}
+        filename={exportedFilename}
+        resolution={r.px}
+      />
 
     </div>
   );

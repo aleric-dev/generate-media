@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Minus, Plus, ArrowUpDown, ArrowLeftRight } from 'lucide-react';
+import { Home, Minus, Plus, ArrowUpDown, ArrowLeftRight } from 'lucide-react';
 import { aspectRatios } from '../constants/templates';
 import { AspectRatioKey } from '../types';
 
@@ -38,21 +38,21 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   return (
     <header className="w-full flex flex-wrap items-center justify-between gap-3 px-3.5 py-2.5 bg-slate-900/80 border border-slate-800 rounded-xl mb-3 backdrop-blur-md z-20 select-none shrink-0">
       
-      {/* Botón Volver a Inicio y Ratios de Aspecto */}
+      {/* Botón Inicio (con icono Home), Ratios de Aspecto y Resolución Real */}
       <div className="flex items-center gap-2.5 flex-wrap">
         <button
           type="button"
           onClick={onGoHome}
-          title="Volver a la pantalla de bienvenida y catálogo"
-          className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 text-xs font-mono font-medium flex items-center gap-1.5 transition shadow-sm"
+          title="Volver a la pantalla de inicio y catálogo"
+          className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 text-xs font-mono font-medium flex items-center gap-1.5 transition shadow-sm"
         >
-          <ArrowLeft className="w-3.5 h-3.5 text-indigo-400" />
+          <Home className="w-3.5 h-3.5 text-indigo-400" />
           <span>Inicio</span>
         </button>
 
         <div className="h-4 w-[1px] bg-slate-800" />
 
-        {/* Selector rápido de Formato de Aspecto */}
+        {/* Selector de Formato de Aspecto */}
         <div className="flex items-center bg-slate-950 p-0.5 rounded-lg border border-slate-800 text-xs font-mono">
           {ratios.map((item) => (
             <button
@@ -70,7 +70,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           ))}
         </div>
 
-        <span className="text-indigo-400 text-xs font-mono font-semibold bg-indigo-500/10 px-2.5 py-1 rounded border border-indigo-500/20 hidden md:inline">
+        {/* Tamaño Real en Píxeles */}
+        <span className="text-indigo-400 text-xs font-mono font-semibold bg-indigo-500/10 px-2.5 py-1 rounded border border-indigo-500/20 hidden sm:inline">
           {currentConfig.px}
         </span>
       </div>

@@ -1,2 +1,2 @@
-export const LOGO_WHITE = '/logo-horizontal.png';
-export const LOGO_DARK = '/logo-dark-horizontal.png';
+export const APP_LOGO = '/logo-rounded.png';
+export const APP_LOGO_RAW = '/logo.png';

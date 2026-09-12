@@ -13,7 +13,7 @@ export const defaultTemplates: PostTemplate[] = [
     id: "t1",
     category: "DESARROLLO A LA MEDIDA",
     color: "#4F46E5",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "¿Tu empresa ya superó a Excel? 3 señales de que necesitas un panel propio",
     titleSize: 48,
@@ -36,13 +36,13 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "line",
     footerShape: "line",
     cta: "Escríbenos y migramos tu operación a la nube.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t2",
     category: "DESARROLLO A LA MEDIDA",
     color: "#4F46E5",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "¿Sabías que cualquiera puede descargar tu base de datos en Excel?",
     titleSize: 46,
@@ -64,14 +64,14 @@ export const defaultTemplates: PostTemplate[] = [
     lightIntensity: 35,
     headerShape: "pill",
     footerShape: "line",
-    cta: "Blindaje de datos corporativos con Aleric Dev.",
-    handle: "aleric.dev"
+    cta: "Blindaje de datos corporativos con infraestructura moderna.",
+    handle: "@tuempresa"
   },
   {
     id: "t3",
     category: "DESARROLLO A LA MEDIDA",
     color: "#4F46E5",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "MVP Express: De la idea a tu software en producción en 3 semanas",
     titleSize: 48,
@@ -93,13 +93,13 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "line",
     footerShape: "card",
     cta: "Lanza tu producto al mercado antes que la competencia.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t4",
     category: "DESARROLLO A LA MEDIDA",
     color: "#4F46E5",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "Por qué las apps en WordPress colapsan cuando tu empresa crece",
     titleSize: 46,
@@ -122,13 +122,13 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "line",
     footerShape: "line",
     cta: "Construimos software que soporta millones de transacciones.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t5",
     category: "DESARROLLO A LA MEDIDA",
     color: "#4F46E5",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "Automatiza la facturación electrónica directamente con la DIAN",
     titleSize: 48,
@@ -151,13 +151,13 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "card",
     footerShape: "line",
     cta: "Conecta tu software a la DIAN de forma transparente.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t6",
     category: "DESARROLLO A LA MEDIDA",
     color: "#4F46E5",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "El costo oculto del software heredado en tu empresa",
     titleSize: 50,
@@ -179,7 +179,7 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "line",
     footerShape: "line",
     cta: "Da el salto a la infraestructura cloud moderna hoy.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
 
   // 2. Landing Pages & Web Speed (t7 a t12)
@@ -187,7 +187,7 @@ export const defaultTemplates: PostTemplate[] = [
     id: "t7",
     category: "LANDING PAGES / WEB SPEED",
     color: "#0891B2",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "Estás pagando pauta publicitaria para rebotar clientes por lentitud",
     titleSize: 46,
@@ -209,13 +209,13 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "line",
     footerShape: "line",
     cta: "Hacemos una auditoría gratuita de velocidad a tu web actual.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t8",
     category: "LANDING PAGES / WEB SPEED",
     color: "#0891B2",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "La regla de los 5 segundos: Si tu visitante no entiende tu oferta, se va",
     titleSize: 48,
@@ -237,13 +237,13 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "pill",
     footerShape: "line",
     cta: "Diseñamos interfaces que cautivan y venden.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t9",
     category: "LANDING PAGES / WEB SPEED",
     color: "#0891B2",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "Por qué tus anuncios de Meta Ads no convierten en tu web",
     titleSize: 48,
@@ -265,13 +265,13 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "line",
     footerShape: "card",
     cta: "Haz rentable cada dólar invertido en publicidad.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t10",
     category: "LANDING PAGES / WEB SPEED",
     color: "#0891B2",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "0.4 segundos: La diferencia entre un cliente cautivado y un rebote",
     titleSize: 46,
@@ -293,13 +293,13 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "line",
     footerShape: "line",
     cta: "Acelera tu presencia comercial a la velocidad de la luz.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t11",
     category: "LANDING PAGES / WEB SPEED",
     color: "#0891B2",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "Cero JavaScript innecesario: La filosofía de alto rendimiento",
     titleSize: 48,
@@ -322,13 +322,13 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "line",
     footerShape: "line",
     cta: "Construimos webs sin peso muerto que convierten visitantes en clientes.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t12",
     category: "LANDING PAGES / WEB SPEED",
     color: "#0891B2",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "Tu landing page es el mejor vendedor de tu empresa: 24/7 sin descanso",
     titleSize: 50,
@@ -350,7 +350,7 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "pill",
     footerShape: "line",
     cta: "Eleva el estatus visual de tu negocio en internet.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
 
   // 3. Automatización & WhatsApp (t13 a t18)
@@ -358,7 +358,7 @@ export const defaultTemplates: PostTemplate[] = [
     id: "t13",
     category: "AUTOMATIZACIÓN & WHATSAPP",
     color: "#059669",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "El mensaje de WhatsApp que le costó $2.000 USD a una empresa",
     titleSize: 46,
@@ -379,14 +379,14 @@ export const defaultTemplates: PostTemplate[] = [
     lightIntensity: 40,
     headerShape: "line",
     footerShape: "line",
-    cta: "Automatiza la atención de tu negocio con Aleric Dev.",
-    handle: "aleric.dev"
+    cta: "Automatiza la atención de tu negocio con infraestructura moderna.",
+    handle: "@tuempresa"
   },
   {
     id: "t14",
     category: "AUTOMATIZACIÓN & WHATSAPP",
     color: "#059669",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "4 tareas que tu vendedor no debería estar haciendo a mano",
     titleSize: 48,
@@ -408,13 +408,13 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "card",
     footerShape: "line",
     cta: "Deja que la tecnología venda mientras tú lideras.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t15",
     category: "AUTOMATIZACIÓN & WHATSAPP",
     color: "#059669",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "Bandeja multiagente: 1 solo número de WhatsApp para todo tu equipo",
     titleSize: 46,
@@ -436,13 +436,13 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "line",
     footerShape: "line",
     cta: "Transforma tu canal de ventas por WhatsApp.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t16",
     category: "AUTOMATIZACIÓN & WHATSAPP",
     color: "#059669",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "Agentes IA en WhatsApp que realmente cierran ventas",
     titleSize: 48,
@@ -464,13 +464,13 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "pill",
     footerShape: "line",
     cta: "Convierte WhatsApp en tu máquina de ventas automática.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t17",
     category: "AUTOMATIZACIÓN & WHATSAPP",
     color: "#059669",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "Sincroniza tus pedidos de la tienda online con tu inventario físico",
     titleSize: 46,
@@ -492,13 +492,13 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "line",
     footerShape: "card",
     cta: "Cero errores de inventario con flujos automatizados.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t18",
     category: "AUTOMATIZACIÓN & WHATSAPP",
     color: "#059669",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "El 70% de tus prospectos compran al negocio que responde primero",
     titleSize: 50,
@@ -520,7 +520,7 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "line",
     footerShape: "line",
     cta: "Atención inmediata para cada cliente potencial.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
 
   // 4. Consultoría & Estrategia (t19 a t24)
@@ -528,7 +528,7 @@ export const defaultTemplates: PostTemplate[] = [
     id: "t19",
     category: "CONSULTORÍA / ESTRATEGIA",
     color: "#D97706",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "La trampa de pagar suscripciones mensuales de automatización",
     titleSize: 46,
@@ -551,15 +551,15 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "line",
     footerShape: "line",
     cta: "Soberanía digital con código 100% de tu propiedad.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t20",
     category: "CONSULTORÍA / ESTRATEGIA",
     color: "#D97706",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
-    title: "En Aleric no nos quedamos con tu código: Tuyo al 100%",
+    title: "Tu código te pertenece al 100% y sin ataduras",
     titleSize: 48,
     titleColor: "contrast",
     subtitle: "Te entregamos los repositorios a tu nombre, documentación técnica completa y cero contratos de amarre.",
@@ -579,18 +579,18 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "card",
     footerShape: "line",
     cta: "Ingeniería transparente y relaciones a largo plazo.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t21",
     category: "CONSULTORÍA / ESTRATEGIA",
     color: "#D97706",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "Hablar con el programador vs. Hablar con un intermediario comercial",
     titleSize: 46,
     titleColor: "contrast",
-    subtitle: "En Aleric trabajas mano a mano con ingenieros sénior sin intermediarios comerciales que prometan imposibles.",
+    subtitle: "Trabaja mano a mano con ingenieros sénior sin intermediarios comerciales que prometan imposibles.",
     subtitleSize: 22,
     subtitlePos: "below",
     moduleVisible: true,
@@ -608,13 +608,13 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "pill",
     footerShape: "line",
     cta: "Ingeniería directa sin teléfonos rotos.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t22",
     category: "CONSULTORÍA / ESTRATEGIA",
     color: "#D97706",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "Auditoría de Arquitectura: Descubre fugas de dinero en tu nube",
     titleSize: 48,
@@ -636,13 +636,13 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "line",
     footerShape: "card",
     cta: "Optimiza tu inversión tecnológica con ingeniería real.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t23",
     category: "CONSULTORÍA / ESTRATEGIA",
     color: "#D97706",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "Por qué tu empresa necesita un CTO As-A-Service",
     titleSize: 48,
@@ -664,13 +664,13 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "line",
     footerShape: "line",
     cta: "Toma decisiones de software respaldadas por expertos.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   },
   {
     id: "t24",
     category: "CONSULTORÍA / ESTRATEGIA",
     color: "#D97706",
-    companyName: "Aleric Dev",
+    companyName: "Tu Empresa",
     logoType: "generic",
     title: "El software no se compra por metro: Se diseña para resolver cuellos de botella",
     titleSize: 50,
@@ -692,6 +692,6 @@ export const defaultTemplates: PostTemplate[] = [
     headerShape: "line",
     footerShape: "line",
     cta: "Construyamos soluciones que hagan crecer tu negocio.",
-    handle: "aleric.dev"
+    handle: "@tuempresa"
   }
 ];

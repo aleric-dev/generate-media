@@ -41,7 +41,7 @@ export const TemplatesModal: React.FC<TemplatesModalProps> = ({
               <LayoutTemplate className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">Banco de Plantillas Aleric Dev (+24 Diseños)</h3>
+              <h3 className="text-sm font-bold text-white">Catálogo de Plantillas Profesionales (+24 Diseños)</h3>
               <p className="text-xs text-slate-400">Selecciona una plantilla para rellenar automáticamente el canvas</p>
             </div>
           </div>

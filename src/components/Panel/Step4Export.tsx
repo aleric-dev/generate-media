@@ -1,7 +1,9 @@
 import React from 'react';
 import { PostState, AspectRatioKey } from '../../types';
 import { aspectRatios } from '../../constants/templates';
-import { Maximize2, Download, CheckCircle2, Loader2 } from 'lucide-react';
+import { Maximize2, Download, CheckCircle2, Loader2, Sparkles, ExternalLink } from 'lucide-react';
+import { GithubIcon } from '../GithubIcon';
+import { LINKS } from '../../constants/links';
 
 interface Step4ExportProps {
   state: PostState;
@@ -85,6 +87,46 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
         <div className="flex items-center justify-between text-xs font-mono text-slate-400 px-1 pt-1">
           <span className="text-emerald-400">{exportStatus || '100% idéntico a pantalla'}</span>
           <span className="text-indigo-400 font-bold">{currentRatio.px}</span>
+        </div>
+      </div>
+
+      {/* 4.3 COMUNIDAD, CÓDIGO ABIERTO & REPORTAR ISSUES */}
+      <div className="p-3.5 bg-slate-900/40 border border-slate-800 rounded-xl space-y-2.5">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-slate-300 font-semibold flex items-center gap-1.5 font-mono">
+            <GithubIcon className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Código Abierto & Feedback</span>
+          </span>
+          <span className="text-[10px] font-mono text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+            MIT
+          </span>
+        </div>
+
+        <p className="text-[11px] text-slate-400 leading-relaxed">
+          ¿Tienes sugerencias o te gustaría proponer una mejora para Media Studio?
+        </p>
+
+        <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
+          <a
+            href={LINKS.GITHUB_ISSUES}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="py-2 px-2.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 hover:text-indigo-200 border border-indigo-500/30 flex items-center justify-center gap-1.5 transition font-semibold"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>Proponer mejora</span>
+          </a>
+
+          <a
+            href={LINKS.GITHUB_REPO}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="py-2 px-2.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 flex items-center justify-center gap-1.5 transition"
+          >
+            <GithubIcon className="w-3.5 h-3.5" />
+            <span>Ver Repo</span>
+            <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+          </a>
         </div>
       </div>
 
