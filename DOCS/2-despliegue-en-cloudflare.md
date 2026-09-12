@@ -55,17 +55,28 @@ npx wrangler pages deploy dist --project-name=generate-media
 
 ---
 
-## 🛡️ 3. Reglas de Enrutamiento y Encabezados Incluidos
+## 🛡️ 3. Reglas de Enrutamiento SPA y Encabezados
 
-El proyecto ya incluye en su carpeta `public/` los archivos de configuración requeridos por Cloudflare Pages:
+El proyecto incluye la configuración canónica para Cloudflare (compatible tanto con Cloudflare Workers Static Assets como con Cloudflare Pages):
 
-1. **`public/_redirects`**:
-   Garantiza que cualquier recarga directa en el navegador responda siempre con la SPA:
-   ```text
-   /*    /index.html   200
+1. **`wrangler.json` (Enrutamiento Nativo SPA)**:
+   Define `"not_found_handling": "single-page-application"`. Esto instruye al Edge de Cloudflare a responder con `index.html` (código 200) ante cualquier ruta del cliente como `/editor`, sin requerir reglas manuales en `_redirects` (evitando el error de bucle infinito `code: 100324`).
+   ```json
+   {
+     "name": "generate-media",
+     "compatibility_date": "2025-01-01",
+     "assets": {
+       "directory": "./dist",
+       "binding": "ASSETS",
+       "not_found_handling": "single-page-application"
+     }
+   }
    ```
 
-2. **`public/_headers`**:
+2. **`dist/404.html` (Fallback Automático SPA)**:
+   Durante la compilación (`npm run build`), Vite duplica automáticamente `index.html` hacia `404.html`, garantizando soporte retrocompatible para cualquier proveedor de alojamiento estático.
+
+3. **`public/_headers`**:
    Optimiza el almacenamiento en caché perimetral de los activos generados con hashes inmutables y refuerza las cabeceras de seguridad:
    ```text
    /assets/*
