@@ -98,7 +98,20 @@ Para enlazar Media Studio con un dominio propio (por ejemplo `media.aleric.dev` 
 
 ---
 
-## 🐞 5. Soporte, Mejoras y Reporte de Issues
+---
+
+## 🔧 5. Solución de Problemas Frecuentes (Troubleshooting)
+
+### Error: `npm warn allow-scripts ... esbuild (postinstall: node install.js)`
+* **Causa**: Ocurre cuando Cloudflare Pages intenta compilar con **Node 24** (versión experimental / no LTS), donde npm 10.9+ tiene políticas de seguridad que bloquean la instalación de scripts nativos.
+* **Solución directa**:
+  * El repositorio cuenta con el archivo [`.node-version`](file:///c:/Users/RICARDO/Documents/Code/aleric-dev/generate-media/.node-version) configurado en `20`.
+  * Cloudflare Pages lee este archivo automáticamente y utiliza **Node.js 20 LTS**, donde `npm clean-install` y `npm run build` se ejecutan de manera estándar, limpia y sin requerir scripts adicionales.
+  * Si compilas manualmente en el panel de Cloudflare, también puedes asegurar la variable de entorno `NODE_VERSION=20`.
+
+---
+
+## 🐞 6. Soporte, Mejoras y Reporte de Issues
 
 * Repositorio en GitHub: [github.com/aleric-dev/generate-media](https://github.com/aleric-dev/generate-media)
 * Reportar un bug o sugerir mejoras: [github.com/aleric-dev/generate-media/issues](https://github.com/aleric-dev/generate-media/issues)
