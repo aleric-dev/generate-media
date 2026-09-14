@@ -11,9 +11,9 @@ export type ModuleType = 'kpi' | 'chart' | 'chat' | 'image' | 'text' | 'steps' |
 
 export type ChartType = 'horizontal-bars' | 'pie' | 'line';
 
-export type LogoType = 'generic' | 'monogram' | 'text' | 'aleric' | 'custom';
+export type LogoType = 'generic' | 'monogram' | 'text' | 'custom';
 
-export type HeaderBrandMode = 'icon-text' | 'only-text' | 'only-logo' | 'logo-text';
+export type HeaderBrandMode = 'icon-text' | 'only-text' | 'custom-text' | 'only-custom' | 'only-logo' | 'logo-text';
 
 export type LogoAspectRatio = 'square' | 'horizontal' | 'vertical' | 'auto';
 
@@ -247,6 +247,7 @@ export interface PostTemplate {
   handle?: string;
   ctaOrder?: CtaOrder;
   ctaAlign?: CtaAlign;
+  brandIcon?: string;
 }
 
 export interface BrandProfile {
@@ -256,6 +257,7 @@ export interface BrandProfile {
   handle: string;
   logoType: LogoType;
   customLogoUrl?: string | null;
+  brandIcon?: string;
   primaryColor: string;
   secondaryColor?: string;
   titleFont?: string;
@@ -286,6 +288,7 @@ export interface PostState {
   // Header
   companyName: string;
   headerBrandMode: HeaderBrandMode;
+  brandIcon?: string;
   logoAspectRatio: LogoAspectRatio;
   headerShowLogo: boolean;
   headerSize: number; // 10 a 24 px

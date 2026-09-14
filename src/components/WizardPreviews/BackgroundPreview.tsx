@@ -1,5 +1,6 @@
 import React from 'react';
 import { PatternType, PatternVignette, LightType } from '../../types';
+import { Sparkles, Sun, Moon } from 'lucide-react';
 
 interface BackgroundPreviewProps {
   canvasMode: 'dark' | 'light';
@@ -20,85 +21,133 @@ export const BackgroundPreview: React.FC<BackgroundPreviewProps> = ({
 }) => {
   const isDark = canvasMode === 'dark';
 
+  // Cálculo de RGB para iluminación dinámica
+  const cleanColor = (currentColor || '#4F46E5').replace('#', '');
+  const bigint = parseInt(cleanColor, 16) || 0x4f46e5;
+  const red = (bigint >> 16) & 255;
+  const green = (bigint >> 8) & 255;
+  const blue = bigint & 255;
+  const rgb = `${red}, ${green}, ${blue}`;
+
+  const lightA1 = isDark ? '0.50' : '0.24';
+  const lightA2 = isDark ? '0.28' : '0.12';
+
+  // Gradientes reales según el tipo de luz seleccionado
+  let glowBg = 'none';
+  if (lightType === 'spotlight') {
+    glowBg = `
+      radial-gradient(circle at 100% 0%, rgba(${rgb}, ${lightA1}) 0%, transparent 60%),
+      radial-gradient(circle at 0% 100%, rgba(${rgb}, ${lightA2}) 0%, transparent 55%)
+    `;
+  } else if (lightType === 'aurora') {
+    glowBg = `
+      radial-gradient(ellipse at 50% 0%, rgba(${rgb}, ${lightA1}) 0%, rgba(6, 182, 212, ${isDark ? '0.25' : '0.15'}) 45%, transparent 75%)
+    `;
+  } else if (lightType === 'dual-beams') {
+    glowBg = `
+      linear-gradient(135deg, rgba(${rgb}, ${lightA1}) 0%, transparent 48%),
+      linear-gradient(315deg, rgba(${rgb}, ${lightA2}) 0%, transparent 48%)
+    `;
+  } else if (lightType === 'glow') {
+    glowBg = `
+      radial-gradient(circle at 50% 25%, rgba(${rgb}, ${lightA1}) 0%, rgba(${rgb}, 0.04) 50%, transparent 80%)
+    `;
+  }
+
+  const getLightLabel = () => {
+    switch (lightType) {
+      case 'glow': return 'Glow Suave';
+      case 'spotlight': return 'Spotlight Esquina';
+      case 'aurora': return 'Aurora Boreal';
+      case 'dual-beams': return 'Haces Dobles';
+      default: return 'Sin Luz';
+    }
+  };
+
   return (
     <div className="w-full flex flex-col items-center justify-center p-4 bg-slate-950/80 rounded-2xl border border-slate-800/80 shadow-inner">
       <div className="w-full text-[11px] font-mono text-slate-400 mb-3 flex items-center justify-between">
-        <span>Previsualización de Atmósfera</span>
-        <span className="px-2 py-0.5 rounded bg-slate-800 text-indigo-300 font-bold">
+        <span className="flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+          <span>Atmósfera & Fondo</span>
+        </span>
+        <span className={`px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1 ${
+          isDark ? 'bg-slate-900 text-indigo-300 border border-slate-800' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+        }`}>
+          {isDark ? <Moon className="w-3 h-3" /> : <Sun className="w-3 h-3" />}
           {isDark ? 'Modo Oscuro' : 'Modo Claro'}
         </span>
       </div>
 
+      {/* Mini Mockup Canvas Ultra HQ con soporte impecable en Modo Claro y Oscuro */}
       <div
-        className={`w-full max-w-sm h-56 rounded-xl border p-4 flex flex-col justify-between shadow-2xl relative overflow-hidden transition-colors duration-300 ${
+        className={`w-full max-w-sm h-56 rounded-xl border p-4 flex flex-col justify-between shadow-2xl relative overflow-hidden transition-all duration-300 ${
           isDark
             ? 'bg-[#070A0F] border-slate-800 text-white'
-            : 'bg-slate-50 border-slate-300 text-slate-900'
+            : 'bg-[#F8FAFC] border-slate-200/90 text-slate-900'
         }`}
       >
-        {/* Capa de Patrón Tecnológico */}
+        {/* 1. Capa de Patrón Tecnológico usando las clases -light o dark y máscara de viñeta */}
         {bgPattern !== 'none' && (
           <div
-            className={`absolute inset-0 pattern-${bgPattern} pointer-events-none transition-opacity`}
+            className={`absolute inset-0 pointer-events-none transition-all ${
+              isDark ? `pattern-${bgPattern}` : `pattern-${bgPattern}-light`
+            } vignette-${patternVignette || 'none'}`}
             style={{ opacity: patternOpacity / 100 }}
           />
         )}
 
-        {/* Capa de Viñeta */}
-        {patternVignette !== 'none' && (
+        {/* 2. Capa de Iluminación Ambiental Procedimental */}
+        {lightType !== 'none' && glowBg !== 'none' && (
           <div
-            className={`absolute inset-0 pointer-events-none ${
-              patternVignette === 'vignette'
-                ? 'bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.85)_100%)]'
-                : patternVignette === 'gradient-top'
-                ? 'bg-gradient-to-b from-black/80 via-transparent to-transparent'
-                : patternVignette === 'gradient-bottom'
-                ? 'bg-gradient-to-t from-black/80 via-transparent to-transparent'
-                : 'bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.8)_0%,transparent_70%)]'
-            }`}
+            className="absolute inset-0 pointer-events-none transition-all duration-300 overflow-hidden"
+            style={{ background: glowBg }}
           />
         )}
 
-        {/* Capa de Iluminación Ambiental */}
-        {lightType !== 'none' && (
-          <div
-            className="absolute -top-10 -right-10 w-40 h-40 rounded-full blur-3xl pointer-events-none transition-all"
-            style={{
-              backgroundColor: currentColor,
-              opacity: isDark ? 0.35 : 0.2,
-            }}
-          />
-        )}
-
-        {/* Simulación de Contenido Frontal */}
+        {/* 3. Indicadores Superiores */}
         <div className="relative z-10 flex items-center justify-between">
           <span
-            className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
-              isDark ? 'bg-slate-900/80 text-white border-slate-700' : 'bg-white/80 text-slate-900 border-slate-300'
+            className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border shadow-xs transition-colors ${
+              isDark
+                ? 'bg-slate-900/80 text-slate-200 border-slate-700/80'
+                : 'bg-white/90 text-slate-800 border-slate-200 shadow-sm'
             }`}
           >
             Trama: {bgPattern}
           </span>
           <span
-            className="text-[10px] font-mono font-bold px-2 py-0.5 rounded"
-            style={{ backgroundColor: `${currentColor}30`, color: currentColor }}
+            className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded border shadow-xs"
+            style={{
+              backgroundColor: `${currentColor}15`,
+              borderColor: `${currentColor}40`,
+              color: currentColor
+            }}
           >
-            Luz: {lightType}
+            {getLightLabel()}
           </span>
         </div>
 
+        {/* 4. Tarjeta Central Demostrativa de Contraste */}
         <div className="relative z-10 text-center my-auto">
           <div
-            className={`p-3 rounded-lg border backdrop-blur-sm max-w-[220px] mx-auto shadow-md ${
-              isDark ? 'bg-slate-900/60 border-slate-800/80 text-slate-200' : 'bg-white/70 border-slate-200 text-slate-800'
+            className={`p-3.5 rounded-xl border backdrop-blur-md max-w-[240px] mx-auto shadow-lg transition-all ${
+              isDark
+                ? 'bg-slate-900/70 border-slate-700/60 text-slate-100 shadow-black/40'
+                : 'bg-white/90 border-slate-200 text-slate-800 shadow-slate-300/40'
             }`}
           >
-            <p className="text-xs font-bold">Atmósfera & Profundidad</p>
-            <p className="text-[10px] opacity-70">Previsualización de contraste del fondo</p>
+            <p className="text-xs font-bold tracking-tight">Atmósfera & Profundidad</p>
+            <p className={`text-[10px] mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              Contraste garantizado en fondo {isDark ? 'oscuro' : 'claro'}
+            </p>
           </div>
         </div>
 
-        <div className="relative z-10 flex items-center justify-between text-[10px] font-mono opacity-60">
+        {/* 5. Pie informativo */}
+        <div className={`relative z-10 flex items-center justify-between text-[10px] font-mono ${
+          isDark ? 'text-slate-400' : 'text-slate-500'
+        }`}>
           <span>Opacidad: {patternOpacity}%</span>
           <span>Viñeta: {patternVignette}</span>
         </div>

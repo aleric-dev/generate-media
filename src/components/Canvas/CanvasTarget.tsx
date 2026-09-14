@@ -1,6 +1,7 @@
 import React, { forwardRef, useMemo } from 'react';
 import { PostState, ShapePlacement, ShapeStyleVariant, ShapeGeometry, ShapeProximity, BackgroundLayerOrder } from '../../types';
 import { aspectRatios } from '../../constants/templates';
+import { getBrandIconComponent } from '../../constants/brandIcons';
 import { Star, CheckCircle2, Radio, User, Sparkles, Tag, ArrowRight, FileCode, Terminal, TrendingUp, TrendingDown, CheckCheck } from 'lucide-react';
 
 interface CanvasTargetProps {
@@ -255,42 +256,41 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
     // Isotipo o imagen de logo
     let logoImgOrIcon: React.ReactNode = null;
 
-    if (state.customLogoUrl) {
-      logoImgOrIcon = (
-        <img
-          src={state.customLogoUrl}
-          alt="Logo"
-          className="filter drop-shadow-md transition-all"
-          style={logoRatioStyle}
-        />
-      );
-    } else if (state.logoType === 'monogram') {
-      const initial = name.charAt(0).toUpperCase();
-      logoImgOrIcon = (
-        <div
-          className="rounded-2xl flex items-center justify-center font-mono font-extrabold text-white shadow-lg transition-all shrink-0"
-          style={{
-            width: `${logoH}px`,
-            height: `${logoH}px`,
-            fontSize: `${Math.round(logoH * 0.45)}px`,
-            background: `linear-gradient(135deg, ${state.currentColor}, #1E1B4B)`,
-            border: '1.5px solid rgba(255,255,255,0.2)'
-          }}
-        >
-          {initial}
-        </div>
-      );
-    } else if (state.logoType === 'text') {
-      return (
-        <div
-          className={`font-mono font-extrabold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}
-          style={{ fontSize: `${Math.round(headerFontSize * 1.6)}px` }}
-        >
-          {name}<span style={{ color: state.currentColor }}>.</span>
-        </div>
-      );
+    if (brandMode === 'custom-text' || brandMode === 'only-custom' || brandMode === 'logo-text') {
+      if (state.customLogoUrl) {
+        logoImgOrIcon = (
+          <img
+            src={state.customLogoUrl}
+            alt="Logo"
+            className="filter drop-shadow-md transition-all"
+            style={logoRatioStyle}
+          />
+        );
+      } else {
+        // Placeholder estilizado cuando no hay imagen cargada aún
+        logoImgOrIcon = (
+          <div
+            className="rounded-xl flex items-center justify-center shadow-lg transition-all shrink-0 border border-dashed"
+            style={{
+              width: `${logoH}px`,
+              height: `${logoH}px`,
+              borderColor: state.currentColor,
+              backgroundColor: `${state.currentColor}15`,
+            }}
+          >
+            <span
+              className="font-mono font-bold uppercase text-[10px]"
+              style={{ color: state.currentColor }}
+            >
+              LOGO
+            </span>
+          </div>
+        );
+      }
     } else {
-      // 'generic': Logo Vectorial Tech
+      // 'icon-text' o fallback: Ícono vectorial seleccionado con el acento de color
+      const SelectedIcon = getBrandIconComponent(state.brandIcon);
+      const iconPx = Math.round(logoH * 0.55);
       logoImgOrIcon = (
         <div
           className="rounded-xl flex items-center justify-center shadow-lg transition-all shrink-0"
@@ -301,23 +301,13 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
             border: `1.5px solid ${state.currentColor}`
           }}
         >
-          <svg
-            width={Math.round(logoH * 0.55)}
-            height={Math.round(logoH * 0.55)}
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke={state.currentColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M2 17L12 22L22 17" stroke={state.currentColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M2 12L12 17L22 12" stroke={state.currentColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <SelectedIcon size={iconPx} color={state.currentColor} strokeWidth={2} />
         </div>
       );
     }
 
-    // 2. Solo Logo
-    if (brandMode === 'only-logo') {
+    // 2. Solo Logo (modo 'only-custom' o fallback 'only-logo')
+    if (brandMode === 'only-custom' || brandMode === 'only-logo') {
       return (
         <div className="flex items-center shrink-0">
           {logoImgOrIcon}
@@ -325,7 +315,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
       );
     }
 
-    // 3. Logo + Texto
+    // 3. Logo / Ícono + Texto ('icon-text' o 'custom-text')
     return (
       <div className="flex items-center gap-3">
         {logoImgOrIcon}

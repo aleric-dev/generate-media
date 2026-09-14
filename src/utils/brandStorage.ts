@@ -1,6 +1,6 @@
 import { BrandProfile } from '../types';
 
-const STORAGE_KEY = 'aleric_saved_brands';
+const STORAGE_KEY = 'media_studio_saved_brands';
 
 export const getSavedBrands = (): BrandProfile[] => {
   if (typeof window === 'undefined') return [];

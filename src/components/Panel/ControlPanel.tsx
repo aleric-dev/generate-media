@@ -8,6 +8,7 @@ import { Step4Export } from './Step4Export';
 import { BrandLogo } from '../BrandLogo';
 import { GithubIcon } from '../GithubIcon';
 import { LINKS } from '../../constants/links';
+import { APP_VERSION } from '../../constants/version';
 
 interface ControlPanelProps {
   state: PostState;
@@ -144,18 +145,13 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         )}
       </div>
 
-      {/* PIE DEL PANEL DE CONTROL: HECHO POR ALERIC.DEV + GITHUB + PROPONER MEJORA */}
+      {/* PIE DEL PANEL DE CONTROL: VERSIÓN Y GITHUB */}
       <div className="p-2.5 px-3.5 bg-slate-950 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono shrink-0">
-        <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-          <span>Hecho por</span>
-          <a
-            href={LINKS.ALERIC}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-indigo-400 hover:text-indigo-300 font-bold underline underline-offset-2 transition"
-          >
-            aleric.dev
-          </a>
+        <div className="flex items-center gap-2 text-[11px] text-slate-400">
+          <span className="font-bold text-white">Media Studio</span>
+          <span className="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold">
+            {APP_VERSION}
+          </span>
         </div>
 
         <div className="flex items-center gap-2">

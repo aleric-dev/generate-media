@@ -18,8 +18,13 @@ import {
 } from 'lucide-react';
 import { PostState, PostTemplate, HeaderShape, FooterShape, HeaderBrandMode, LogoType, PatternType, PatternVignette, LightType, ModuleType } from '../types';
 import { defaultTemplates } from '../constants/templates';
+import { BRAND_ICONS } from '../constants/brandIcons';
+import { FONT_OPTIONS } from '../constants/fonts';
 import { getSavedBrands, saveBrand, getDefaultBrand, deleteBrand } from '../utils/brandStorage';
-import { RealCanvasPreview } from './RealCanvasPreview';
+import { BrandingPreview } from './WizardPreviews/BrandingPreview';
+import { TypographyPreview } from './WizardPreviews/TypographyPreview';
+import { ContentPreview } from './WizardPreviews/ContentPreview';
+import { BackgroundPreview } from './WizardPreviews/BackgroundPreview';
 
 interface CreationWizardModalProps {
   isOpen: boolean;
@@ -34,8 +39,8 @@ export const CreationWizardModal: React.FC<CreationWizardModalProps> = ({
   onConfirmAndOpenEditor,
   currentState,
 }) => {
-  // Pasos: 1: Branding, 2: Paleta & Fuentes, 3: Contenido / Plantillas, 4: Fondo, 5: Confirmar
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  // Pasos: 1: Branding, 2: Paleta & Fuentes, 3: Contenido, 4: Atmósfera & Fondo
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
 
   // Estado temporal del asistente
   const [wizardState, setWizardState] = useState<PostState>({ ...currentState });
@@ -78,6 +83,7 @@ export const CreationWizardModal: React.FC<CreationWizardModalProps> = ({
       handle: brand.handle,
       logoType: brand.logoType,
       customLogoUrl: brand.customLogoUrl || null,
+      brandIcon: brand.brandIcon || 'terminal',
       currentColor: brand.primaryColor,
       titleFont: brand.titleFont || wizardState.titleFont,
       subtitleFont: brand.subtitleFont || wizardState.subtitleFont,
@@ -94,6 +100,7 @@ export const CreationWizardModal: React.FC<CreationWizardModalProps> = ({
       handle: wizardState.handle,
       logoType: wizardState.logoType,
       customLogoUrl: wizardState.customLogoUrl,
+      brandIcon: wizardState.brandIcon || 'terminal',
       primaryColor: wizardState.currentColor,
       titleFont: wizardState.titleFont,
       subtitleFont: wizardState.subtitleFont,
@@ -151,15 +158,6 @@ export const CreationWizardModal: React.FC<CreationWizardModalProps> = ({
     { color: '#10B981', name: 'Mint' },
   ];
 
-  const fontOptions = [
-    { id: 'font-space-mono', label: 'Space Mono', desc: 'Precisión técnica' },
-    { id: 'font-inter', label: 'Inter UI', desc: 'Limpia y neutral' },
-    { id: 'font-plus-jakarta', label: 'Plus Jakarta', desc: 'Corporativa moderna' },
-    { id: 'font-outfit', label: 'Outfit Bold', desc: 'Alto impacto' },
-    { id: 'font-syne', label: 'Syne Futurista', desc: 'Vanguardista' },
-    { id: 'font-jetbrains', label: 'JetBrains Mono', desc: 'Código sintáctico' },
-  ];
-
   const patterns: PatternType[] = [
     'circuit',
     'hexagons',
@@ -204,7 +202,7 @@ export const CreationWizardModal: React.FC<CreationWizardModalProps> = ({
               <h2 className="text-base font-bold text-white flex items-center gap-2">
                 <span>Asistente de Creación Modular</span>
                 <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                  Paso {currentStep} de 5
+                  Paso {currentStep} de 4
                 </span>
               </h2>
               <p className="text-xs text-slate-400">
@@ -222,14 +220,13 @@ export const CreationWizardModal: React.FC<CreationWizardModalProps> = ({
           </button>
         </div>
 
-        {/* INDICADOR DE PASOS SUPERIOR */}
+        {/* INDICADOR DE PASOS SUPERIOR (4 PASOS ESENCIALES) */}
         <div className="px-6 py-2.5 bg-slate-950/50 border-b border-slate-800/80 flex items-center justify-between text-xs font-mono shrink-0 overflow-x-auto gap-2">
           {[
             { step: 1, label: '1. Branding', icon: Building2 },
-            { step: 2, label: '2. Paleta & Tipografía', icon: Palette },
-            { step: 3, label: '3. Contenido / Plantillas', icon: FileText },
+            { step: 2, label: '2. Paleta & Fuentes', icon: Palette },
+            { step: 3, label: '3. Contenido & Módulos', icon: FileText },
             { step: 4, label: '4. Atmósfera & Fondo', icon: Layers },
-            { step: 5, label: '5. Confirmar', icon: CheckCircle2 },
           ].map((s) => {
             const IconComponent = s.icon;
             const isCurrent = currentStep === s.step;
@@ -306,7 +303,7 @@ export const CreationWizardModal: React.FC<CreationWizardModalProps> = ({
                       type="text"
                       value={wizardState.companyName}
                       onChange={(e) => updateWizard({ companyName: e.target.value })}
-                      placeholder="Ej. Aleric Dev"
+                      placeholder="Ej. Mi Marca"
                       className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 outline-none"
                     />
                   </div>
@@ -317,29 +314,42 @@ export const CreationWizardModal: React.FC<CreationWizardModalProps> = ({
                       type="text"
                       value={wizardState.handle}
                       onChange={(e) => updateWizard({ handle: e.target.value })}
-                      placeholder="Ej. @aleric.dev"
+                      placeholder="Ej. @mimarca"
                       className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 outline-none"
                     />
                   </div>
                 </div>
 
-                {/* Selección y Carga de Logo */}
+                {/* Composición de Marca (4 Modos Canónicos) */}
                 <div className="space-y-2 text-xs font-mono">
-                  <label className="text-slate-300 font-semibold">Tipo de Logotipo</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-slate-300 font-semibold">Composición de Marca</label>
+                    <span className="text-[10px] text-indigo-400">
+                      {(wizardState.headerBrandMode || 'icon-text') === 'icon-text' && 'Ícono + Texto'}
+                      {wizardState.headerBrandMode === 'only-text' && 'Solo Texto'}
+                      {wizardState.headerBrandMode === 'custom-text' && 'Texto + Logo Personalizado'}
+                      {wizardState.headerBrandMode === 'only-custom' && 'Solo Logo Personalizado'}
+                    </span>
+                  </div>
+
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
-                      { id: 'generic' as const, label: 'Monograma' },
-                      { id: 'text' as const, label: 'Solo Texto' },
-                      { id: 'aleric' as const, label: 'Aleric Oficial' },
-                      { id: 'custom' as const, label: 'Subir Imagen' },
+                      { id: 'icon-text' as HeaderBrandMode, label: 'Ícono + Texto' },
+                      { id: 'only-text' as HeaderBrandMode, label: 'Solo Texto' },
+                      { id: 'custom-text' as HeaderBrandMode, label: 'Texto + Logo' },
+                      { id: 'only-custom' as HeaderBrandMode, label: 'Solo Logo' },
                     ].map((m) => (
                       <button
                         key={m.id}
                         type="button"
-                        onClick={() => updateWizard({ logoType: m.id })}
-                        className={`p-2 rounded-lg border text-center transition ${
-                          wizardState.logoType === m.id
-                            ? 'bg-indigo-600/20 border-indigo-500 text-white font-bold'
+                        onClick={() => updateWizard({ 
+                          headerBrandMode: m.id,
+                          headerShowLogo: m.id !== 'only-text',
+                          logoType: (m.id === 'custom-text' || m.id === 'only-custom') ? 'custom' : 'generic'
+                        })}
+                        className={`p-2 rounded-lg border text-center transition text-[11px] ${
+                          (wizardState.headerBrandMode || 'icon-text') === m.id
+                            ? 'bg-indigo-600/25 border-indigo-500 text-white font-bold shadow-sm'
                             : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
                         }`}
                       >
@@ -348,14 +358,49 @@ export const CreationWizardModal: React.FC<CreationWizardModalProps> = ({
                     ))}
                   </div>
 
-                  {wizardState.logoType === 'custom' && (
+                  {/* 1. Selector de Íconos cuando está en 'icon-text' */}
+                  {(wizardState.headerBrandMode || 'icon-text') === 'icon-text' && (
+                    <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-400 text-[11px]">Selecciona un Ícono:</span>
+                        <span className="text-indigo-400 text-[11px] font-semibold">
+                          {BRAND_ICONS.find((i) => i.id === (wizardState.brandIcon || 'terminal'))?.label || 'Terminal'}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5 max-h-32 overflow-y-auto pr-0.5 custom-scrollbar">
+                        {BRAND_ICONS.map((iconItem) => {
+                          const IconCmp = iconItem.icon;
+                          const isSelected = (wizardState.brandIcon || 'terminal') === iconItem.id;
+                          return (
+                            <button
+                              key={iconItem.id}
+                              type="button"
+                              onClick={() => updateWizard({ brandIcon: iconItem.id })}
+                              title={iconItem.label}
+                              className={`p-1.5 rounded-lg border flex flex-col items-center gap-1 transition ${
+                                isSelected
+                                  ? 'bg-indigo-600/25 border-indigo-500 text-indigo-300 shadow-sm'
+                                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+                              }`}
+                            >
+                              <IconCmp className="w-3.5 h-3.5" />
+                              <span className="text-[8px] font-mono truncate w-full text-center">{iconItem.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 2. Carga de Logo cuando es 'custom-text' o 'only-custom' */}
+                  {(wizardState.headerBrandMode === 'custom-text' || wizardState.headerBrandMode === 'only-custom') && (
                     <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
                         {wizardState.customLogoUrl ? (
                           <img
                             src={wizardState.customLogoUrl}
                             alt="Logo"
-                            className="w-8 h-8 rounded-lg object-cover border border-slate-700"
+                            className="w-8 h-8 rounded-lg object-contain border border-slate-700 bg-slate-900"
                           />
                         ) : (
                           <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-slate-500">
@@ -363,51 +408,32 @@ export const CreationWizardModal: React.FC<CreationWizardModalProps> = ({
                           </div>
                         )}
                         <span className="text-slate-400 text-[11px]">
-                          {wizardState.customLogoUrl ? 'Logo personalizado cargado' : 'Selecciona un archivo PNG o SVG'}
+                          {wizardState.customLogoUrl ? 'Logo personalizado cargado' : 'Selecciona un archivo PNG, SVG o JPG'}
                         </span>
                       </div>
 
-                      <label className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[11px] cursor-pointer shadow-sm">
-                        <span>Cargar Logo</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleLogoUpload}
-                          className="hidden"
-                        />
-                      </label>
+                      <div className="flex items-center gap-1.5">
+                        {wizardState.customLogoUrl && (
+                          <button
+                            type="button"
+                            onClick={() => updateWizard({ customLogoUrl: null })}
+                            className="px-2 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-[11px] font-mono transition"
+                          >
+                            Quitar
+                          </button>
+                        )}
+                        <label className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[11px] cursor-pointer shadow-sm">
+                          <span>{wizardState.customLogoUrl ? 'Cambiar' : 'Cargar Logo'}</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleLogoUpload}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
                     </div>
                   )}
-                </div>
-
-                {/* Estilo de Header y Footer */}
-                <div className="grid grid-cols-2 gap-3 text-xs font-mono">
-                  <div className="space-y-1.5">
-                    <label className="text-slate-300 font-semibold">Estilo de Cabecera</label>
-                    <select
-                      value={wizardState.headerShape}
-                      onChange={(e) => updateWizard({ headerShape: e.target.value as HeaderShape })}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 outline-none"
-                    >
-                      <option value="line">Línea Minimal</option>
-                      <option value="pill">Pill Flotante</option>
-                      <option value="card">Tarjeta Card</option>
-                      <option value="floating-dock">Floating Dock</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-slate-300 font-semibold">Estilo de Pie (Footer)</label>
-                    <select
-                      value={wizardState.footerShape}
-                      onChange={(e) => updateWizard({ footerShape: e.target.value as FooterShape })}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 outline-none"
-                    >
-                      <option value="line">Línea Minimal</option>
-                      <option value="pill">Pill Flotante</option>
-                      <option value="card">Tarjeta Card</option>
-                    </select>
-                  </div>
                 </div>
 
                 {/* BOTÓN PARA GUARDAR COMO MARCA RECURRENTE */}
@@ -494,48 +520,36 @@ export const CreationWizardModal: React.FC<CreationWizardModalProps> = ({
                   </div>
                 </div>
 
-                {/* Fuentes: Título y Subtítulo */}
+                {/* Fuentes: Título y Subtítulo con Selects idénticos al Editor */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono pt-2">
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <label className="text-slate-300 font-semibold">Tipografía del Título</label>
-                    <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                      {fontOptions.map((f) => (
-                        <button
-                          key={f.id}
-                          type="button"
-                          onClick={() => updateWizard({ titleFont: f.id })}
-                          className={`w-full p-2 rounded-lg border text-left flex items-center justify-between transition ${
-                            wizardState.titleFont === f.id
-                              ? 'bg-indigo-600/20 border-indigo-500 text-white font-bold'
-                              : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          <span className={f.id}>{f.label}</span>
-                          <span className="text-[9px] text-slate-500">{f.desc}</span>
-                        </button>
+                    <select
+                      value={wizardState.titleFont}
+                      onChange={(e) => updateWizard({ titleFont: e.target.value })}
+                      className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs focus:border-indigo-500 outline-none transition"
+                    >
+                      {FONT_OPTIONS.map((f) => (
+                        <option key={f.id} value={f.id}>
+                          {f.label} ({f.desc})
+                        </option>
                       ))}
-                    </div>
+                    </select>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <label className="text-slate-300 font-semibold">Tipografía del Subtítulo</label>
-                    <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                      {fontOptions.map((f) => (
-                        <button
-                          key={f.id}
-                          type="button"
-                          onClick={() => updateWizard({ subtitleFont: f.id })}
-                          className={`w-full p-2 rounded-lg border text-left flex items-center justify-between transition ${
-                            wizardState.subtitleFont === f.id
-                              ? 'bg-indigo-600/20 border-indigo-500 text-white font-bold'
-                              : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          <span className={f.id}>{f.label}</span>
-                          <span className="text-[9px] text-slate-500">{f.desc}</span>
-                        </button>
+                    <select
+                      value={wizardState.subtitleFont}
+                      onChange={(e) => updateWizard({ subtitleFont: e.target.value })}
+                      className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-xs focus:border-indigo-500 outline-none transition"
+                    >
+                      {FONT_OPTIONS.map((f) => (
+                        <option key={f.id} value={f.id}>
+                          {f.label} ({f.desc})
+                        </option>
                       ))}
-                    </div>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -791,61 +805,55 @@ export const CreationWizardModal: React.FC<CreationWizardModalProps> = ({
               </div>
             )}
 
-            {/* ========================================================================= */}
-            {/* PASO 5: CONFIRMACIÓN Y RESUMEN */}
-            {/* ========================================================================= */}
-            {currentStep === 5 && (
-              <div className="space-y-4">
-                <div className="pb-2 border-b border-slate-800">
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span>Resumen y Confirmación Final</span>
-                  </h3>
-                  <p className="text-xs text-slate-400">
-                    Revisa las configuraciones elegidas antes de transferirlas al editor
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3 text-xs font-mono">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
-                    <span className="text-slate-400">Empresa / Marca:</span>
-                    <span className="text-white font-bold">{wizardState.companyName} ({wizardState.handle})</span>
-                  </div>
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
-                    <span className="text-slate-400">Color Primario:</span>
-                    <div className="flex items-center gap-2">
-                      <span className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: wizardState.currentColor }} />
-                      <span className="text-white font-bold">{wizardState.currentColor}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
-                    <span className="text-slate-400">Fuentes Seleccionadas:</span>
-                    <span className="text-white font-bold">{wizardState.titleFont.replace('font-', '')} / {wizardState.subtitleFont.replace('font-', '')}</span>
-                  </div>
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
-                    <span className="text-slate-400">Módulo Central:</span>
-                    <span className="text-emerald-400 font-bold uppercase">{wizardState.activeModule}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-400">Fondo & Trama:</span>
-                    <span className="text-indigo-300 font-bold capitalize">{wizardState.canvasMode} • {wizardState.bgPattern}</span>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center gap-3">
-                  <Sparkles className="w-5 h-5 text-emerald-400 shrink-0" />
-                  <p className="text-xs text-emerald-300">
-                    Todo está listo. Al confirmar, ingresaremos directamente al <strong>Editor Ultra HQ 1080p</strong> con tu diseño completamente ensamblado.
-                  </p>
-                </div>
-              </div>
-            )}
-
           </div>
 
-          {/* COLUMNA DERECHA: PREVISUALIZACIÓN REAL EN TIEMPO REAL (5 cols) */}
-          <div className="lg:col-span-5 p-4 bg-slate-950/60 flex flex-col items-center justify-center border-l border-slate-800/80">
-            <RealCanvasPreview state={wizardState} maxHeight={490} />
+          {/* COLUMNA DERECHA: PREVISUALIZACIÓN AISLADA FOCALIZADA POR PASO (5 cols) */}
+          <div className="lg:col-span-5 p-4 sm:p-6 bg-slate-950/60 flex flex-col items-center justify-center border-l border-slate-800/80 min-h-[380px]">
+            {currentStep === 1 && (
+              <BrandingPreview
+                companyName={wizardState.companyName}
+                handle={wizardState.handle}
+                logoType={wizardState.logoType}
+                brandIcon={wizardState.brandIcon}
+                customLogoUrl={wizardState.customLogoUrl}
+                headerBrandMode={wizardState.headerBrandMode}
+                currentColor={wizardState.currentColor}
+                onLogoUpload={handleLogoUpload}
+              />
+            )}
+
+            {currentStep === 2 && (
+              <TypographyPreview
+                currentColor={wizardState.currentColor}
+                titleFont={wizardState.titleFont}
+                subtitleFont={wizardState.subtitleFont}
+                sampleTitle={wizardState.title}
+                sampleSubtitle={wizardState.subtitle}
+                onTitleFontChange={(font) => updateWizard({ titleFont: font })}
+                onSubtitleFontChange={(font) => updateWizard({ subtitleFont: font })}
+              />
+            )}
+
+            {currentStep === 3 && (
+              <ContentPreview
+                title={wizardState.title}
+                subtitle={wizardState.subtitle}
+                activeModule={wizardState.activeModule}
+                currentColor={wizardState.currentColor}
+                titleFont={wizardState.titleFont}
+              />
+            )}
+
+            {currentStep === 4 && (
+              <BackgroundPreview
+                canvasMode={wizardState.canvasMode}
+                bgPattern={wizardState.bgPattern}
+                patternOpacity={wizardState.patternOpacity}
+                patternVignette={wizardState.patternVignette}
+                lightType={wizardState.lightType}
+                currentColor={wizardState.currentColor}
+              />
+            )}
           </div>
 
         </div>
@@ -855,19 +863,19 @@ export const CreationWizardModal: React.FC<CreationWizardModalProps> = ({
           <button
             type="button"
             disabled={currentStep === 1}
-            onClick={() => setCurrentStep((currentStep - 1) as any)}
-            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-mono flex items-center gap-1.5 transition disabled:opacity-30 disabled:pointer-events-none"
+            onClick={() => setCurrentStep((currentStep - 1) as 1 | 2 | 3 | 4)}
+            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-mono flex items-center gap-1.5 transition disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Paso Anterior</span>
           </button>
 
           <div className="flex items-center gap-3">
-            {currentStep < 5 ? (
+            {currentStep < 4 ? (
               <button
                 type="button"
-                onClick={() => setCurrentStep((currentStep + 1) as any)}
-                className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-mono font-bold flex items-center gap-2 transition shadow-lg shadow-indigo-600/25"
+                onClick={() => setCurrentStep((currentStep + 1) as 1 | 2 | 3 | 4)}
+                className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-mono font-bold flex items-center gap-2 transition shadow-lg shadow-indigo-600/25 cursor-pointer"
               >
                 <span>Siguiente Paso</span>
                 <ArrowRight className="w-4 h-4" />
@@ -876,7 +884,7 @@ export const CreationWizardModal: React.FC<CreationWizardModalProps> = ({
               <button
                 type="button"
                 onClick={() => onConfirmAndOpenEditor(wizardState)}
-                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white text-xs font-mono font-bold flex items-center gap-2 transition shadow-lg shadow-emerald-600/25 animate-pulse"
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white text-xs font-mono font-bold flex items-center gap-2 transition shadow-lg shadow-emerald-600/25 cursor-pointer"
               >
                 <Check className="w-4 h-4" />
                 <span>Confirmar y Abrir en el Editor Ultra HQ ➔</span>

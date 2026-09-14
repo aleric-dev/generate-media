@@ -1,53 +1,71 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LayoutTemplate, Sparkles, ArrowRight, Coffee, ExternalLink } from 'lucide-react';
-import { BrandLogo } from './BrandLogo';
-import { GithubIcon } from './GithubIcon';
+import { BrandLogo } from '../components/BrandLogo';
+import { GithubIcon } from '../components/GithubIcon';
 import { LINKS } from '../constants/links';
+import { APP_VERSION } from '../constants/version';
+import { useStudioStore } from '../store/useStudioStore';
+import { getDefaultBrand } from '../utils/brandStorage';
 
-interface WelcomeScreenProps {
-  onStartFromScratch: () => void;
-  onOpenTemplates: () => void;
-  onOpenWizard: () => void;
-  onGoLanding: () => void;
-  savedBrandName?: string;
-}
+export const HomePage: React.FC = () => {
+  const navigate = useNavigate();
+  const setWizardModalOpen = useStudioStore((s) => s.setWizardModalOpen);
+  const setTemplatesModalOpen = useStudioStore((s) => s.setTemplatesModalOpen);
+  const resetToScratch = useStudioStore((s) => s.resetToScratch);
 
-export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
-  onStartFromScratch,
-  onOpenTemplates,
-  onOpenWizard,
-  onGoLanding,
-  savedBrandName,
-}) => {
+  const defaultBrand = typeof window !== 'undefined' ? getDefaultBrand() : null;
+  const savedBrandName = defaultBrand?.name || defaultBrand?.companyName;
+
+  const handleStartFromScratch = () => {
+    resetToScratch();
+    navigate('/editor');
+  };
+
+  const handleOpenTemplates = () => {
+    setTemplatesModalOpen(true);
+  };
+
+  const handleOpenWizard = () => {
+    setWizardModalOpen(true);
+  };
+
+  const handleGoLanding = () => {
+    navigate('/presentacion');
+  };
+
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-b from-[#070A0F] via-[#090E1A] to-[#04060A] flex flex-col items-center justify-between p-6 sm:p-10 select-none overflow-y-auto">
-      
+    <div className="w-full min-h-screen bg-gradient-to-b from-[#070A0F] via-[#090E1A] to-[#04060A] flex flex-col items-center justify-between p-6 sm:p-10 select-none overflow-y-auto relative">
       {/* Glow decorativo de fondo */}
       <div className="absolute w-[600px] h-[600px] bg-indigo-600/15 rounded-full blur-[140px] pointer-events-none -top-40 left-1/2 -translate-x-1/2" />
 
-      {/* Barra superior sutil */}
-      <div className="w-full max-w-3xl flex items-center justify-between z-10 shrink-0">
+      {/* Barra superior sutil y balanceada */}
+      <header className="w-full max-w-4xl flex items-center justify-between z-10 shrink-0 h-10">
         <button
           type="button"
-          onClick={onGoLanding}
-          className="text-xs font-mono text-slate-400 hover:text-indigo-300 flex items-center gap-1.5 transition underline underline-offset-4"
+          onClick={handleGoLanding}
+          className="text-xs font-mono text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition cursor-pointer group"
+          title="Ver página de presentación"
         >
-          <span>← Volver a la Landing de Presentación</span>
+          <span className="w-2 h-2 rounded-full bg-indigo-500/60 group-hover:bg-indigo-400 transition-colors" />
+          <span className="opacity-80 group-hover:opacity-100">Conoce más del proyecto</span>
         </button>
 
-        {savedBrandName && (
-          <span className="text-[11px] font-mono px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-emerald-400 flex items-center gap-1.5">
+        {savedBrandName ? (
+          <span className="text-[11px] font-mono px-3 py-1 rounded-full bg-slate-900/90 border border-slate-800 text-emerald-400 flex items-center gap-1.5 shadow-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
             <span>Marca activa: {savedBrandName}</span>
           </span>
+        ) : (
+          <div className="w-10" />
         )}
-      </div>
+      </header>
 
-      <div className="relative z-10 max-w-3xl w-full text-center space-y-8 my-auto py-6">
-        
-        {/* Logo & Versión v1.1 */}
-        <div className="space-y-3">
-          <div className="flex justify-center pb-1">
+      {/* CONTENIDO PRINCIPAL: 100% CENTRADO VERTICAL Y HORIZONTAL */}
+      <main className="relative z-10 max-w-3xl w-full text-center space-y-7 sm:space-y-8 my-auto py-6 flex flex-col items-center justify-center">
+        {/* Logo & Versión */}
+        <div className="space-y-3 flex flex-col items-center">
+          <div className="pb-1">
             <BrandLogo size="xl" />
           </div>
 
@@ -56,7 +74,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               href={LINKS.GITHUB_REPO}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-mono transition shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-mono transition shadow-sm"
             >
               <GithubIcon className="w-3.5 h-3.5" />
               <span>Open Source en GitHub</span>
@@ -66,22 +84,21 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             Media Studio{' '}
             <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 align-middle shadow-sm">
-              v1.1
+              {APP_VERSION}
             </span>
           </h1>
           <p className="text-slate-400 text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
-            Generador de contenido visual en 1080p nativo. Elige cómo deseas comenzar tu publicación técnica hoy:
+            Generador de contenido visual en 1080p nativo. Elige cómo deseas comenzar tu publicación hoy:
           </p>
         </div>
 
         {/* Las 3 Grandes Opciones de Entrada */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-left">
-          
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-left w-full">
           {/* OPCIÓN 1: ASISTENTE PASO A PASO (DESTACADO) */}
           <button
             type="button"
-            onClick={onOpenWizard}
-            className="group relative p-5 rounded-2xl bg-gradient-to-b from-[#0F172A] to-[#0A0F1D] hover:from-[#131D35] hover:to-[#0D1426] border-2 border-indigo-500/60 hover:border-indigo-400 transition-all duration-300 flex flex-col justify-between space-y-5 shadow-xl hover:shadow-indigo-500/20 sm:scale-105 z-10"
+            onClick={handleOpenWizard}
+            className="group relative p-5 rounded-2xl bg-gradient-to-b from-[#0F172A] to-[#0A0F1D] hover:from-[#131D35] hover:to-[#0D1426] border-2 border-indigo-500/60 hover:border-indigo-400 transition-all duration-300 flex flex-col justify-between space-y-5 shadow-xl hover:shadow-indigo-500/20 sm:scale-105 z-10 cursor-pointer"
           >
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
@@ -96,7 +113,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                 Asistente Guiado
               </h2>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Configura tu marca, fuentes, módulo y fondo paso a paso con previsualizaciones antes de entrar.
+                Configura tu marca, paleta, contenido y atmósfera con previsualizaciones antes de entrar.
               </p>
             </div>
 
@@ -109,8 +126,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           {/* OPCIÓN 2: A PARTIR DE UNA PLANTILLA */}
           <button
             type="button"
-            onClick={onOpenTemplates}
-            className="group relative p-5 rounded-2xl bg-[#0B101B]/80 hover:bg-[#0E1524] border border-slate-800 hover:border-indigo-500/60 text-left transition-all duration-300 flex flex-col justify-between space-y-5 shadow-xl hover:shadow-indigo-500/10"
+            onClick={handleOpenTemplates}
+            className="group relative p-5 rounded-2xl bg-[#0B101B]/80 hover:bg-[#0E1524] border border-slate-800 hover:border-indigo-500/60 text-left transition-all duration-300 flex flex-col justify-between space-y-5 shadow-xl hover:shadow-indigo-500/10 cursor-pointer"
           >
             <div className="space-y-2.5">
               <div className="w-11 h-11 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 flex items-center justify-center transition-transform group-hover:scale-110">
@@ -133,8 +150,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           {/* OPCIÓN 3: EMPEZAR DE 0 */}
           <button
             type="button"
-            onClick={onStartFromScratch}
-            className="group relative p-5 rounded-2xl bg-[#0B101B]/80 hover:bg-[#0E1524] border border-slate-800 hover:border-emerald-500/60 text-left transition-all duration-300 flex flex-col justify-between space-y-5 shadow-xl hover:shadow-emerald-500/10"
+            onClick={handleStartFromScratch}
+            className="group relative p-5 rounded-2xl bg-[#0B101B]/80 hover:bg-[#0E1524] border border-slate-800 hover:border-emerald-500/60 text-left transition-all duration-300 flex flex-col justify-between space-y-5 shadow-xl hover:shadow-emerald-500/10 cursor-pointer"
           >
             <div className="space-y-2.5">
               <div className="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center justify-center transition-transform group-hover:scale-110">
@@ -153,14 +170,14 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </span>
           </button>
-
         </div>
+      </main>
 
-      </div>
-
-      {/* FOOTER OFICIAL CON CRÉDITO A ALERIC.DEV, GITHUB, ISSUES Y KO-FI */}
-      <footer className="relative z-10 w-full max-w-2xl flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-800/80 text-xs font-mono text-slate-500 shrink-0">
+      {/* FOOTER CON MENCIÓN ORGÁNICA A ALERIC.DEV */}
+      <footer className="relative z-10 w-full max-w-4xl flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-800/80 text-xs font-mono text-slate-500 shrink-0">
         <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+          <span>Media Studio {APP_VERSION}</span>
+          <span className="text-slate-700 hidden sm:inline">•</span>
           <div className="flex items-center gap-1.5">
             <span>Creado por</span>
             <a
@@ -169,13 +186,11 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               rel="noopener noreferrer"
               className="text-indigo-400 hover:text-indigo-300 font-bold inline-flex items-center gap-1 transition underline underline-offset-4"
             >
-              <span>Aleric.dev</span>
+              <span>aleric.dev</span>
               <ExternalLink className="w-3 h-3" />
             </a>
           </div>
-
           <span className="text-slate-700 hidden sm:inline">•</span>
-
           <a
             href={LINKS.GITHUB_REPO}
             target="_blank"
@@ -185,32 +200,18 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             <GithubIcon className="w-3.5 h-3.5" />
             <span>GitHub</span>
           </a>
-
-          <span className="text-slate-700 hidden sm:inline">•</span>
-
-          <a
-            href={LINKS.GITHUB_ISSUES}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>Proponer mejora</span>
-          </a>
         </div>
 
-        {/* Botón Ko-fi */}
         <a
           href={LINKS.KOFI}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-3.5 py-1.5 rounded-full bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 hover:text-amber-200 flex items-center gap-2 transition shadow-sm font-semibold text-xs shrink-0"
+          className="px-3 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 text-amber-300 flex items-center gap-1.5 transition"
         >
           <Coffee className="w-3.5 h-3.5 text-amber-400" />
-          <span>Apóyanos en Ko-fi</span>
+          <span>Apoyar en Ko-fi</span>
         </a>
       </footer>
-
     </div>
   );
 };

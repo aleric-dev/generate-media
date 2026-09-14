@@ -163,7 +163,7 @@ export const ExportSuccessModal: React.FC<ExportSuccessModalProps> = ({
                   ¿Te fue útil esta herramienta?
                 </h4>
                 <p className="text-[11px] text-slate-300 leading-relaxed">
-                  Media Studio es <strong>100% gratuito y sin marcas de agua</strong>. Si te ahorró tiempo de diseño, invita un café en Ko-fi al equipo de <strong>Aleric.dev</strong> para seguir creando herramientas libres de bloatware.
+                  Media Studio es <strong>100% gratuito y sin marcas de agua</strong>. Si te ahorró tiempo de diseño, apoya el proyecto invitando un café en Ko-fi para seguir creando herramientas abiertas libres de bloatware.
                 </p>
               </div>
             </div>

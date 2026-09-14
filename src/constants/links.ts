@@ -1,6 +1,6 @@
 export const LINKS = {
-  GITHUB_REPO: 'https://github.com/aleric-dev/generate-media',
-  GITHUB_ISSUES: 'https://github.com/aleric-dev/generate-media/issues',
-  KOFI: 'https://ko-fi.com/alericdev',
+  GITHUB_REPO: 'https://github.com',
+  GITHUB_ISSUES: 'https://github.com',
+  KOFI: 'https://ko-fi.com',
   ALERIC: 'https://aleric.dev',
 } as const;

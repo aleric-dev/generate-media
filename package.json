@@ -1,7 +1,7 @@
 {
-  "name": "aleric-social-post-studio",
+  "name": "media-studio-pro",
   "private": true,
-  "version": "0.3.0",
+  "version": "1.1.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -19,7 +19,9 @@
     "html2canvas": "^1.4.1",
     "lucide-react": "^0.475.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.18.3",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

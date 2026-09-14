@@ -43,8 +43,11 @@ import {
   Tag,
   Gift,
   ListOrdered,
-  Quote
+  Quote,
+  X
 } from 'lucide-react';
+import { BRAND_ICONS } from '../../constants/brandIcons';
+import { FONT_OPTIONS } from '../../constants/fonts';
 import { AccordionSection } from './AccordionSection';
 
 interface Step1ContentProps {
@@ -69,20 +72,7 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
   const toggleSection = (key: string) => {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
-  const fontOptions = [
-    { id: 'font-inter', label: 'Inter UI', desc: 'Limpia, neutra y legible' },
-    { id: 'font-montserrat', label: 'Montserrat', desc: 'Geométrica y comercial' },
-    { id: 'font-poppins', label: 'Poppins', desc: 'Amigable, redondeada y actual' },
-    { id: 'font-plus-jakarta', label: 'Plus Jakarta', desc: 'Moderna y corporativa' },
-    { id: 'font-outfit', label: 'Outfit Bold', desc: 'Editorial de alto impacto' },
-    { id: 'font-playfair', label: 'Playfair Display', desc: 'Elegante y serif de lujo' },
-    { id: 'font-space-mono', label: 'Space Mono', desc: 'Monoespaciada de precisión' },
-    { id: 'font-jetbrains', label: 'JetBrains Mono', desc: 'Sintaxis de código moderno' },
-    { id: 'font-fira-code', label: 'Fira Code', desc: 'Mono técnica para devs' },
-    { id: 'font-syne', label: 'Syne Futurista', desc: 'Vanguardista y diseño premium' },
-    { id: 'font-raleway', label: 'Raleway', desc: 'Estilizada y refinada' },
-    { id: 'font-oswald', label: 'Oswald', desc: 'Condensada y titulares potentes' },
-  ];
+  const fontOptions = FONT_OPTIONS;
 
   // Helper para KPIs
   const addKPICard = () => {
@@ -254,85 +244,145 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
           <div>
             <label className="text-[11px] text-slate-400 block mb-1">Composición de Marca:</label>
             <div className="grid grid-cols-2 gap-1.5 text-xs font-mono">
-            {[
-              { id: 'icon-text' as HeaderBrandMode, label: 'Logo + Texto' },
-              { id: 'only-logo' as HeaderBrandMode, label: 'Solo Logo' },
-              { id: 'only-text' as HeaderBrandMode, label: 'Solo Texto Empresa' },
-              { id: 'logo-text' as HeaderBrandMode, label: 'Logo Integrado' },
-            ].map((mode) => (
-              <button
-                key={mode.id}
-                type="button"
-                onClick={() => updateState({ 
-                  headerBrandMode: mode.id,
-                  headerShowLogo: mode.id !== 'only-text'
+              {[
+                { id: 'icon-text' as HeaderBrandMode, label: 'Ícono + Texto' },
+                { id: 'only-text' as HeaderBrandMode, label: 'Solo Texto' },
+                { id: 'custom-text' as HeaderBrandMode, label: 'Texto + Logo Personalizado' },
+                { id: 'only-custom' as HeaderBrandMode, label: 'Solo Logo Personalizado' },
+              ].map((mode) => (
+                <button
+                  key={mode.id}
+                  type="button"
+                  onClick={() => updateState({ 
+                    headerBrandMode: mode.id,
+                    headerShowLogo: mode.id !== 'only-text',
+                    logoType: (mode.id === 'custom-text' || mode.id === 'only-custom') ? 'custom' : 'generic'
+                  })}
+                  className={`py-1.5 px-2 rounded-lg text-center transition ${
+                    (state.headerBrandMode || 'icon-text') === mode.id
+                      ? 'bg-indigo-600 text-white font-bold shadow-sm'
+                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {mode.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Opción 1: Selector de Ícono cuando está en 'Ícono + Texto' */}
+          {(state.headerBrandMode || 'icon-text') === 'icon-text' && (
+            <div className="p-2.5 bg-slate-950/80 border border-slate-800 rounded-xl space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-slate-300 font-medium">Seleccionar Ícono:</span>
+                <span className="text-[10px] font-mono text-indigo-400 font-semibold">
+                  {BRAND_ICONS.find((i) => i.id === (state.brandIcon || 'terminal'))?.label || 'Terminal'}
+                </span>
+              </div>
+              <div className="grid grid-cols-4 gap-1.5 max-h-36 overflow-y-auto pr-0.5 custom-scrollbar">
+                {BRAND_ICONS.map((iconItem) => {
+                  const IconCmp = iconItem.icon;
+                  const isSelected = (state.brandIcon || 'terminal') === iconItem.id;
+                  return (
+                    <button
+                      key={iconItem.id}
+                      type="button"
+                      onClick={() => updateState({ brandIcon: iconItem.id })}
+                      title={iconItem.label}
+                      className={`p-2 rounded-lg border flex flex-col items-center gap-1 transition ${
+                        isSelected
+                          ? 'bg-indigo-600/25 border-indigo-500 text-indigo-300 shadow-sm'
+                          : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+                      }`}
+                    >
+                      <IconCmp className="w-4 h-4" />
+                      <span className="text-[9px] font-mono truncate w-full text-center">{iconItem.label}</span>
+                    </button>
+                  );
                 })}
-                className={`py-1.5 px-2 rounded-lg text-center transition ${
-                  (state.headerBrandMode || 'icon-text') === mode.id
-                    ? 'bg-indigo-600 text-white font-bold shadow-sm'
-                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                {mode.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Subida o Selección de Logo y Formato de Aspecto */}
-        {state.headerBrandMode !== 'only-text' && (
-          <div className="p-2.5 bg-slate-950/80 border border-slate-800 rounded-xl space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] text-slate-300 font-medium">Logo / Isotipo:</span>
-              <label className="px-2 py-1 rounded-md bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 text-[10px] font-mono font-bold flex items-center gap-1 transition cursor-pointer">
-                <Upload className="w-3 h-3" /> Subir Logo
-                <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
-              </label>
+              </div>
             </div>
+          )}
 
-            {/* Proporción de Aspecto del Logo */}
-            <div>
-              <span className="text-[10px] text-slate-400 block mb-1">Proporción del Logo:</span>
-              <div className="grid grid-cols-4 gap-1 text-[10px] font-mono">
-                {[
-                  { id: 'auto' as LogoAspectRatio, label: 'Auto' },
-                  { id: 'square' as LogoAspectRatio, label: '1:1 Cuadrado' },
-                  { id: 'horizontal' as LogoAspectRatio, label: 'Horizontal' },
-                  { id: 'vertical' as LogoAspectRatio, label: 'Vertical' },
-                ].map((ratio) => (
+          {/* Opción 2: Subida de Logo & Formato cuando es Logo Personalizado */}
+          {(state.headerBrandMode === 'custom-text' || state.headerBrandMode === 'only-custom' || state.headerBrandMode === 'only-logo' || state.headerBrandMode === 'logo-text') && (
+            <div className="p-2.5 bg-slate-950/80 border border-slate-800 rounded-xl space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-slate-300 font-medium">Logo Personalizado:</span>
+                <label className="px-2.5 py-1 rounded-md bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 text-[10px] font-mono font-bold flex items-center gap-1 transition cursor-pointer">
+                  <Upload className="w-3 h-3" />
+                  <span>{state.customLogoUrl ? 'Cambiar Logo' : 'Subir Imagen'}</span>
+                  <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                </label>
+              </div>
+
+              {/* Vista previa y botón para remover si está cargado */}
+              {state.customLogoUrl && (
+                <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900/90 border border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={state.customLogoUrl}
+                      alt="Logo"
+                      className="w-7 h-7 rounded object-contain bg-slate-950 border border-slate-800"
+                    />
+                    <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> Imagen cargada
+                    </span>
+                  </div>
                   <button
-                    key={ratio.id}
                     type="button"
-                    onClick={() => updateState({ logoAspectRatio: ratio.id })}
-                    className={`py-1 px-1 rounded text-center transition ${
-                      (state.logoAspectRatio || 'auto') === ratio.id
-                        ? 'bg-indigo-600 text-white font-bold'
-                        : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
-                    }`}
+                    onClick={() => updateState({ customLogoUrl: null })}
+                    className="text-slate-400 hover:text-rose-400 text-[10px] font-mono flex items-center gap-0.5 p-1 rounded hover:bg-rose-500/10 transition"
+                    title="Quitar logo"
                   >
-                    {ratio.label}
+                    <X className="w-3 h-3" /> Quitar
                   </button>
-                ))}
-              </div>
-            </div>
+                </div>
+              )}
 
-            {/* Slider Tamaño Logo */}
-            <div>
-              <div className="flex justify-between text-[11px] text-slate-400 mb-1">
-                <span>Tamaño del Logo:</span>
-                <span className="font-mono text-indigo-400 font-bold">{state.logoSize || 44} px</span>
+              {/* Proporción de Aspecto del Logo */}
+              <div>
+                <span className="text-[10px] text-slate-400 block mb-1">Proporción del Logo:</span>
+                <div className="grid grid-cols-4 gap-1 text-[10px] font-mono">
+                  {[
+                    { id: 'auto' as LogoAspectRatio, label: 'Auto' },
+                    { id: 'square' as LogoAspectRatio, label: '1:1 Cuadrado' },
+                    { id: 'horizontal' as LogoAspectRatio, label: 'Horizontal' },
+                    { id: 'vertical' as LogoAspectRatio, label: 'Vertical' },
+                  ].map((ratio) => (
+                    <button
+                      key={ratio.id}
+                      type="button"
+                      onClick={() => updateState({ logoAspectRatio: ratio.id })}
+                      className={`py-1 px-1 rounded text-center transition ${
+                        (state.logoAspectRatio || 'auto') === ratio.id
+                          ? 'bg-indigo-600 text-white font-bold'
+                          : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {ratio.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <input
-                type="range"
-                min={20}
-                max={120}
-                value={state.logoSize || 44}
-                onChange={(e) => updateState({ logoSize: Number(e.target.value) })}
-                className="w-full accent-indigo-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
-              />
+
+              {/* Slider Tamaño Logo */}
+              <div>
+                <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                  <span>Tamaño del Logo:</span>
+                  <span className="font-mono text-indigo-400 font-bold">{state.logoSize || 44} px</span>
+                </div>
+                <input
+                  type="range"
+                  min={20}
+                  max={120}
+                  value={state.logoSize || 44}
+                  onChange={(e) => updateState({ logoSize: Number(e.target.value) })}
+                  className="w-full accent-indigo-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Textos del Header */}
         <div className="grid grid-cols-2 gap-2.5">

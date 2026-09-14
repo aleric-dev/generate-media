@@ -41,7 +41,7 @@ export const PageTransitionLoader: React.FC<PageTransitionLoaderProps> = ({
             <span>{message}</span>
           </p>
           <p className="text-[11px] font-mono text-slate-400">
-            Aleric Media Studio • Render 1080p Ultra HQ
+            Media Studio • Render 1080p Ultra HQ
           </p>
         </div>
       </div>
