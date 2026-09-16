@@ -1,8 +1,6 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { HomePage } from './pages/HomePage';
-import { LandingPage } from './pages/LandingPage';
-import { EditorPage } from './pages/EditorPage';
+import { BrowserRouter, useNavigate } from 'react-router-dom';
+import { AppRoutes } from './routes';
 import { CreationWizardModal } from './components/CreationWizardModal';
 import { TemplatesModal } from './components/TemplatesModal';
 import { useStudioStore } from './store/useStudioStore';
@@ -54,17 +52,7 @@ export const App: React.FC = () => {
   return (
     <BrowserRouter>
       <div className="w-full min-h-screen bg-[#050811] text-slate-100 font-inter">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/inicio" element={<HomePage />} />
-          <Route path="/presentacion" element={<LandingPage />} />
-          <Route path="/landing" element={<Navigate to="/presentacion" replace />} />
-          <Route path="/bienvenida" element={<Navigate to="/inicio" replace />} />
-          <Route path="/welcome" element={<Navigate to="/inicio" replace />} />
-          <Route path="/menu" element={<Navigate to="/inicio" replace />} />
-          <Route path="/editor" element={<EditorPage />} />
-          <Route path="*" element={<Navigate to="/inicio" replace />} />
-        </Routes>
+        <AppRoutes />
         <AppModals />
       </div>
     </BrowserRouter>

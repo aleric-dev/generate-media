@@ -1,21 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutTemplate, Sparkles, ArrowRight, Coffee, ExternalLink } from 'lucide-react';
+import { LayoutTemplate, Sparkles, ArrowRight } from 'lucide-react';
 import { BrandLogo } from '../components/BrandLogo';
-import { GithubIcon } from '../components/GithubIcon';
-import { LINKS } from '../constants/links';
-import { APP_VERSION } from '../constants/version';
 import { useStudioStore } from '../store/useStudioStore';
-import { getDefaultBrand } from '../utils/brandStorage';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const setWizardModalOpen = useStudioStore((s) => s.setWizardModalOpen);
   const setTemplatesModalOpen = useStudioStore((s) => s.setTemplatesModalOpen);
   const resetToScratch = useStudioStore((s) => s.resetToScratch);
-
-  const defaultBrand = typeof window !== 'undefined' ? getDefaultBrand() : null;
-  const savedBrandName = defaultBrand?.name || defaultBrand?.companyName;
 
   const handleStartFromScratch = () => {
     resetToScratch();
@@ -30,62 +23,18 @@ export const HomePage: React.FC = () => {
     setWizardModalOpen(true);
   };
 
-  const handleGoLanding = () => {
-    navigate('/presentacion');
-  };
-
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-[#070A0F] via-[#090E1A] to-[#04060A] flex flex-col items-center justify-between p-6 sm:p-10 select-none overflow-y-auto relative">
-      {/* Glow decorativo de fondo */}
-      <div className="absolute w-[600px] h-[600px] bg-indigo-600/15 rounded-full blur-[140px] pointer-events-none -top-40 left-1/2 -translate-x-1/2" />
-
-      {/* Barra superior sutil y balanceada */}
-      <header className="w-full max-w-4xl flex items-center justify-between z-10 shrink-0 h-10">
-        <button
-          type="button"
-          onClick={handleGoLanding}
-          className="text-xs font-mono text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition cursor-pointer group"
-          title="Ver página de presentación"
-        >
-          <span className="w-2 h-2 rounded-full bg-indigo-500/60 group-hover:bg-indigo-400 transition-colors" />
-          <span className="opacity-80 group-hover:opacity-100">Conoce más del proyecto</span>
-        </button>
-
-        {savedBrandName ? (
-          <span className="text-[11px] font-mono px-3 py-1 rounded-full bg-slate-900/90 border border-slate-800 text-emerald-400 flex items-center gap-1.5 shadow-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-            <span>Marca activa: {savedBrandName}</span>
-          </span>
-        ) : (
-          <div className="w-10" />
-        )}
-      </header>
-
+    <div className="w-full flex-1 flex flex-col items-center justify-center p-6 sm:p-10 select-none relative my-auto">
       {/* CONTENIDO PRINCIPAL: 100% CENTRADO VERTICAL Y HORIZONTAL */}
-      <main className="relative z-10 max-w-3xl w-full text-center space-y-7 sm:space-y-8 my-auto py-6 flex flex-col items-center justify-center">
-        {/* Logo & Versión */}
+      <main className="relative z-10 max-w-3xl w-full text-center space-y-7 sm:space-y-8 py-6 flex flex-col items-center justify-center">
+        {/* Logo & Título */}
         <div className="space-y-3 flex flex-col items-center">
           <div className="pb-1">
             <BrandLogo size="xl" />
           </div>
 
-          <div className="inline-flex items-center gap-2">
-            <a
-              href={LINKS.GITHUB_REPO}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-mono transition shadow-sm"
-            >
-              <GithubIcon className="w-3.5 h-3.5" />
-              <span>Open Source en GitHub</span>
-            </a>
-          </div>
-
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            Media Studio{' '}
-            <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 align-middle shadow-sm">
-              {APP_VERSION}
-            </span>
+            Panel de Creación
           </h1>
           <p className="text-slate-400 text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
             Generador de contenido visual en 1080p nativo. Elige cómo deseas comenzar tu publicación hoy:
@@ -172,46 +121,6 @@ export const HomePage: React.FC = () => {
           </button>
         </div>
       </main>
-
-      {/* FOOTER CON MENCIÓN ORGÁNICA A ALERIC.DEV */}
-      <footer className="relative z-10 w-full max-w-4xl flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-800/80 text-xs font-mono text-slate-500 shrink-0">
-        <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
-          <span>Media Studio {APP_VERSION}</span>
-          <span className="text-slate-700 hidden sm:inline">•</span>
-          <div className="flex items-center gap-1.5">
-            <span>Creado por</span>
-            <a
-              href={LINKS.ALERIC}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-indigo-400 hover:text-indigo-300 font-bold inline-flex items-center gap-1 transition underline underline-offset-4"
-            >
-              <span>aleric.dev</span>
-              <ExternalLink className="w-3 h-3" />
-            </a>
-          </div>
-          <span className="text-slate-700 hidden sm:inline">•</span>
-          <a
-            href={LINKS.GITHUB_REPO}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-slate-300 flex items-center gap-1.5 transition"
-          >
-            <GithubIcon className="w-3.5 h-3.5" />
-            <span>GitHub</span>
-          </a>
-        </div>
-
-        <a
-          href={LINKS.KOFI}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-3 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 text-amber-300 flex items-center gap-1.5 transition"
-        >
-          <Coffee className="w-3.5 h-3.5 text-amber-400" />
-          <span>Apoyar en Ko-fi</span>
-        </a>
-      </footer>
     </div>
   );
 };
