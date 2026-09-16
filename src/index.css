@@ -8,6 +8,12 @@
   --category-color: #4F46E5;
 }
 
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+  background-color: #050811;
+}
+
 .font-space-mono { font-family: 'Space Mono', monospace; }
 .font-courier-prime { font-family: 'Courier Prime', monospace; }
 .font-jetbrains { font-family: 'JetBrains Mono', monospace; }

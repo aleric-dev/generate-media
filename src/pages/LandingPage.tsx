@@ -69,7 +69,7 @@ export const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full relative">
+    <div className="w-full relative overflow-x-hidden">
       {/* Loader de transición al navegar al espacio de trabajo */}
       <PageTransitionLoader isLoading={isTransitioning} message="Cargando espacio de trabajo..." />
 
@@ -320,11 +320,11 @@ export const LandingPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {/* ================================================================= */}
           {/* 1. RATIO 9:16 (EL MÁS ALTO - 1080 × 1920 px)                      */}
           {/* ================================================================= */}
-          <div className="p-5 rounded-2xl bg-[#080D1A]/85 border border-slate-800 hover:border-sky-500/40 transition-all duration-200 flex flex-col justify-between space-y-4 group">
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#080D1A]/85 border border-slate-800 hover:border-sky-500/40 transition-all duration-200 flex flex-col justify-between space-y-4 group">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 font-mono text-xs font-bold border border-sky-500/30">
@@ -338,14 +338,14 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
 
-            {/* Escenario de altura fija con base alineada para comparar la altura real */}
-            <div className="w-full h-[300px] bg-slate-950/70 rounded-xl border border-slate-800/80 p-3 flex items-end justify-center relative overflow-hidden">
+            {/* Escenario responsive: en móvil centrado y adaptado, en desktop base alineada a 300px */}
+            <div className="w-full h-[275px] sm:h-[300px] bg-slate-950/70 rounded-xl border border-slate-800/80 p-3 flex items-center sm:items-end justify-center relative overflow-hidden">
               <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:12px_12px]" />
               <div className="absolute bottom-0 inset-x-0 h-px bg-slate-800" />
 
-              {/* Mockup 9:16 Proporcional Real: w:150px, h:267px (Ratio 9/16 exacto) */}
+              {/* Mockup 9:16 Proporcional Real: w:145px, h:258px en móvil / w:150px, h:267px en desktop */}
               <div
-                className="w-[150px] h-[267px] bg-slate-900 rounded-xl border border-sky-500/40 p-2.5 flex flex-col justify-between shadow-xl relative z-10 transition-transform duration-300 group-hover:-translate-y-1"
+                className="w-[145px] h-[258px] sm:w-[150px] sm:h-[267px] bg-slate-900 rounded-xl border border-sky-500/40 p-2.5 flex flex-col justify-between shadow-xl relative z-10 transition-transform duration-300 group-hover:-translate-y-1"
                 style={{
                   boxShadow: '0 15px 30px -10px rgba(0,0,0,0.8), 0 0 20px rgba(56,189,248,0.15)',
                 }}
@@ -359,8 +359,8 @@ export const LandingPage: React.FC = () => {
                 {/* Contenido Vertical */}
                 <div className="space-y-2 my-auto">
                   <div className="h-2 w-14 bg-sky-500/30 rounded" />
-                  <div className="h-3 w-full bg-slate-200 rounded" />
-                  <div className="h-2.5 w-4/5 bg-slate-400 rounded" />
+                  <div className="h-2.5 w-full bg-slate-300/80 rounded" />
+                  <div className="h-2 w-4/5 bg-slate-500 rounded" />
 
                   {/* Bloque de código o kpi simulado */}
                   <div className="p-2 rounded bg-slate-950/90 border border-slate-800 space-y-1 mt-2">
@@ -382,7 +382,7 @@ export const LandingPage: React.FC = () => {
           {/* ================================================================= */}
           {/* 2. RATIO 4:5 (VERTICAL ESTÁNDAR - 1080 × 1350 px)                 */}
           {/* ================================================================= */}
-          <div className="p-5 rounded-2xl bg-[#080D1A]/85 border border-slate-800 hover:border-indigo-500/40 transition-all duration-200 flex flex-col justify-between space-y-4 group">
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#080D1A]/85 border border-slate-800 hover:border-indigo-500/40 transition-all duration-200 flex flex-col justify-between space-y-4 group">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono text-xs font-bold border border-indigo-500/30">
@@ -396,14 +396,14 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
 
-            {/* Escenario de altura fija con base alineada */}
-            <div className="w-full h-[300px] bg-slate-950/70 rounded-xl border border-slate-800/80 p-3 flex items-end justify-center relative overflow-hidden">
+            {/* Escenario responsive: en móvil h-[225px] centrado, en desktop h-[300px] base alineada */}
+            <div className="w-full h-[225px] sm:h-[300px] bg-slate-950/70 rounded-xl border border-slate-800/80 p-3 flex items-center sm:items-end justify-center relative overflow-hidden">
               <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:12px_12px]" />
               <div className="absolute bottom-0 inset-x-0 h-px bg-slate-800" />
 
-              {/* Mockup 4:5 Proporcional Real: w:150px, h:188px (Ratio 4/5 exacto) */}
+              {/* Mockup 4:5 Proporcional Real: w:155px, h:194px en móvil / w:150px, h:188px en desktop */}
               <div
-                className="w-[150px] h-[188px] bg-slate-900 rounded-xl border border-indigo-500/40 p-2.5 flex flex-col justify-between shadow-xl relative z-10 transition-transform duration-300 group-hover:-translate-y-1"
+                className="w-[155px] h-[194px] sm:w-[150px] sm:h-[188px] bg-slate-900 rounded-xl border border-indigo-500/40 p-2.5 flex flex-col justify-between shadow-xl relative z-10 transition-transform duration-300 group-hover:-translate-y-1"
                 style={{
                   boxShadow: '0 15px 30px -10px rgba(0,0,0,0.8), 0 0 20px rgba(99,102,241,0.15)',
                 }}
@@ -416,8 +416,8 @@ export const LandingPage: React.FC = () => {
 
                 {/* Contenido 4:5 */}
                 <div className="space-y-1.5 my-auto">
-                  <div className="h-2.5 w-full bg-slate-200 rounded" />
-                  <div className="h-2 w-3/4 bg-slate-400 rounded" />
+                  <div className="h-2 w-full bg-slate-300/80 rounded" />
+                  <div className="h-1.5 w-3/4 bg-slate-500 rounded" />
 
                   <div className="p-2 rounded-lg bg-slate-950/90 border border-slate-800 flex items-center justify-between mt-1">
                     <span className="text-[10px] font-mono font-bold text-indigo-400">+340%</span>
@@ -437,7 +437,7 @@ export const LandingPage: React.FC = () => {
           {/* ================================================================= */}
           {/* 3. RATIO 1:1 (POST CUADRADO UNIVERSAL - 1080 × 1080 px)           */}
           {/* ================================================================= */}
-          <div className="p-5 rounded-2xl bg-[#080D1A]/85 border border-slate-800 hover:border-emerald-500/40 transition-all duration-200 flex flex-col justify-between space-y-4 group">
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#080D1A]/85 border border-slate-800 hover:border-emerald-500/40 transition-all duration-200 flex flex-col justify-between space-y-4 group">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono text-xs font-bold border border-emerald-500/30">
@@ -451,14 +451,14 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
 
-            {/* Escenario de altura fija con base alineada */}
-            <div className="w-full h-[300px] bg-slate-950/70 rounded-xl border border-slate-800/80 p-3 flex items-end justify-center relative overflow-hidden">
+            {/* Escenario responsive: en móvil h-[195px] centrado, en desktop h-[300px] base alineada */}
+            <div className="w-full h-[195px] sm:h-[300px] bg-slate-950/70 rounded-xl border border-slate-800/80 p-3 flex items-center sm:items-end justify-center relative overflow-hidden">
               <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:12px_12px]" />
               <div className="absolute bottom-0 inset-x-0 h-px bg-slate-800" />
 
-              {/* Mockup 1:1 Proporcional Real: w:150px, h:150px (Cuadrado 1:1 exacto) */}
+              {/* Mockup 1:1 Proporcional Real: w:165px, h:165px en móvil / w:150px, h:150px en desktop */}
               <div
-                className="w-[150px] h-[150px] bg-slate-900 rounded-xl border border-emerald-500/40 p-2.5 flex flex-col justify-between shadow-xl relative z-10 transition-transform duration-300 group-hover:-translate-y-1"
+                className="w-[165px] h-[165px] sm:w-[150px] sm:h-[150px] bg-slate-900 rounded-xl border border-emerald-500/40 p-2.5 flex flex-col justify-between shadow-xl relative z-10 transition-transform duration-300 group-hover:-translate-y-1"
                 style={{
                   boxShadow: '0 15px 30px -10px rgba(0,0,0,0.8), 0 0 20px rgba(16,185,129,0.15)',
                 }}
@@ -471,8 +471,8 @@ export const LandingPage: React.FC = () => {
 
                 {/* Contenido 1:1 */}
                 <div className="space-y-1.5 my-auto">
-                  <div className="h-2.5 w-full bg-slate-200 rounded" />
-                  <div className="h-2 w-3/4 bg-slate-400 rounded" />
+                  <div className="h-2 w-full bg-slate-300/80 rounded" />
+                  <div className="h-1.5 w-3/4 bg-slate-500 rounded" />
                   <div className="h-4 w-full bg-slate-950 rounded border border-slate-800 flex items-center px-1.5">
                     <div className="h-1.5 w-16 bg-emerald-400 rounded" />
                   </div>
@@ -490,7 +490,7 @@ export const LandingPage: React.FC = () => {
           {/* ================================================================= */}
           {/* 4. RATIO 16:9 (PANORÁMICO / EL MÁS BAJO - 1920 × 1080 px)          */}
           {/* ================================================================= */}
-          <div className="p-5 rounded-2xl bg-[#080D1A]/85 border border-slate-800 hover:border-purple-500/40 transition-all duration-200 flex flex-col justify-between space-y-4 group">
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#080D1A]/85 border border-slate-800 hover:border-purple-500/40 transition-all duration-200 flex flex-col justify-between space-y-4 group">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono text-xs font-bold border border-purple-500/30">
@@ -504,14 +504,14 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
 
-            {/* Escenario de altura fija con base alineada */}
-            <div className="w-full h-[300px] bg-slate-950/70 rounded-xl border border-slate-800/80 p-3 flex items-end justify-center relative overflow-hidden">
+            {/* Escenario responsive: en móvil h-[160px] centrado, en desktop h-[300px] base alineada */}
+            <div className="w-full h-[160px] sm:h-[300px] bg-slate-950/70 rounded-xl border border-slate-800/80 p-3 flex items-center sm:items-end justify-center relative overflow-hidden">
               <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#c084fc_1px,transparent_1px)] [background-size:12px_12px]" />
               <div className="absolute bottom-0 inset-x-0 h-px bg-slate-800" />
 
-              {/* Mockup 16:9 Proporcional Real: w:204px, h:115px (Ratio 16/9 exacto) */}
+              {/* Mockup 16:9 Proporcional Real: w:230px, h:130px en móvil / w:204px, h:115px en desktop */}
               <div
-                className="w-[204px] h-[115px] bg-slate-900 rounded-xl border border-purple-500/40 p-2.5 flex flex-col justify-between shadow-xl relative z-10 transition-transform duration-300 group-hover:-translate-y-1"
+                className="w-[230px] h-[130px] sm:w-[204px] sm:h-[115px] bg-slate-900 rounded-xl border border-purple-500/40 p-2.5 flex flex-col justify-between shadow-xl relative z-10 transition-transform duration-300 group-hover:-translate-y-1"
                 style={{
                   boxShadow: '0 15px 30px -10px rgba(0,0,0,0.8), 0 0 20px rgba(192,132,252,0.15)',
                 }}
@@ -525,8 +525,8 @@ export const LandingPage: React.FC = () => {
                 {/* Contenido Horizontal en 2 columnas */}
                 <div className="grid grid-cols-2 gap-2 items-center my-auto">
                   <div className="space-y-1">
-                    <div className="h-2 w-full bg-slate-200 rounded" />
-                    <div className="h-1.5 w-3/4 bg-slate-400 rounded" />
+                    <div className="h-2 w-full bg-slate-300/80 rounded" />
+                    <div className="h-1.5 w-3/4 bg-slate-500 rounded" />
                   </div>
                   <div className="h-6 bg-slate-950 rounded border border-slate-800 flex items-center justify-center">
                     <span className="text-[7px] font-mono text-purple-300 font-bold">1920×1080</span>

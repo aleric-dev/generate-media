@@ -188,12 +188,13 @@ export const LandingShowcasePreview: React.FC<LandingShowcasePreviewProps> = ({
     const updateScale = () => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      const availW = rect.width - 24;
-      const availH = (rect.height || 520) - 24;
+      const padding = window.innerWidth < 640 ? 16 : 24;
+      const availW = rect.width - padding;
+      const availH = (rect.height || rect.width) - padding;
 
       if (availW > 0 && availH > 0) {
         const factor = Math.min(availW / nativeW, availH / nativeH);
-        setScale(Math.max(0.22, Math.min(factor, 0.46)));
+        setScale(Math.max(0.18, Math.min(factor, 0.46)));
       }
     };
 
@@ -234,8 +235,7 @@ export const LandingShowcasePreview: React.FC<LandingShowcasePreviewProps> = ({
       <div className="lg:col-span-7 flex items-center justify-center w-full">
         <div
           ref={containerRef}
-          className="w-full flex items-center justify-center p-4 sm:p-6 bg-slate-950/90 rounded-2xl border border-slate-800/80 relative overflow-hidden"
-          style={{ minHeight: '480px' }}
+          className="w-full aspect-square lg:aspect-auto lg:min-h-[480px] flex items-center justify-center p-2 sm:p-6 bg-slate-950/90 rounded-2xl border border-slate-800/80 relative overflow-hidden"
         >
           {/* Trama de fondo ambiental suave */}
           <div
@@ -278,40 +278,10 @@ export const LandingShowcasePreview: React.FC<LandingShowcasePreviewProps> = ({
       {/* ===================================================================== */}
       {/* COLUMNA DERECHA: OPCIONES (EJEMPLOS) Y BOTÓN CTA (SIN DETALLES/LABELS) */}
       {/* ===================================================================== */}
-      <div className="lg:col-span-5 flex flex-col justify-center space-y-5 text-left">
-        {/* Selector de las 6 Temáticas (sin labels, solo botones de ejemplo) */}
-        <div className="grid grid-cols-2 gap-2.5">
-          {SHOWCASE_THEMES.map((theme) => {
-            const Icon = theme.icon;
-            const isSelected = activeThemeId === theme.id;
-            return (
-              <button
-                key={theme.id}
-                type="button"
-                onClick={() => setActiveThemeId(theme.id)}
-                className={`px-3 py-3 rounded-2xl text-xs font-mono font-bold flex items-center gap-2.5 transition-all cursor-pointer ${
-                  isSelected
-                    ? 'bg-slate-800 text-white border shadow-lg'
-                    : 'bg-slate-900/70 text-slate-400 hover:text-slate-200 border border-slate-800/80 hover:bg-slate-800'
-                }`}
-                style={{
-                  borderColor: isSelected ? activeColorHex : undefined,
-                  boxShadow: isSelected ? `0 0 16px ${activeColorHex}30` : undefined,
-                }}
-              >
-                <Icon
-                  className="w-4 h-4 shrink-0 transition-colors"
-                  style={{ color: isSelected ? activeColorHex : undefined }}
-                />
-                <span className="truncate">{theme.name}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Selector de los 8 Colores (sin labels de texto ni códigos hex) */}
-        <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-          <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+      <div className="lg:col-span-5 flex flex-col justify-center space-y-4 sm:space-y-5 text-left">
+        {/* 1. Selector de los 7 Colores (centrados, una sola fila, sin 1080x1080) */}
+        <div className="flex items-center justify-center p-2.5 sm:p-3 rounded-2xl bg-slate-900/60 border border-slate-800/80 w-full">
+          <div className="flex items-center justify-center gap-2 sm:gap-2.5 flex-nowrap overflow-x-auto py-0.5 max-w-full">
             {SHOWCASE_COLORS.map((c) => {
               const isSelected = activeColorHex === c.hex;
               return (
@@ -321,7 +291,7 @@ export const LandingShowcasePreview: React.FC<LandingShowcasePreviewProps> = ({
                   onClick={() => setActiveColorHex(c.hex)}
                   title={c.name}
                   aria-label={c.name}
-                  className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
+                  className={`w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
                     isSelected
                       ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-950 scale-110 shadow-lg'
                       : 'opacity-70 hover:opacity-100 hover:scale-105'
@@ -336,24 +306,54 @@ export const LandingShowcasePreview: React.FC<LandingShowcasePreviewProps> = ({
               );
             })}
           </div>
-
-          <span className="text-[11px] font-mono font-semibold text-slate-400 shrink-0 ml-2">1080 × 1080</span>
         </div>
 
-        {/* ÚNICO BOTÓN PRINCIPAL CON EL CTA */}
-        <div className="pt-2">
+        {/* 2. Selector de las 6 Temáticas (en móvil: 1 fila con solo iconos; en desktop: grid 2 columnas) */}
+        <div className="flex flex-row items-center justify-center gap-2 overflow-x-auto sm:grid sm:grid-cols-2 sm:gap-2.5 w-full py-0.5">
+          {SHOWCASE_THEMES.map((theme) => {
+            const Icon = theme.icon;
+            const isSelected = activeThemeId === theme.id;
+            return (
+              <button
+                key={theme.id}
+                type="button"
+                onClick={() => setActiveThemeId(theme.id)}
+                title={theme.name}
+                aria-label={theme.name}
+                className={`p-2.5 sm:px-3 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-mono font-bold flex items-center justify-center sm:justify-start gap-2.5 shrink-0 transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-slate-800 text-white border shadow-lg'
+                    : 'bg-slate-900/70 text-slate-400 hover:text-slate-200 border border-slate-800/80 hover:bg-slate-800'
+                }`}
+                style={{
+                  borderColor: isSelected ? activeColorHex : undefined,
+                  boxShadow: isSelected ? `0 0 16px ${activeColorHex}30` : undefined,
+                }}
+              >
+                <Icon
+                  className="w-4 h-4 shrink-0 transition-colors"
+                  style={{ color: isSelected ? activeColorHex : undefined }}
+                />
+                <span className="hidden sm:inline truncate">{theme.name}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 3. Único Botón Principal con el CTA */}
+        <div className="pt-1 sm:pt-2">
           <button
             type="button"
             onClick={handleApplyAndCreate}
-            className="w-full py-4 rounded-2xl text-white font-mono text-sm font-bold transition-all duration-200 shadow-xl flex items-center justify-center gap-2.5 cursor-pointer hover:scale-[1.02] active:scale-[0.99]"
+            className="w-full py-3.5 sm:py-4 rounded-2xl text-white font-mono text-xs sm:text-sm font-bold transition-all duration-200 shadow-xl flex items-center justify-center gap-2.5 cursor-pointer hover:scale-[1.02] active:scale-[0.99]"
             style={{
               backgroundColor: activeColorHex,
               boxShadow: `0 12px 30px -6px ${activeColorHex}50`,
             }}
           >
-            <Sparkles className="w-4 h-4 text-white" />
+            <Sparkles className="w-4 h-4 text-white shrink-0" />
             <span>Comienza a crear con esta plantilla</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 shrink-0" />
           </button>
         </div>
       </div>
