@@ -65,7 +65,7 @@ export const initialPostState: PostState = {
 
   moduleVisible: true,
   moduleSize: 'normal',
-  moduleScale: 1.0,
+  moduleScale: 100,
   moduleFontSize: 14,
   activeModule: 'kpi',
   chartType: 'horizontal-bars',

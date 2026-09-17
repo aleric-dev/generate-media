@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   PostState, 
   PatternType, 
@@ -7,11 +7,11 @@ import {
   LightDirection, 
   ShapeType, 
   ShapePlacement, 
-  ShapeSizeVariant,
-  ShapeStyleVariant,
-  ShapeGeometry,
-  ShapeProximity,
-  BackgroundLayerOrder
+  ShapeSizeVariant, 
+  ShapeStyleVariant, 
+  ShapeGeometry, 
+  ShapeProximity, 
+  BackgroundLayerOrder 
 } from '../../types';
 import { 
   Cpu, 
@@ -21,12 +21,13 @@ import {
   Sun, 
   Upload, 
   Shapes, 
-  Dices,
-  Layers,
-  Eye,
-  Sliders,
-  Palette
+  Dices, 
+  Layers, 
+  Eye, 
+  Sliders, 
+  Palette 
 } from 'lucide-react';
+import { AccordionSection } from './AccordionSection';
 
 interface Step3BackgroundProps {
   state: PostState;
@@ -37,6 +38,12 @@ export const Step3Background: React.FC<Step3BackgroundProps> = ({
   state,
   updateState
 }) => {
+  const [activeSection, setActiveSection] = useState<string | null>('pattern');
+
+  const toggleSection = (key: string) => {
+    setActiveSection((prev) => (prev === key ? null : key));
+  };
+
   const patterns: { id: PatternType; label: string }[] = [
     { id: 'circuit', label: '🖲️ Circuitos Impresos PCB' },
     { id: 'hexagons', label: '⬡ Hexágonos Tech (Grafeno)' },
@@ -103,29 +110,35 @@ export const Step3Background: React.FC<Step3BackgroundProps> = ({
 
   return (
     <div className="space-y-4">
-      
+
       {/* ========================================================================= */}
       {/* 1. PATRÓN DE TEXTURA (CON SWITCH ON/OFF Y OPACIDAD) */}
       {/* ========================================================================= */}
-      <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-          <label className="text-xs text-white font-bold flex items-center gap-1.5">
-            <Cpu className="w-4 h-4 text-indigo-400" /> Patrón / Trama de Fondo
-          </label>
-          <button
-            type="button"
-            onClick={() => updateState({ patternEnabled: state.patternEnabled === false ? true : false })}
-            className={`w-11 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
-              state.patternEnabled !== false ? 'bg-indigo-600' : 'bg-slate-800'
-            }`}
-          >
-            <span
-              className={`w-5 h-5 rounded-full bg-white transition-transform transform ${
-                state.patternEnabled !== false ? 'translate-x-5' : 'translate-x-0'
+      <AccordionSection
+        id="pattern"
+        title="Patrón / Trama de Fondo"
+        icon={Cpu}
+        badge={state.patternEnabled !== false ? state.bgPattern : 'Desactivado'}
+        isOpen={activeSection === 'pattern'}
+        onToggle={() => toggleSection('pattern')}
+      >
+        <div className="space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <span className="text-xs text-slate-300 font-medium">Activar Patrón de Textura:</span>
+            <button
+              type="button"
+              onClick={() => updateState({ patternEnabled: state.patternEnabled === false ? true : false })}
+              className={`w-11 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
+                state.patternEnabled !== false ? 'bg-indigo-600' : 'bg-slate-800'
               }`}
-            />
-          </button>
-        </div>
+            >
+              <span
+                className={`w-5 h-5 rounded-full bg-white transition-transform transform ${
+                  state.patternEnabled !== false ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
 
         {state.patternEnabled !== false && (
           <>
@@ -198,30 +211,37 @@ export const Step3Background: React.FC<Step3BackgroundProps> = ({
             </div>
           </>
         )}
-      </div>
+        </div>
+      </AccordionSection>
 
       {/* ========================================================================= */}
       {/* 2. LUCES AMBIENTALES NEÓN (CON SWITCH ON/OFF E INTENSIDAD) */}
       {/* ========================================================================= */}
-      <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-          <label className="text-xs text-white font-bold flex items-center gap-1.5">
-            <Sun className="w-4 h-4 text-amber-400" /> Luces Ambientales & Neón
-          </label>
-          <button
-            type="button"
-            onClick={() => updateState({ lightsEnabled: state.lightsEnabled === false ? true : false })}
-            className={`w-11 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
-              state.lightsEnabled !== false ? 'bg-amber-500' : 'bg-slate-800'
-            }`}
-          >
-            <span
-              className={`w-5 h-5 rounded-full bg-white transition-transform transform ${
-                state.lightsEnabled !== false ? 'translate-x-5' : 'translate-x-0'
+      <AccordionSection
+        id="lights"
+        title="Luces Ambientales & Neón"
+        icon={Sun}
+        badge={state.lightsEnabled !== false ? state.lightType : 'Desactivado'}
+        isOpen={activeSection === 'lights'}
+        onToggle={() => toggleSection('lights')}
+      >
+        <div className="space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <span className="text-xs text-slate-300 font-medium">Activar Luces Neón:</span>
+            <button
+              type="button"
+              onClick={() => updateState({ lightsEnabled: state.lightsEnabled === false ? true : false })}
+              className={`w-11 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
+                state.lightsEnabled !== false ? 'bg-amber-500' : 'bg-slate-800'
               }`}
-            />
-          </button>
-        </div>
+            >
+              <span
+                className={`w-5 h-5 rounded-full bg-white transition-transform transform ${
+                  state.lightsEnabled !== false ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
 
         {state.lightsEnabled !== false && (
           <>
@@ -278,30 +298,37 @@ export const Step3Background: React.FC<Step3BackgroundProps> = ({
             )}
           </>
         )}
-      </div>
+        </div>
+      </AccordionSection>
 
       {/* ========================================================================= */}
       {/* 3. FORMAS GEOMÉTRICAS (ACABADOS, GEOMETRÍAS, BORDES LIMPIOS) */}
       {/* ========================================================================= */}
-      <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-          <label className="text-xs text-white font-bold flex items-center gap-1.5">
-            <Shapes className="w-4 h-4 text-indigo-400" /> Formas Decorativas en Bordes
-          </label>
-          <button
-            type="button"
-            onClick={() => updateState({ shapesEnabled: state.shapesEnabled === false ? true : false })}
-            className={`w-11 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
-              state.shapesEnabled !== false ? 'bg-indigo-600' : 'bg-slate-800'
-            }`}
-          >
-            <span
-              className={`w-5 h-5 rounded-full bg-white transition-transform transform ${
-                state.shapesEnabled !== false ? 'translate-x-5' : 'translate-x-0'
+      <AccordionSection
+        id="shapes"
+        title="Formas Decorativas en Bordes"
+        icon={Shapes}
+        badge={state.shapesEnabled !== false ? `${state.shapeCount || 6} formas` : 'Desactivado'}
+        isOpen={activeSection === 'shapes'}
+        onToggle={() => toggleSection('shapes')}
+      >
+        <div className="space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <span className="text-xs text-slate-300 font-medium">Activar Formas en Bordes:</span>
+            <button
+              type="button"
+              onClick={() => updateState({ shapesEnabled: state.shapesEnabled === false ? true : false })}
+              className={`w-11 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
+                state.shapesEnabled !== false ? 'bg-indigo-600' : 'bg-slate-800'
               }`}
-            />
-          </button>
-        </div>
+            >
+              <span
+                className={`w-5 h-5 rounded-full bg-white transition-transform transform ${
+                  state.shapesEnabled !== false ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
 
         {state.shapesEnabled !== false && (
           <div className="space-y-3">
@@ -507,7 +534,8 @@ export const Step3Background: React.FC<Step3BackgroundProps> = ({
             </div>
           </div>
         )}
-      </div>
+        </div>
+      </AccordionSection>
 
     </div>
   );

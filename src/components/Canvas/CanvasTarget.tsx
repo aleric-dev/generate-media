@@ -208,16 +208,17 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
   const imgBorderClass = `img-border-${state.imageBorderStyle || 'none'}`;
 
   // Escala interna y tamaño de fuente del módulo
-  const modScale = (state.moduleScale || 100) / 100;
+  const rawScale = state.moduleScale ?? 100;
+  const modScale = rawScale <= 2.5 ? (rawScale === 0 ? 1 : rawScale) : rawScale / 100;
   const modFontSize = state.moduleFontSize || 14;
 
-  let modulePad = 'p-6';
+  let basePadding = 36;
   let moduleMinH = isWidescreen ? 'min-h-[220px]' : 'min-h-[280px]';
   if (state.moduleSize === 'compact') {
-    modulePad = 'p-4';
+    basePadding = 24;
     moduleMinH = isWidescreen ? 'min-h-[160px]' : 'min-h-[200px]';
   } else if (state.moduleSize === 'spacious') {
-    modulePad = 'p-8';
+    basePadding = 52;
     moduleMinH = isWidescreen ? 'min-h-[280px]' : 'min-h-[360px]';
   }
 
@@ -669,9 +670,9 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
     return (
       <div
         id="block-module"
-        className={`${isLight ? 'glass-card-light' : 'glass-card-clean'} rounded-2xl ${modulePad} ${moduleMinH} transition-all w-full flex flex-col justify-center h-auto`}
+        className={`${isLight ? 'glass-card-light' : 'glass-card-clean'} rounded-2xl ${moduleMinH} transition-all w-full flex flex-col justify-center h-auto`}
         style={{
-          padding: `${Math.round(24 * modScale)}px`
+          padding: `${Math.round(basePadding * modScale)}px`
         }}
       >
         {/* ================================================================= */}

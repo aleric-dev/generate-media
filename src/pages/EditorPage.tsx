@@ -1,9 +1,12 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { aspectRatios } from '../constants/templates';
-import { TopNavbar } from '../components/TopNavbar';
 import { ControlPanel } from '../components/Panel/ControlPanel';
 import { CanvasTarget } from '../components/Canvas/CanvasTarget';
+import { FloatingWorkspaceCard } from '../components/FloatingWorkspaceCard';
+import { FloatingBrandBadge } from '../components/FloatingBrandBadge';
+import { AboutStudioModal } from '../components/AboutStudioModal';
+import { SaveConfigModal } from '../components/SaveConfigModal';
 import { ExportSuccessModal } from '../components/ExportSuccessModal';
 import { useStudioStore } from '../store/useStudioStore';
 import * as htmlToImage from 'html-to-image';
@@ -13,6 +16,10 @@ export const EditorPage: React.FC = () => {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
+
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [saveModalOpen, setSaveModalOpen] = useState(false);
+  const [aboutModalOpen, setAboutModalOpen] = useState(false);
 
   const postState = useStudioStore((s) => s.postState);
   const updatePostState = useStudioStore((s) => s.updatePostState);
@@ -36,10 +43,11 @@ export const EditorPage: React.FC = () => {
   const getRealAvailable = useCallback(() => {
     const el = viewportRef.current;
     if (!el) return { w: 900, h: 700 };
-    const padding = window.innerWidth < 640 ? 24 : 48;
+    const paddingX = window.innerWidth < 640 ? 40 : 96;
+    const paddingY = window.innerWidth < 640 ? 40 : 96;
     return {
-      w: Math.max(el.clientWidth - padding, 200),
-      h: Math.max(el.clientHeight - padding, 200),
+      w: Math.max(el.clientWidth - paddingX, 200),
+      h: Math.max(el.clientHeight - paddingY, 200),
     };
   }, []);
 
@@ -172,32 +180,38 @@ export const EditorPage: React.FC = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex overflow-hidden bg-[#070A0F] select-none">
-      {/* 1. COLUMNA IZQUIERDA: PANEL DE CONTROL INTEGRADO */}
-      <aside className="w-[460px] xl:w-[500px] h-full flex-shrink-0 flex flex-col bg-[#0B101B] border-r border-slate-800 shadow-2xl z-20">
+    <div className="h-screen w-screen flex overflow-hidden bg-[#070A0F] select-none relative">
+      {/* 1. COLUMNA IZQUIERDA: PANEL DE CONTROL CON RAIL PERMANENTE Y EXTENSIÓN */}
+      <aside
+        className={`${
+          isSidebarCollapsed ? 'w-[68px]' : 'w-[488px] xl:w-[528px]'
+        } h-full flex-shrink-0 flex flex-col bg-[#070A11] shadow-2xl z-20 transition-all duration-300 ease-in-out`}
+      >
         <ControlPanel
           state={postState}
           updateState={updatePostState}
           onExport={handleExportHQ}
           isExporting={isExporting}
           exportStatus={exportStatus}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          onGoHome={() => navigate('/inicio')}
+          onOpenSaveModal={() => setSaveModalOpen(true)}
         />
       </aside>
 
       {/* 2. COLUMNA DERECHA: ÁREA DE TRABAJO Y PREVISUALIZACIÓN */}
-      <main className="flex-1 min-w-0 h-full flex flex-col p-3 sm:p-4 bg-gradient-to-b from-[#070A0F] to-[#020408] overflow-hidden">
-        {/* TOP NAVBAR */}
-        <TopNavbar
+      <main className="flex-1 min-w-0 h-full flex flex-col p-2 sm:p-4 bg-gradient-to-b from-[#070A0F] to-[#020408] overflow-hidden relative">
+        {/* TARJETA FLOTANTE VERTICAL DE HERRAMIENTAS (RATIOS, ZOOM Y ATAJOS) */}
+        <FloatingWorkspaceCard
           aspectRatio={postState.aspectRatio}
           onAspectRatioChange={(ratio) => updatePostState({ aspectRatio: ratio })}
           zoomMode={postState.zoomMode}
           zoomLevel={postState.zoomLevel}
           onZoomChange={handleZoomChange}
-          onGoHome={() => navigate('/inicio')}
-          onOpenWizard={() => setWizardModalOpen(true)}
         />
 
-        {/* CANVAS VIEWPORT */}
+        {/* CANVAS VIEWPORT CENTRAL */}
         <div
           id="canvas-viewport"
           ref={viewportRef}
@@ -222,17 +236,25 @@ export const EditorPage: React.FC = () => {
           </div>
         </div>
 
-        {/* FOOTER SUTIL */}
-        <div className="mt-2 text-center text-xs font-mono text-slate-500 flex items-center justify-center gap-4 shrink-0">
-          <span>
-            <strong className="text-slate-400">Ctrl + Rueda</strong> para Zoom
-          </span>
-          <span>•</span>
-          <span className="text-emerald-400 font-semibold">Previsualización en Base 1080p Nativa</span>
-        </div>
+        {/* BOTÓN FLOTANTE CON LOGO DE MARCA Y MODAL ABOUT US (REEMPLAZA AL ANTIGUO FOOTER) */}
+        <FloatingBrandBadge onClick={() => setAboutModalOpen(true)} />
       </main>
 
-      {/* Modal de Éxito de Exportación */}
+      {/* MODAL DE GUARDAR CONFIGURACIÓN / PLANTILLA / MARCA / JSON */}
+      <SaveConfigModal
+        isOpen={saveModalOpen}
+        onClose={() => setSaveModalOpen(false)}
+        state={postState}
+        onLoadPreset={(savedState) => updatePostState(savedState)}
+      />
+
+      {/* MODAL ABOUT US / ACERCA DE MEDIA STUDIO */}
+      <AboutStudioModal
+        isOpen={aboutModalOpen}
+        onClose={() => setAboutModalOpen(false)}
+      />
+
+      {/* MODAL DE ÉXITO DE EXPORTACIÓN */}
       <ExportSuccessModal
         isOpen={exportModalOpen}
         onClose={() => setExportModalOpen(false)}

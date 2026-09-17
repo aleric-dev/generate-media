@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   PostState, 
   ModuleType, 
@@ -59,19 +59,12 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
   state,
   updateState
 }) => {
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    header: false,
-    title: true,
-    subtitle: false,
-    intermediate: false,
-    layout: false,
-    module: true,
-    footer: false,
-  });
+  const [activeSection, setActiveSection] = useState<string | null>('header');
 
   const toggleSection = (key: string) => {
-    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+    setActiveSection((prev) => (prev === key ? null : key));
   };
+
   const fontOptions = FONT_OPTIONS;
 
   // Helper para KPIs
@@ -231,7 +224,7 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
         title="Cabecera de Marca (Header)"
         icon={Heading}
         badge={state.companyName || 'Tu Empresa'}
-        isOpen={openSections.header}
+        isOpen={activeSection === 'header'}
         onToggle={() => toggleSection('header')}
       >
         <div className="space-y-3">
@@ -503,7 +496,7 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
         title="Título Principal"
         icon={Type}
         badge={`${state.titleSize} px`}
-        isOpen={openSections.title}
+        isOpen={activeSection === 'title'}
         onToggle={() => toggleSection('title')}
       >
         <div className="space-y-3">
@@ -641,7 +634,7 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
         title="Subtítulo / Bajada Descriptiva"
         icon={Type}
         badge={`${state.subtitleSize} px`}
-        isOpen={openSections.subtitle}
+        isOpen={activeSection === 'subtitle'}
         onToggle={() => toggleSection('subtitle')}
       >
         <div className="space-y-3">
@@ -778,7 +771,7 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
         title="Grupo Intermedio / Badges"
         icon={Tag}
         badge={state.tagsGroupVisible ? 'Visible' : 'Oculto'}
-        isOpen={openSections.intermediate}
+        isOpen={activeSection === 'intermediate'}
         onToggle={() => toggleSection('intermediate')}
       >
         <div className="space-y-3">
@@ -971,7 +964,7 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
         title="Jerarquía y Espaciados Dinámicos"
         icon={Layers}
         badge="Gaps"
-        isOpen={openSections.layout}
+        isOpen={activeSection === 'layout'}
         onToggle={() => toggleSection('layout')}
       >
         <div className="space-y-3">
@@ -1071,7 +1064,7 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
         title="Módulo Central de Contenido"
         icon={Sliders}
         badge={state.moduleVisible ? `Módulo: ${state.activeModule}` : 'Oculto'}
-        isOpen={openSections.module}
+        isOpen={activeSection === 'module'}
         onToggle={() => toggleSection('module')}
       >
         <div className="space-y-3">
@@ -1672,7 +1665,7 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
         title="Pie de Imagen (Footer & CTA)"
         icon={MessageSquare}
         badge={state.handle || '@tuempresa'}
-        isOpen={openSections.footer}
+        isOpen={activeSection === 'footer'}
         onToggle={() => toggleSection('footer')}
       >
         <div className="space-y-3">

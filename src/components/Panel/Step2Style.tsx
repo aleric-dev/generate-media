@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PostState, HeaderShape, FooterShape } from '../../types';
 import { SunMoon, Sun, Moon, Palette, Layout } from 'lucide-react';
+import { AccordionSection } from './AccordionSection';
 
 interface Step2StyleProps {
   state: PostState;
@@ -11,6 +12,12 @@ export const Step2Style: React.FC<Step2StyleProps> = ({
   state,
   updateState
 }) => {
+  const [activeSection, setActiveSection] = useState<string | null>('theme');
+
+  const toggleSection = (key: string) => {
+    setActiveSection((prev) => (prev === key ? null : key));
+  };
+
   const colorPresets = [
     { color: '#4F46E5', name: 'Indigo', cat: 'DESARROLLO A LA MEDIDA' },
     { color: '#0891B2', name: 'Cyan', cat: 'CLOUD & DEVOPS' },
@@ -36,12 +43,16 @@ export const Step2Style: React.FC<Step2StyleProps> = ({
 
   return (
     <div className="space-y-4">
-      
+
       {/* 2.1 Tema Claro / Oscuro del Lienzo */}
-      <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-2.5">
-        <label className="text-xs text-white font-bold flex items-center gap-1.5">
-          <SunMoon className="w-4 h-4 text-indigo-400" /> Modo del Lienzo (Fondo Base)
-        </label>
+      <AccordionSection
+        id="theme"
+        title="Modo del Lienzo (Fondo Base)"
+        icon={SunMoon}
+        badge={state.canvasMode === 'dark' ? 'Modo Oscuro' : 'Modo Claro'}
+        isOpen={activeSection === 'theme'}
+        onToggle={() => toggleSection('theme')}
+      >
         <div className="grid grid-cols-2 gap-2 text-xs font-mono">
           <button
             type="button"
@@ -66,60 +77,63 @@ export const Step2Style: React.FC<Step2StyleProps> = ({
             <Sun className="w-4 h-4 text-amber-400" /> Modo Claro
           </button>
         </div>
-      </div>
+      </AccordionSection>
 
       {/* 2.2 Color Principal de la Vista & Acentos */}
-      <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
-        <div className="flex items-center justify-between">
-          <label className="text-xs text-white font-bold flex items-center gap-1.5">
-            <Palette className="w-4 h-4 text-indigo-400" /> Paleta Corporativa & Acentos
-          </label>
-          <span className="text-xs font-mono font-bold text-indigo-400">{state.currentColor}</span>
-        </div>
+      <AccordionSection
+        id="colors"
+        title="Paleta Corporativa & Acentos"
+        icon={Palette}
+        badge={state.currentColor}
+        isOpen={activeSection === 'colors'}
+        onToggle={() => toggleSection('colors')}
+      >
+        <div className="space-y-3">
+          {/* 20 Presets Corporativos */}
+          <div className="grid grid-cols-5 gap-1.5 text-[9px] font-mono max-h-48 overflow-y-auto pr-1">
+            {colorPresets.map((p) => (
+              <button
+                key={p.color}
+                type="button"
+                onClick={() => updateState({ currentColor: p.color, category: p.cat })}
+                className={`p-1.5 rounded-lg bg-slate-950 border flex flex-col items-center gap-1 transition ${
+                  state.currentColor.toLowerCase() === p.color.toLowerCase()
+                    ? 'border-indigo-400 ring-1 ring-indigo-400'
+                    : 'border-slate-800 hover:border-slate-600'
+                }`}
+                title={`${p.name} - ${p.cat}`}
+              >
+                <span className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: p.color }} />
+                <span className="text-slate-300 truncate w-full text-center">{p.name}</span>
+              </button>
+            ))}
+          </div>
 
-        {/* 20 Presets Corporativos */}
-        <div className="grid grid-cols-5 gap-1.5 text-[9px] font-mono max-h-48 overflow-y-auto pr-1">
-          {colorPresets.map((p) => (
-            <button
-              key={p.color}
-              type="button"
-              onClick={() => updateState({ currentColor: p.color, category: p.cat })}
-              className={`p-1.5 rounded-lg bg-slate-950 border flex flex-col items-center gap-1 transition ${
-                state.currentColor.toLowerCase() === p.color.toLowerCase()
-                  ? 'border-indigo-400 ring-1 ring-indigo-400'
-                  : 'border-slate-800 hover:border-slate-600'
-              }`}
-              title={`${p.name} - ${p.cat}`}
-            >
-              <span className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: p.color }} />
-              <span className="text-slate-300 truncate w-full text-center">{p.name}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Color Hexadecimal Libre */}
-        <div className="pt-1 border-t border-slate-800/80">
-          <label className="text-[11px] text-slate-400 block mb-1">Color Personalizado (Hexadecimal):</label>
-          <div className="flex items-center gap-2.5 bg-slate-950 border border-slate-800 rounded-xl p-2">
-            <input
-              type="color"
-              value={state.currentColor}
-              onChange={(e) => updateState({ currentColor: e.target.value })}
-              className="w-8 h-8 rounded-lg cursor-pointer border-0 bg-transparent p-0"
-            />
-            <span className="text-xs font-mono font-bold text-slate-200">{state.currentColor}</span>
-            <span className="text-[11px] text-slate-500 font-mono pl-2">Tono exacto de tu marca</span>
+          {/* Color Hexadecimal Libre */}
+          <div className="pt-2 border-t border-slate-800/80">
+            <label className="text-[11px] text-slate-400 block mb-1">Color Personalizado (Hexadecimal):</label>
+            <div className="flex items-center gap-2.5 bg-slate-950 border border-slate-800 rounded-xl p-2">
+              <input
+                type="color"
+                value={state.currentColor}
+                onChange={(e) => updateState({ currentColor: e.target.value })}
+                className="w-8 h-8 rounded-lg cursor-pointer border-0 bg-transparent p-0"
+              />
+              <span className="text-xs font-mono font-bold text-slate-200">{state.currentColor}</span>
+              <span className="text-[11px] text-slate-500 font-mono pl-2">Tono exacto de tu marca</span>
+            </div>
           </div>
         </div>
-      </div>
+      </AccordionSection>
 
       {/* 2.3 Estilos de Contenedores: Header y Footer */}
-      <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
-        <div className="flex items-center gap-2 border-b border-slate-800/80 pb-2">
-          <Layout className="w-4 h-4 text-indigo-400" />
-          <span className="text-xs text-white font-bold">Estilo de Contenedores (Header & Footer)</span>
-        </div>
-
+      <AccordionSection
+        id="containers"
+        title="Estilo de Contenedores (Header & Footer)"
+        icon={Layout}
+        isOpen={activeSection === 'containers'}
+        onToggle={() => toggleSection('containers')}
+      >
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="text-[11px] text-slate-300 font-medium mb-1 block">Contenedor Header:</label>
@@ -156,7 +170,7 @@ export const Step2Style: React.FC<Step2StyleProps> = ({
             </select>
           </div>
         </div>
-      </div>
+      </AccordionSection>
 
     </div>
   );
