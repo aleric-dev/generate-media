@@ -74,14 +74,16 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 
           <div className="w-8 h-[1px] bg-slate-800/80 my-0.5" />
 
-          {/* LOS 4 PASOS COMO ICONOS CON INDICADOR LUMINOSO */}
+          {/* LOS 4 PASOS COMO ICONOS CON SECUENCIA POSICIONAL DIRECTA (SIN MEMORIA) */}
           <div className="flex flex-col items-center gap-3 w-full px-2">
             {steps.map((s) => {
               const IconComponent = s.icon;
               const isActive = state.activeStep === s.id;
+              const isSombreado = s.id < state.activeStep;
+
               return (
                 <div key={s.id} className="relative w-full flex items-center justify-center">
-                  {/* Indicador azul flotante en el borde izquierdo (idéntico a la referencia) */}
+                  {/* Indicador azul flotante en el borde izquierdo para el paso activo */}
                   {isActive && (
                     <span className="absolute -left-2 w-1.5 h-7 rounded-r-full bg-indigo-500 shadow-[0_0_12px_#6366F1] animate-pulse" />
                   )}
@@ -96,6 +98,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all ${
                       isActive
                         ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 ring-1 ring-indigo-400'
+                        : isSombreado
+                        ? 'bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 hover:text-white border border-indigo-500/40 shadow-sm shadow-indigo-500/10'
                         : 'bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800/60'
                     }`}
                   >

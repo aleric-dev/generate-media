@@ -489,571 +489,527 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
       </AccordionSection>
 
       {/* ========================================================================= */}
-      {/* 2. TÍTULO PRINCIPAL (TIPOGRAFÍA, ALINEACIÓN, COLOR) */}
+      {/* 2. TEXTOS, MENSAJE & ESPACIADOS (FUSIÓN STREAMLINED DE TÍTULO, SUBTÍTULO, TAGS Y GAPS) */}
       {/* ========================================================================= */}
       <AccordionSection
-        id="title"
-        title="Título Principal"
+        id="typography"
+        title="Textos, Mensaje & Espaciados"
         icon={Type}
-        badge={`${state.titleSize} px`}
-        isOpen={activeSection === 'title'}
-        onToggle={() => toggleSection('title')}
+        badge={`${state.titleSize}px • ${state.titleFont?.replace('font-', '') || 'inter'}`}
+        isOpen={activeSection === 'typography'}
+        onToggle={() => toggleSection('typography')}
       >
-        <div className="space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-            <span className="text-xs text-slate-400 font-semibold">Titular y Tipografía</span>
-            <span className="text-[11px] font-mono text-indigo-400 font-bold">{state.titleSize} px</span>
-          </div>
-
-          <textarea
-            rows={2}
-            value={state.title}
-            onChange={(e) => updateState({ title: e.target.value })}
-            placeholder="Escribe aquí el titular principal..."
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none leading-relaxed"
-          />
-
-        {/* Tipografía Independiente del Título */}
-        <div>
-          <label className="text-[10px] text-slate-400 block mb-1 font-mono">Fuente del Título:</label>
-          <select
-            value={state.titleFont || 'font-inter'}
-            onChange={(e) => updateState({ titleFont: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
-          >
-            {fontOptions.map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.label} ({f.desc})
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Alineación del Título */}
-        <div className="space-y-1 pt-1">
-          <label className="text-[10px] text-slate-400 font-mono block">Alineación del Título:</label>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { id: 'left' as TextAlign, label: 'Izquierda', icon: AlignLeft },
-              { id: 'center' as TextAlign, label: 'Centro', icon: AlignCenter },
-              { id: 'right' as TextAlign, label: 'Derecha', icon: AlignRight },
-            ].map((align) => {
-              const Icon = align.icon;
-              const isSelected = (state.titleAlign || state.textAlign || 'center') === align.id;
-              return (
-                <button
-                  key={align.id}
-                  type="button"
-                  onClick={() => updateState({ titleAlign: align.id, textAlign: align.id })}
-                  className={`py-1.5 px-2 rounded-xl text-xs font-mono font-medium flex items-center justify-center gap-1.5 transition ${
-                    isSelected
-                      ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400'
-                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{align.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Tamaño y Color del Título */}
-        <div className="space-y-2 pt-1">
-          <div>
-            <div className="flex justify-between text-[11px] text-slate-400 mb-1">
-              <span>Tamaño del Título:</span>
-              <span className="font-mono text-indigo-400 font-bold">{state.titleSize} px</span>
+        <div className="space-y-4">
+          
+          {/* 2.1 TÍTULO PRINCIPAL (H1) */}
+          <div className="space-y-3 p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+              <span className="text-xs text-slate-300 font-bold flex items-center gap-1.5">
+                <Type className="w-3.5 h-3.5 text-indigo-400" /> Titular Principal (H1)
+              </span>
+              <span className="text-[10px] font-mono text-indigo-400 font-bold">{state.titleSize} px</span>
             </div>
-            <input
-              type="range"
-              min={24}
-              max={88}
-              value={state.titleSize}
-              onChange={(e) => updateState({ titleSize: Number(e.target.value) })}
-              className="w-full accent-indigo-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
+
+            <textarea
+              rows={2}
+              value={state.title}
+              onChange={(e) => updateState({ title: e.target.value })}
+              placeholder="Escribe aquí el titular principal..."
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none leading-relaxed font-semibold"
             />
-          </div>
 
-          <div>
-            <label className="text-[10px] text-slate-400 block mb-1 font-mono">Color del Título:</label>
-            <div className="grid grid-cols-3 gap-1.5 text-xs font-mono">
-              <button
-                type="button"
-                onClick={() => updateState({ titleColorMode: 'contrast' })}
-                className={`py-1.5 px-2 rounded-lg text-center transition ${
-                  state.titleColorMode === 'contrast'
-                    ? 'bg-indigo-600 text-white font-bold'
-                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                Alto Contraste
-              </button>
-              <button
-                type="button"
-                onClick={() => updateState({ titleColorMode: 'category' })}
-                className={`py-1.5 px-2 rounded-lg text-center transition ${
-                  state.titleColorMode === 'category'
-                    ? 'bg-indigo-600 text-white font-bold'
-                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                Color Acento
-              </button>
-              <button
-                type="button"
-                onClick={() => updateState({ titleColorMode: 'custom' })}
-                className={`py-1.5 px-2 rounded-lg text-center transition flex items-center justify-center gap-1 ${
-                  state.titleColorMode === 'custom'
-                    ? 'bg-indigo-600 text-white font-bold'
-                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                <span>Hex</span>
-                {state.titleColorMode === 'custom' && (
-                  <input
-                    type="color"
-                    value={state.titleCustomColor}
-                    onChange={(e) => updateState({ titleCustomColor: e.target.value })}
-                    className="w-3.5 h-3.5 rounded cursor-pointer border-0 p-0"
-                  />
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      </AccordionSection>
-
-      {/* ========================================================================= */}
-      {/* 3. SUBTÍTULO INDEPENDIENTE (FUENTE, COLOR ALTO CONTRASTE, ALINEACIÓN) */}
-      {/* ========================================================================= */}
-      <AccordionSection
-        id="subtitle"
-        title="Subtítulo / Bajada Descriptiva"
-        icon={Type}
-        badge={`${state.subtitleSize} px`}
-        isOpen={activeSection === 'subtitle'}
-        onToggle={() => toggleSection('subtitle')}
-      >
-        <div className="space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-            <span className="text-xs text-slate-400 font-semibold">Bajada y Contraste</span>
-            <span className="text-[11px] font-mono text-indigo-400 font-bold">{state.subtitleSize} px</span>
-          </div>
-
-        <textarea
-          rows={2}
-          value={state.subtitle}
-          onChange={(e) => updateState({ subtitle: e.target.value })}
-          placeholder="Escribe el subtítulo o argumento secundario..."
-          className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none leading-relaxed"
-        />
-
-        {/* Tipografía Independiente del Subtítulo */}
-        <div>
-          <label className="text-[10px] text-slate-400 block mb-1 font-mono">Fuente del Subtítulo:</label>
-          <select
-            value={state.subtitleFont || state.titleFont || 'font-inter'}
-            onChange={(e) => updateState({ subtitleFont: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
-          >
-            {fontOptions.map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.label} ({f.desc})
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Alineación del Subtítulo */}
-        <div className="space-y-1 pt-1">
-          <label className="text-[10px] text-slate-400 font-mono block">Alineación del Subtítulo:</label>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { id: 'left' as TextAlign, label: 'Izquierda', icon: AlignLeft },
-              { id: 'center' as TextAlign, label: 'Centro', icon: AlignCenter },
-              { id: 'right' as TextAlign, label: 'Derecha', icon: AlignRight },
-            ].map((align) => {
-              const Icon = align.icon;
-              const isSelected = (state.subtitleAlign || state.textAlign || 'center') === align.id;
-              return (
-                <button
-                  key={align.id}
-                  type="button"
-                  onClick={() => updateState({ subtitleAlign: align.id })}
-                  className={`py-1.5 px-2 rounded-xl text-xs font-mono font-medium flex items-center justify-center gap-1.5 transition ${
-                    isSelected
-                      ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400'
-                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{align.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Tamaño y Color del Subtítulo */}
-        <div className="grid grid-cols-2 gap-2 pt-1 text-xs font-mono">
-          <div>
-            <span className="text-[10px] text-slate-400 block mb-1">Color del Subtítulo:</span>
-            <div className="grid grid-cols-3 gap-1">
-              <button
-                type="button"
-                onClick={() => updateState({ subtitleColorMode: 'contrast' })}
-                className={`py-1 px-1 rounded text-[10px] text-center transition ${
-                  (state.subtitleColorMode || 'contrast') === 'contrast'
-                    ? 'bg-indigo-600 text-white font-bold'
-                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                }`}
-                title="Contraste Óptimo (Claro en fondo oscuro, oscuro en fondo claro)"
-              >
-                Óptimo
-              </button>
-              <button
-                type="button"
-                onClick={() => updateState({ subtitleColorMode: 'dimmed' })}
-                className={`py-1 px-1 rounded text-[10px] text-center transition ${
-                  state.subtitleColorMode === 'dimmed'
-                    ? 'bg-indigo-600 text-white font-bold'
-                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                }`}
-                title="Atenuado / Slate Suave"
-              >
-                Suave
-              </button>
-              <button
-                type="button"
-                onClick={() => updateState({ subtitleColorMode: 'custom' })}
-                className={`py-1 px-1 rounded text-[10px] text-center transition flex items-center justify-center gap-0.5 ${
-                  state.subtitleColorMode === 'custom'
-                    ? 'bg-indigo-600 text-white font-bold'
-                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                Hex
-                {state.subtitleColorMode === 'custom' && (
-                  <input
-                    type="color"
-                    value={state.subtitleCustomColor || '#94a3b8'}
-                    onChange={(e) => updateState({ subtitleCustomColor: e.target.value })}
-                    className="w-3 h-3 rounded cursor-pointer border-0 p-0"
-                  />
-                )}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <span className="text-[10px] text-slate-400 block mb-1">Tamaño:</span>
-            <input
-              type="range"
-              min={13}
-              max={38}
-              value={state.subtitleSize}
-              onChange={(e) => updateState({ subtitleSize: Number(e.target.value) })}
-              className="w-full accent-indigo-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer mt-2"
-            />
-          </div>
-        </div>
-      </div>
-      </AccordionSection>
-
-      {/* ========================================================================= */}
-      {/* 4. GRUPO INTERMEDIO OPCIONAL (BADGES, RATING, AUTOR, SOCIAL-PROOF, ETC.) */}
-      {/* ========================================================================= */}
-      <AccordionSection
-        id="intermediate"
-        title="Grupo Intermedio / Badges"
-        icon={Tag}
-        badge={state.tagsGroupVisible ? 'Visible' : 'Oculto'}
-        isOpen={activeSection === 'intermediate'}
-        onToggle={() => toggleSection('intermediate')}
-      >
-        <div className="space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-            <span className="text-xs text-slate-400 font-semibold">Configuración de Elemento</span>
-            <button
-              type="button"
-            onClick={() => updateState({ tagsGroupVisible: state.tagsGroupVisible === false ? true : false })}
-            className={`w-11 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
-              state.tagsGroupVisible !== false ? 'bg-indigo-600' : 'bg-slate-800'
-            }`}
-          >
-            <span
-              className={`w-5 h-5 rounded-full bg-white transition-transform transform ${
-                state.tagsGroupVisible !== false ? 'translate-x-5' : 'translate-x-0'
-              }`}
-            />
-          </button>
-        </div>
-
-        {state.tagsGroupVisible !== false && (
-          <div className="space-y-2.5">
-            {/* Tipo de Elemento Intermedio */}
+            {/* Tipografía Independiente del Título */}
             <div>
-              <span className="text-[10px] text-slate-400 block mb-1 font-mono">Tipo de Elemento Intermedio:</span>
-              <div className="grid grid-cols-3 gap-1.5 text-[10px] font-mono">
+              <label className="text-[10px] text-slate-400 block mb-1 font-mono">Fuente del Título:</label>
+              <select
+                value={state.titleFont || 'font-inter'}
+                onChange={(e) => updateState({ titleFont: e.target.value })}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
+              >
+                {fontOptions.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.label} ({f.desc})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Alineación del Título */}
+            <div className="space-y-1 pt-1">
+              <label className="text-[10px] text-slate-400 font-mono block">Alineación:</label>
+              <div className="grid grid-cols-3 gap-2">
                 {[
-                  { id: 'badges' as TagsGroupType, label: 'Badges Tech', icon: Tag },
-                  { id: 'rating' as TagsGroupType, label: 'Estrellas ★', icon: Star },
-                  { id: 'author' as TagsGroupType, label: 'Ficha Autor', icon: User },
-                  { id: 'social-proof' as TagsGroupType, label: 'Social Proof', icon: CheckCircle2 },
-                  { id: 'status-pill' as TagsGroupType, label: 'Live Status', icon: Radio },
-                ].map((item) => {
-                  const Icon = item.icon;
-                  const isSelected = (state.tagsGroupType || 'badges') === item.id;
+                  { id: 'left' as TextAlign, label: 'Izquierda', icon: AlignLeft },
+                  { id: 'center' as TextAlign, label: 'Centro', icon: AlignCenter },
+                  { id: 'right' as TextAlign, label: 'Derecha', icon: AlignRight },
+                ].map((align) => {
+                  const Icon = align.icon;
+                  const isSelected = (state.titleAlign || state.textAlign || 'center') === align.id;
                   return (
                     <button
-                      key={item.id}
+                      key={align.id}
                       type="button"
-                      onClick={() => updateState({ tagsGroupType: item.id })}
-                      className={`py-1.5 px-1.5 rounded-lg flex items-center justify-center gap-1 transition ${
+                      onClick={() => updateState({ titleAlign: align.id, textAlign: align.id })}
+                      className={`py-1.5 px-2 rounded-xl text-xs font-mono font-medium flex items-center justify-center gap-1.5 transition ${
                         isSelected
-                          ? 'bg-indigo-600 text-white font-bold'
-                          : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                          ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400'
+                          : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900'
                       }`}
                     >
-                      <Icon className="w-3 h-3" />
-                      <span>{item.label}</span>
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{align.label}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Inputs según el Tipo */}
-            {(!state.tagsGroupType || state.tagsGroupType === 'badges') && (
+            {/* Tamaño y Color del Título */}
+            <div className="space-y-2 pt-1">
               <div>
-                <label className="text-[10px] text-slate-400 block mb-1 font-mono">
-                  Badges de Tecnologías (separadas por comas):
-                </label>
+                <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                  <span>Tamaño de Fuente:</span>
+                  <span className="font-mono text-indigo-400 font-bold">{state.titleSize} px</span>
+                </div>
                 <input
-                  type="text"
-                  value={state.tags}
-                  onChange={(e) => updateState({ tags: e.target.value })}
-                  placeholder="Ej: PostgreSQL, Next.js, Cloudflare, Docker"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+                  type="range"
+                  min={24}
+                  max={88}
+                  value={state.titleSize}
+                  onChange={(e) => updateState({ titleSize: Number(e.target.value) })}
+                  className="w-full accent-indigo-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
                 />
               </div>
-            )}
 
-            {state.tagsGroupType === 'rating' && (
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <label className="text-[10px] text-slate-400 block mb-1 font-mono">Puntuación (Score):</label>
-                  <input
-                    type="text"
-                    value={state.ratingScore || '4.9/5.0'}
-                    onChange={(e) => updateState({ ratingScore: e.target.value })}
-                    placeholder="4.9/5.0"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] text-slate-400 block mb-1 font-mono">Texto de Reseña:</label>
-                  <input
-                    type="text"
-                    value={state.ratingCount || '+500 Clientes Satisfechos'}
-                    onChange={(e) => updateState({ ratingCount: e.target.value })}
-                    placeholder="+500 Clientes Satisfechos"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white font-mono"
-                  />
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1 font-mono">Color del Título:</label>
+                <div className="grid grid-cols-3 gap-1.5 text-xs font-mono">
+                  <button
+                    type="button"
+                    onClick={() => updateState({ titleColorMode: 'contrast' })}
+                    className={`py-1.5 px-2 rounded-lg text-center transition ${
+                      state.titleColorMode === 'contrast'
+                        ? 'bg-indigo-600 text-white font-bold'
+                        : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Alto Contraste
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateState({ titleColorMode: 'category' })}
+                    className={`py-1.5 px-2 rounded-lg text-center transition ${
+                      state.titleColorMode === 'category'
+                        ? 'bg-indigo-600 text-white font-bold'
+                        : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Color Acento
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateState({ titleColorMode: 'custom' })}
+                    className={`py-1.5 px-2 rounded-lg text-center transition flex items-center justify-center gap-1 ${
+                      state.titleColorMode === 'custom'
+                        ? 'bg-indigo-600 text-white font-bold'
+                        : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <span>Hex</span>
+                    {state.titleColorMode === 'custom' && (
+                      <input
+                        type="color"
+                        value={state.titleCustomColor}
+                        onChange={(e) => updateState({ titleCustomColor: e.target.value })}
+                        className="w-3.5 h-3.5 rounded cursor-pointer border-0 p-0"
+                      />
+                    )}
+                  </button>
                 </div>
               </div>
-            )}
+            </div>
+          </div>
 
-            {state.tagsGroupType === 'author' && (
-              <div className="space-y-2 text-xs">
-                <div className="grid grid-cols-2 gap-2">
+          {/* 2.2 SUBTÍTULO / BAJADA DESCRIPTIVA */}
+          <div className="space-y-3 p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+              <span className="text-xs text-slate-300 font-bold flex items-center gap-1.5">
+                <Type className="w-3.5 h-3.5 text-indigo-400" /> Subtítulo / Bajada Descriptiva
+              </span>
+              <span className="text-[10px] font-mono text-indigo-400 font-bold">{state.subtitleSize} px</span>
+            </div>
+
+            <textarea
+              rows={2}
+              value={state.subtitle}
+              onChange={(e) => updateState({ subtitle: e.target.value })}
+              placeholder="Escribe el subtítulo o argumento secundario..."
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none leading-relaxed"
+            />
+
+            {/* Tipografía Independiente del Subtítulo */}
+            <div>
+              <label className="text-[10px] text-slate-400 block mb-1 font-mono">Fuente del Subtítulo:</label>
+              <select
+                value={state.subtitleFont || state.titleFont || 'font-inter'}
+                onChange={(e) => updateState({ subtitleFont: e.target.value })}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
+              >
+                {fontOptions.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.label} ({f.desc})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Alineación del Subtítulo */}
+            <div className="space-y-1 pt-1">
+              <label className="text-[10px] text-slate-400 font-mono block">Alineación:</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { id: 'left' as TextAlign, label: 'Izquierda', icon: AlignLeft },
+                  { id: 'center' as TextAlign, label: 'Centro', icon: AlignCenter },
+                  { id: 'right' as TextAlign, label: 'Derecha', icon: AlignRight },
+                ].map((align) => {
+                  const Icon = align.icon;
+                  const isSelected = (state.subtitleAlign || state.textAlign || 'center') === align.id;
+                  return (
+                    <button
+                      key={align.id}
+                      type="button"
+                      onClick={() => updateState({ subtitleAlign: align.id })}
+                      className={`py-1.5 px-2 rounded-xl text-xs font-mono font-medium flex items-center justify-center gap-1.5 transition ${
+                        isSelected
+                          ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400'
+                          : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{align.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Tamaño y Color del Subtítulo */}
+            <div className="grid grid-cols-2 gap-2 pt-1 text-xs font-mono">
+              <div>
+                <span className="text-[10px] text-slate-400 block mb-1">Color:</span>
+                <div className="grid grid-cols-3 gap-1">
+                  <button
+                    type="button"
+                    onClick={() => updateState({ subtitleColorMode: 'contrast' })}
+                    className={`py-1 px-1 rounded text-[10px] text-center transition ${
+                      (state.subtitleColorMode || 'contrast') === 'contrast'
+                        ? 'bg-indigo-600 text-white font-bold'
+                        : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                    title="Contraste Óptimo"
+                  >
+                    Óptimo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateState({ subtitleColorMode: 'dimmed' })}
+                    className={`py-1 px-1 rounded text-[10px] text-center transition ${
+                      state.subtitleColorMode === 'dimmed'
+                        ? 'bg-indigo-600 text-white font-bold'
+                        : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                    title="Atenuado / Secundario"
+                  >
+                    Suave
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateState({ subtitleColorMode: 'category' })}
+                    className={`py-1 px-1 rounded text-[10px] text-center transition ${
+                      state.subtitleColorMode === 'category'
+                        ? 'bg-indigo-600 text-white font-bold'
+                        : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                    title="Color Acento"
+                  >
+                    Acento
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-[10px] text-slate-400 mb-1">
+                  <span>Tamaño:</span>
+                  <span className="text-indigo-400 font-bold">{state.subtitleSize} px</span>
+                </div>
+                <input
+                  type="range"
+                  min={14}
+                  max={44}
+                  value={state.subtitleSize}
+                  onChange={(e) => updateState({ subtitleSize: Number(e.target.value) })}
+                  className="w-full accent-indigo-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 2.3 GRUPO INTERMEDIO / BADGES */}
+          <div className="space-y-3 p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+              <label className="text-xs text-white font-bold flex items-center gap-1.5">
+                <Tag className="w-3.5 h-3.5 text-indigo-400" /> Grupo Intermedio / Badges
+              </label>
+              <button
+                type="button"
+                onClick={() => updateState({ tagsGroupVisible: !state.tagsGroupVisible })}
+                className={`w-11 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
+                  state.tagsGroupVisible ? 'bg-indigo-600' : 'bg-slate-800'
+                }`}
+              >
+                <span
+                  className={`w-5 h-5 rounded-full bg-white transition-transform transform ${
+                    state.tagsGroupVisible ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {state.tagsGroupVisible && (
+              <div className="space-y-3">
+                {/* Selector de Tipo de Grupo Intermedio */}
+                <div>
+                  <label className="text-[10px] text-slate-400 block mb-1 font-mono">Tipo de Elemento:</label>
+                  <div className="grid grid-cols-3 gap-1.5 text-[10px] font-mono">
+                    {[
+                      { id: 'badges' as TagsGroupType, label: 'Badges Tech', icon: Tag },
+                      { id: 'rating' as TagsGroupType, label: 'Estrellas ★', icon: Star },
+                      { id: 'author' as TagsGroupType, label: 'Ficha Autor', icon: User },
+                      { id: 'social-proof' as TagsGroupType, label: 'Social Proof', icon: CheckCircle2 },
+                      { id: 'status-pill' as TagsGroupType, label: 'Live Status', icon: Radio },
+                    ].map((item) => {
+                      const Icon = item.icon;
+                      const isSelected = (state.tagsGroupType || 'badges') === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => updateState({ tagsGroupType: item.id })}
+                          className={`py-1.5 px-1.5 rounded-lg flex items-center justify-center gap-1 transition ${
+                            isSelected
+                              ? 'bg-indigo-600 text-white font-bold'
+                              : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          <Icon className="w-3 h-3" />
+                          <span>{item.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Inputs según el Tipo */}
+                {(!state.tagsGroupType || state.tagsGroupType === 'badges') && (
                   <div>
-                    <label className="text-[10px] text-slate-400 block mb-1 font-mono">Nombre del Autor:</label>
+                    <label className="text-[10px] text-slate-400 block mb-1 font-mono">
+                      Badges de Tecnologías (separadas por comas):
+                    </label>
                     <input
                       type="text"
-                      value={state.authorName || 'Ricardo Zapata'}
-                      onChange={(e) => updateState({ authorName: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white"
+                      value={state.tags}
+                      onChange={(e) => updateState({ tags: e.target.value })}
+                      placeholder="Ej: PostgreSQL, Next.js, Cloudflare, Docker"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
                     />
                   </div>
+                )}
+
+                {state.tagsGroupType === 'rating' && (
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <label className="text-[10px] text-slate-400 block mb-1 font-mono">Puntuación:</label>
+                      <input
+                        type="text"
+                        value={state.ratingScore || '4.9/5.0'}
+                        onChange={(e) => updateState({ ratingScore: e.target.value })}
+                        placeholder="4.9/5.0"
+                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-slate-400 block mb-1 font-mono">Texto Reseña:</label>
+                      <input
+                        type="text"
+                        value={state.ratingCount || '+500 Clientes'}
+                        onChange={(e) => updateState({ ratingCount: e.target.value })}
+                        placeholder="+500 Clientes Satisfechos"
+                        className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white font-mono"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {state.tagsGroupType === 'author' && (
+                  <div className="space-y-2 text-xs">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[10px] text-slate-400 block mb-1 font-mono">Nombre:</label>
+                        <input
+                          type="text"
+                          value={state.authorName || 'Ricardo Zapata'}
+                          onChange={(e) => updateState({ authorName: e.target.value })}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-400 block mb-1 font-mono">Cargo / Rol:</label>
+                        <input
+                          type="text"
+                          value={state.authorRole || 'Lead Software Architect'}
+                          onChange={(e) => updateState({ authorRole: e.target.value })}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-slate-400 font-mono">Avatar de Autor:</span>
+                      <label className="px-2 py-1 rounded bg-indigo-600/20 text-indigo-300 border border-indigo-500/40 text-[10px] font-mono cursor-pointer flex items-center gap-1">
+                        <Upload className="w-3 h-3" /> Subir Foto
+                        <input type="file" accept="image/*" onChange={handleAuthorAvatarUpload} className="hidden" />
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {state.tagsGroupType === 'social-proof' && (
                   <div>
-                    <label className="text-[10px] text-slate-400 block mb-1 font-mono">Cargo / Rol:</label>
+                    <label className="text-[10px] text-slate-400 block mb-1 font-mono">Texto de Prueba Social:</label>
                     <input
                       type="text"
-                      value={state.authorRole || 'Lead Software Architect'}
-                      onChange={(e) => updateState({ authorRole: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white"
+                      value={state.socialProofText || '⚡ Confiado por más de 120 startups en Latam'}
+                      onChange={(e) => updateState({ socialProofText: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white"
                     />
                   </div>
+                )}
+
+                {state.tagsGroupType === 'status-pill' && (
+                  <div>
+                    <label className="text-[10px] text-slate-400 block mb-1 font-mono">Texto de Estado:</label>
+                    <input
+                      type="text"
+                      value={state.statusPillText || 'EN VIVO • NUEVA VERSIÓN'}
+                      onChange={(e) => updateState({ statusPillText: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white font-mono"
+                    />
+                  </div>
+                )}
+
+                {/* Posición del Grupo */}
+                <div className="pt-2 border-t border-slate-800/80">
+                  <label className="text-[10px] text-slate-400 block mb-1 font-mono">Ubicación del Grupo:</label>
+                  <div className="grid grid-cols-2 gap-1.5 text-xs font-mono">
+                    <button
+                      type="button"
+                      onClick={() => updateState({ tagsPosition: 'above-title' })}
+                      className={`py-1.5 px-2 rounded-lg text-center transition ${
+                        state.tagsPosition === 'above-title'
+                          ? 'bg-indigo-600 text-white font-bold'
+                          : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      Arriba del Título
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => updateState({ tagsPosition: 'below-subtitle' })}
+                      className={`py-1.5 px-2 rounded-lg text-center transition ${
+                        (state.tagsPosition || 'below-subtitle') === 'below-subtitle'
+                          ? 'bg-indigo-600 text-white font-bold'
+                          : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      Debajo del Subtítulo
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-slate-400 font-mono">Avatar de Autor:</span>
-                  <label className="px-2 py-1 rounded bg-indigo-600/20 text-indigo-300 border border-indigo-500/40 text-[10px] font-mono cursor-pointer flex items-center gap-1">
-                    <Upload className="w-3 h-3" /> Subir Foto
-                    <input type="file" accept="image/*" onChange={handleAuthorAvatarUpload} className="hidden" />
-                  </label>
-                </div>
               </div>
             )}
+          </div>
 
-            {state.tagsGroupType === 'social-proof' && (
-              <div>
-                <label className="text-[10px] text-slate-400 block mb-1 font-mono">Texto de Prueba Social:</label>
-                <input
-                  type="text"
-                  value={state.socialProofText || '⚡ Confiado por más de 120 startups en Latam'}
-                  onChange={(e) => updateState({ socialProofText: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white"
-                />
+          {/* 2.4 JERARQUÍA & ESPACIADOS (GAPS) */}
+          <div className="space-y-3 p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+              <span className="text-xs text-slate-300 font-bold flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-indigo-400" /> Jerarquía y Espaciados (Gaps)
+              </span>
+            </div>
+
+            {/* Presets de Espaciado Rápido */}
+            <div>
+              <label className="text-[10px] text-slate-400 block mb-1 font-mono">Preset de Separación:</label>
+              <div className="grid grid-cols-3 gap-1.5 text-xs font-mono">
+                <button
+                  type="button"
+                  onClick={() => updateState({ gapTitleSubtitle: 8, gapTextToTags: 12, gapTagsToModule: 16 })}
+                  className="py-1.5 px-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-indigo-500 text-slate-300 hover:text-white transition text-center"
+                >
+                  Compacto
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateState({ gapTitleSubtitle: 12, gapTextToTags: 16, gapTagsToModule: 24 })}
+                  className="py-1.5 px-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-indigo-500 text-slate-300 hover:text-white transition text-center"
+                >
+                  Equilibrado
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateState({ gapTitleSubtitle: 18, gapTextToTags: 24, gapTagsToModule: 36 })}
+                  className="py-1.5 px-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-indigo-500 text-slate-300 hover:text-white transition text-center"
+                >
+                  Amplio
+                </button>
               </div>
-            )}
+            </div>
 
-            {state.tagsGroupType === 'status-pill' && (
-              <div>
-                <label className="text-[10px] text-slate-400 block mb-1 font-mono">Texto de Estado en Vivo:</label>
-                <input
-                  type="text"
-                  value={state.statusPillText || 'EN VIVO • NUEVA VERSIÓN DISPONIBLE'}
-                  onChange={(e) => updateState({ statusPillText: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white font-mono"
-                />
-              </div>
-            )}
-
-            {/* Posición del Grupo: Arriba del Título o Abajo del Subtítulo */}
+            {/* Prioridad de Contenido */}
             <div className="pt-2 border-t border-slate-800/80">
-              <label className="text-[10px] text-slate-400 block mb-1 font-mono">Ubicación del Grupo:</label>
+              <div className="flex justify-between text-[11px] text-slate-300 font-medium mb-1 font-mono">
+                <span>Prioridad de Contenido:</span>
+                <span className="text-indigo-400 text-[10px]">
+                  {state.aspectRatio === '16:9' ? '(2 Columnas)' : '(Arriba / Abajo)'}
+                </span>
+              </div>
               <div className="grid grid-cols-2 gap-1.5 text-xs font-mono">
                 <button
                   type="button"
-                  onClick={() => updateState({ tagsPosition: 'above-title' })}
+                  onClick={() => updateState({ layoutFlow: 'text-first' })}
                   className={`py-1.5 px-2 rounded-lg text-center transition ${
-                    state.tagsPosition === 'above-title'
+                    (state.layoutFlow || 'text-first') === 'text-first'
                       ? 'bg-indigo-600 text-white font-bold'
                       : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
                   }`}
                 >
-                  Arriba del Título
+                  {state.aspectRatio === '16:9' ? 'Texto Izq ➔ Módulo' : 'Texto Arriba'}
                 </button>
                 <button
                   type="button"
-                  onClick={() => updateState({ tagsPosition: 'below-subtitle' })}
+                  onClick={() => updateState({ layoutFlow: 'content-first' })}
                   className={`py-1.5 px-2 rounded-lg text-center transition ${
-                    (state.tagsPosition || 'below-subtitle') === 'below-subtitle'
+                    state.layoutFlow === 'content-first'
                       ? 'bg-indigo-600 text-white font-bold'
                       : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
                   }`}
                 >
-                  Debajo del Subtítulo
+                  {state.aspectRatio === '16:9' ? 'Módulo Izq ➔ Texto' : 'Módulo Arriba'}
                 </button>
               </div>
             </div>
           </div>
-        )}
+
         </div>
-      </AccordionSection>
-
-      {/* ========================================================================= */}
-      {/* 5. DISTRIBUCIÓN DE ESPACIOS & ORDEN JERÁRQUICO (16:9 2 COLUMNAS Y ESPACIADORES) */}
-      {/* ========================================================================= */}
-      <AccordionSection
-        id="layout"
-        title="Jerarquía y Espaciados Dinámicos"
-        icon={Layers}
-        badge="Gaps"
-        isOpen={activeSection === 'layout'}
-        onToggle={() => toggleSection('layout')}
-      >
-        <div className="space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-            <span className="text-xs text-slate-400 font-semibold">Distribución & Separación</span>
-          </div>
-
-        {/* Flujo / Orden de Layout (Texto Primero vs Módulo Primero) */}
-        <div>
-          <div className="flex justify-between text-[11px] text-slate-300 font-medium mb-1">
-            <span>Prioridad de Contenido:</span>
-            <span className="text-indigo-400 text-[10px] font-mono">
-              {state.aspectRatio === '16:9' ? '(2 Columnas Izq / Der)' : '(Arriba / Abajo)'}
-            </span>
-          </div>
-          <div className="grid grid-cols-2 gap-1.5 text-xs font-mono">
-            <button
-              type="button"
-              onClick={() => updateState({ layoutFlow: 'text-first' })}
-              className={`py-1.5 px-2 rounded-lg text-center transition ${
-                (state.layoutFlow || 'text-first') === 'text-first'
-                  ? 'bg-indigo-600 text-white font-bold'
-                  : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-              }`}
-            >
-              {state.aspectRatio === '16:9' ? 'Texto Izq ➔ Módulo Der' : 'Texto Arriba ➔ Módulo Abajo'}
-            </button>
-            <button
-              type="button"
-              onClick={() => updateState({ layoutFlow: 'content-first' })}
-              className={`py-1.5 px-2 rounded-lg text-center transition ${
-                state.layoutFlow === 'content-first'
-                  ? 'bg-indigo-600 text-white font-bold'
-                  : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-              }`}
-            >
-              {state.aspectRatio === '16:9' ? 'Módulo Izq ➔ Texto Der' : 'Módulo Arriba ➔ Texto Abajo'}
-            </button>
-          </div>
-        </div>
-
-        {/* Sliders de Separadores Dinámicos */}
-        <div className="space-y-2 pt-2 border-t border-slate-800/80">
-          <div>
-            <div className="flex justify-between text-[10px] text-slate-400 font-mono mb-1">
-              <span>Espacio Título ➔ Subtítulo:</span>
-              <span className="text-indigo-400 font-bold">{state.gapTitleSubtitle || 12} px</span>
-            </div>
-            <input
-              type="range"
-              min={4}
-              max={40}
-              value={state.gapTitleSubtitle || 12}
-              onChange={(e) => updateState({ gapTitleSubtitle: Number(e.target.value) })}
-              className="w-full accent-indigo-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
-            />
-          </div>
-
-          <div>
-            <div className="flex justify-between text-[10px] text-slate-400 font-mono mb-1">
-              <span>Espacio Textos ➔ Grupo Intermedio:</span>
-              <span className="text-indigo-400 font-bold">{state.gapTextToTags || 16} px</span>
-            </div>
-            <input
-              type="range"
-              min={4}
-              max={60}
-              value={state.gapTextToTags || 16}
-              onChange={(e) => updateState({ gapTextToTags: Number(e.target.value) })}
-              className="w-full accent-indigo-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
-            />
-          </div>
-
-          <div>
-            <div className="flex justify-between text-[10px] text-slate-400 font-mono mb-1">
-              <span>Espacio General ➔ Módulo Central:</span>
-              <span className="text-indigo-400 font-bold">{state.gapTagsToModule || 24} px</span>
-            </div>
-            <input
-              type="range"
-              min={8}
-              max={80}
-              value={state.gapTagsToModule || 24}
-              onChange={(e) => updateState({ gapTagsToModule: Number(e.target.value) })}
-              className="w-full accent-indigo-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
-            />
-          </div>
-        </div>
-      </div>
       </AccordionSection>
 
       {/* ========================================================================= */}
@@ -1061,9 +1017,9 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
       {/* ========================================================================= */}
       <AccordionSection
         id="module"
-        title="Módulo Central de Contenido"
+        title="Módulo Central & Footer"
         icon={Sliders}
-        badge={state.moduleVisible ? `Módulo: ${state.activeModule}` : 'Oculto'}
+        badge={state.moduleVisible ? `Módulo: ${state.activeModule}` : 'Pie & CTA'}
         isOpen={activeSection === 'module'}
         onToggle={() => toggleSection('module')}
       >
@@ -1654,136 +1610,130 @@ export const Step1Content: React.FC<Step1ContentProps> = ({
             </div>
           </div>
         )}
-        </div>
-      </AccordionSection>
 
-      {/* ========================================================================= */}
-      {/* 7. FOOTER (TEXTOS, TAMAÑOS, ORDEN Y ALINEACIÓN) */}
-      {/* ========================================================================= */}
-      <AccordionSection
-        id="footer"
-        title="Pie de Imagen (Footer & CTA)"
-        icon={MessageSquare}
-        badge={state.handle || '@tuempresa'}
-        isOpen={activeSection === 'footer'}
-        onToggle={() => toggleSection('footer')}
-      >
-        <div className="space-y-3">
+        {/* ========================================================================= */}
+        {/* SUB-BLOQUE INTEGRADO: PIE DE IMAGEN (FOOTER & CTA)                        */}
+        {/* ========================================================================= */}
+        <div className="pt-4 border-t border-slate-800/80 space-y-3">
           <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-            <span className="text-xs text-slate-400 font-semibold">Configuración de Pie</span>
-            <span className="text-[11px] font-mono text-indigo-400 font-bold">{state.footerSize || 13} px</span>
-          </div>
-
-        <div>
-          <label className="text-[11px] text-slate-400 block mb-1">Texto del CTA (Llamado a la Acción):</label>
-          <input
-            type="text"
-            value={state.cta}
-            onChange={(e) => updateState({ cta: e.target.value })}
-            placeholder="Ej: Escríbenos y migramos tu operación a la nube."
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
-          />
-        </div>
-
-        <div>
-          <label className="text-[11px] text-slate-400 block mb-1">Handle / Usuario / Sitio Web:</label>
-          <input
-            type="text"
-            value={state.handle}
-            onChange={(e) => updateState({ handle: e.target.value })}
-            placeholder="Ej: tumarca.com o @tuempresa"
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
-          />
-        </div>
-
-        {/* Slider de Tamaño de Tipografía del Footer */}
-        <div>
-          <div className="flex justify-between text-[11px] text-slate-400 mb-1">
-            <span>Tamaño de Texto del Footer:</span>
-            <span className="font-mono text-indigo-400 font-bold">{state.footerSize || 13} px</span>
-          </div>
-          <input
-            type="range"
-            min={10}
-            max={24}
-            value={state.footerSize || 13}
-            onChange={(e) => updateState({ footerSize: Number(e.target.value) })}
-            className="w-full accent-indigo-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
-          />
-        </div>
-
-        {/* Orden y Alineación del CTA y Handle */}
-        <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800/80 text-xs font-mono">
-          <div>
-            <label className="text-[10px] text-slate-400 block mb-1">Orden de Elementos:</label>
-            <div className="grid grid-cols-2 gap-1">
-              <button
-                type="button"
-                onClick={() => updateState({ ctaOrder: 'cta-first' })}
-                className={`py-1.5 px-1.5 rounded-lg text-center transition text-[11px] ${
-                  (state.ctaOrder || 'cta-first') === 'cta-first'
-                    ? 'bg-indigo-600 text-white font-bold shadow-sm'
-                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                CTA ➔ Handle
-              </button>
-              <button
-                type="button"
-                onClick={() => updateState({ ctaOrder: 'handle-first' })}
-                className={`py-1.5 px-1.5 rounded-lg text-center transition text-[11px] ${
-                  state.ctaOrder === 'handle-first'
-                    ? 'bg-indigo-600 text-white font-bold shadow-sm'
-                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                Handle ➔ CTA
-              </button>
-            </div>
+            <span className="text-xs text-slate-300 font-bold flex items-center gap-1.5">
+              <MessageSquare className="w-3.5 h-3.5 text-indigo-400" /> Pie de Imagen (Footer & CTA)
+            </span>
+            <span className="text-[10px] font-mono text-indigo-400 font-bold">{state.footerSize || 13} px</span>
           </div>
 
           <div>
-            <label className="text-[10px] text-slate-400 block mb-1">Alineación en Canvas:</label>
-            <div className="grid grid-cols-3 gap-1">
-              <button
-                type="button"
-                onClick={() => updateState({ ctaAlign: 'left' })}
-                className={`py-1.5 px-1 rounded-lg flex items-center justify-center transition ${
-                  state.ctaAlign === 'left'
-                    ? 'bg-indigo-600 text-white font-bold'
-                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                }`}
-                title="Izquierda"
-              >
-                <AlignLeft className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => updateState({ ctaAlign: 'center' })}
-                className={`py-1.5 px-1 rounded-lg flex items-center justify-center transition ${
-                  (state.ctaAlign || 'center') === 'center'
-                    ? 'bg-indigo-600 text-white font-bold'
-                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                }`}
-                title="Centrado"
-              >
-                <AlignCenter className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => updateState({ ctaAlign: 'between' })}
-                className={`py-1.5 px-1 rounded-lg flex items-center justify-center transition text-[10px] ${
-                  state.ctaAlign === 'between'
-                    ? 'bg-indigo-600 text-white font-bold'
-                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                }`}
-                title="Extremos (Separados)"
-              >
-                Extremos
-              </button>
+            <label className="text-[11px] text-slate-400 block mb-1">Texto del CTA (Llamado a la Acción):</label>
+            <input
+              type="text"
+              value={state.cta}
+              onChange={(e) => updateState({ cta: e.target.value })}
+              placeholder="Ej: Escríbenos y migramos tu operación a la nube."
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label className="text-[11px] text-slate-400 block mb-1">Handle / Usuario / Sitio Web:</label>
+            <input
+              type="text"
+              value={state.handle}
+              onChange={(e) => updateState({ handle: e.target.value })}
+              placeholder="Ej: tumarca.com o @tuempresa"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+            />
+          </div>
+
+          {/* Slider de Tamaño de Tipografía del Footer */}
+          <div>
+            <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+              <span>Tamaño de Texto del Footer:</span>
+              <span className="font-mono text-indigo-400 font-bold">{state.footerSize || 13} px</span>
+            </div>
+            <input
+              type="range"
+              min={10}
+              max={24}
+              value={state.footerSize || 13}
+              onChange={(e) => updateState({ footerSize: Number(e.target.value) })}
+              className="w-full accent-indigo-500 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
+            />
+          </div>
+
+          {/* Orden y Alineación del CTA y Handle */}
+          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800/80 text-xs font-mono">
+            <div>
+              <label className="text-[10px] text-slate-400 block mb-1">Orden de Elementos:</label>
+              <div className="grid grid-cols-2 gap-1">
+                <button
+                  type="button"
+                  onClick={() => updateState({ ctaOrder: 'cta-first' })}
+                  className={`py-1.5 px-1.5 rounded-lg text-center transition text-[11px] ${
+                    (state.ctaOrder || 'cta-first') === 'cta-first'
+                      ? 'bg-indigo-600 text-white font-bold shadow-sm'
+                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  CTA ➔ Handle
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateState({ ctaOrder: 'handle-first' })}
+                  className={`py-1.5 px-1.5 rounded-lg text-center transition text-[11px] ${
+                    state.ctaOrder === 'handle-first'
+                      ? 'bg-indigo-600 text-white font-bold shadow-sm'
+                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Handle ➔ CTA
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[10px] text-slate-400 block mb-1">Alineación en Canvas:</label>
+              <div className="grid grid-cols-3 gap-1">
+                <button
+                  type="button"
+                  onClick={() => updateState({ ctaAlign: 'left' })}
+                  className={`py-1.5 px-1 rounded-lg flex items-center justify-center transition ${
+                    state.ctaAlign === 'left'
+                      ? 'bg-indigo-600 text-white font-bold'
+                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                  title="Izquierda"
+                >
+                  <AlignLeft className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateState({ ctaAlign: 'center' })}
+                  className={`py-1.5 px-1 rounded-lg flex items-center justify-center transition ${
+                    (state.ctaAlign || 'center') === 'center'
+                      ? 'bg-indigo-600 text-white font-bold'
+                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                  title="Centrado"
+                >
+                  <AlignCenter className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateState({ ctaAlign: 'between' })}
+                  className={`py-1.5 px-1 rounded-lg flex items-center justify-center transition text-[10px] ${
+                    state.ctaAlign === 'between'
+                      ? 'bg-indigo-600 text-white font-bold'
+                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                  title="Extremos (Separados)"
+                >
+                  Extremos
+                </button>
+              </div>
             </div>
           </div>
         </div>
+
         </div>
       </AccordionSection>
 

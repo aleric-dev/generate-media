@@ -25,8 +25,8 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
   return (
     <div className="space-y-4">
       
-      {/* 4.1 Aspect Ratio y Resoluciones */}
-      <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
+      {/* 4.1 Aspect Ratio y Resoluciones Compacto */}
+      <div className="p-3.5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-2.5">
         <div className="flex items-center justify-between">
           <label className="text-xs text-white font-bold flex items-center gap-1.5">
             <Maximize2 className="w-4 h-4 text-indigo-400" /> Formato & Dimensiones
@@ -36,7 +36,7 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+        <div className="grid grid-cols-4 gap-1.5 text-xs font-mono">
           {(['4:5', '1:1', '9:16', '16:9'] as AspectRatioKey[]).map((key) => {
             const r = aspectRatios[key];
             const isSelected = state.aspectRatio === key;
@@ -45,21 +45,21 @@ export const Step4Export: React.FC<Step4ExportProps> = ({
                 key={key}
                 type="button"
                 onClick={() => updateState({ aspectRatio: key })}
-                className={`py-2.5 px-3 rounded-xl transition flex flex-col items-center ${
+                className={`py-2 px-1 rounded-xl transition flex flex-col items-center ${
                   isSelected
-                    ? 'bg-indigo-600 text-white font-bold shadow-md'
+                    ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30'
                     : 'bg-slate-950 border border-slate-800 text-slate-300 hover:text-white'
                 }`}
               >
-                <span className="text-sm">{r.label.split(' ')[0]}</span>
-                <span className="text-[11px] font-normal opacity-80">{r.px}</span>
+                <span className="text-xs">{r.label.split(' ')[0]}</span>
+                <span className="text-[10px] font-normal opacity-75">{r.px.split('x')[1]}p</span>
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* 4.2 BOTÓN DE DESCARGA EXCLUSIVO DE ESTE PASO */}
+      {/* 4.2 BOTÓN DE DESCARGA ULTRA HQ (HERO) */}
       <div className="p-4 bg-gradient-to-br from-indigo-950/40 to-slate-950 border border-indigo-500/40 rounded-2xl space-y-3.5 shadow-xl">
         <div className="text-xs font-mono text-indigo-300 font-semibold flex items-center gap-1.5">
           <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Listo para Publicar

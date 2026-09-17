@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { PostState, HeaderShape, FooterShape } from '../../types';
 import { SunMoon, Sun, Moon, Palette, Layout } from 'lucide-react';
 import { AccordionSection } from './AccordionSection';
@@ -12,7 +12,7 @@ export const Step2Style: React.FC<Step2StyleProps> = ({
   state,
   updateState
 }) => {
-  const [activeSection, setActiveSection] = useState<string | null>('theme');
+  const [activeSection, setActiveSection] = useState<string | null>('palette');
 
   const toggleSection = (key: string) => {
     setActiveSection((prev) => (prev === key ? null : key));
@@ -44,93 +44,94 @@ export const Step2Style: React.FC<Step2StyleProps> = ({
   return (
     <div className="space-y-4">
 
-      {/* 2.1 Tema Claro / Oscuro del Lienzo */}
+      {/* 2.1 TEMA DEL LIENZO & PALETA CORPORATIVA (FUSIÓN STREAMLINED) */}
       <AccordionSection
-        id="theme"
-        title="Modo del Lienzo (Fondo Base)"
-        icon={SunMoon}
-        badge={state.canvasMode === 'dark' ? 'Modo Oscuro' : 'Modo Claro'}
-        isOpen={activeSection === 'theme'}
-        onToggle={() => toggleSection('theme')}
-      >
-        <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-          <button
-            type="button"
-            onClick={() => updateState({ canvasMode: 'dark' })}
-            className={`py-2.5 px-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition ${
-              state.canvasMode === 'dark'
-                ? 'bg-slate-950 border-2 border-indigo-500 text-white shadow-lg shadow-indigo-500/10'
-                : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
-            }`}
-          >
-            <Moon className="w-4 h-4 text-indigo-400" /> Modo Oscuro
-          </button>
-          <button
-            type="button"
-            onClick={() => updateState({ canvasMode: 'light' })}
-            className={`py-2.5 px-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition ${
-              state.canvasMode === 'light'
-                ? 'bg-slate-900 border-2 border-amber-500 text-white shadow-lg shadow-amber-500/10'
-                : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-            }`}
-          >
-            <Sun className="w-4 h-4 text-amber-400" /> Modo Claro
-          </button>
-        </div>
-      </AccordionSection>
-
-      {/* 2.2 Color Principal de la Vista & Acentos */}
-      <AccordionSection
-        id="colors"
-        title="Paleta Corporativa & Acentos"
+        id="palette"
+        title="Tema & Paleta Corporativa"
         icon={Palette}
-        badge={state.currentColor}
-        isOpen={activeSection === 'colors'}
-        onToggle={() => toggleSection('colors')}
+        badge={state.canvasMode === 'dark' ? 'Oscuro • ' + state.currentColor : 'Claro • ' + state.currentColor}
+        isOpen={activeSection === 'palette'}
+        onToggle={() => toggleSection('palette')}
       >
-        <div className="space-y-3">
-          {/* 20 Presets Corporativos */}
-          <div className="grid grid-cols-5 gap-1.5 text-[9px] font-mono max-h-48 overflow-y-auto pr-1">
-            {colorPresets.map((p) => (
+        <div className="space-y-3.5">
+          {/* Selector de Modo Oscuro / Claro */}
+          <div>
+            <label className="text-[11px] text-slate-400 font-mono mb-1.5 block">Modo Base del Lienzo:</label>
+            <div className="grid grid-cols-2 gap-2 text-xs font-mono">
               <button
-                key={p.color}
                 type="button"
-                onClick={() => updateState({ currentColor: p.color, category: p.cat })}
-                className={`p-1.5 rounded-lg bg-slate-950 border flex flex-col items-center gap-1 transition ${
-                  state.currentColor.toLowerCase() === p.color.toLowerCase()
-                    ? 'border-indigo-400 ring-1 ring-indigo-400'
-                    : 'border-slate-800 hover:border-slate-600'
+                onClick={() => updateState({ canvasMode: 'dark' })}
+                className={`py-2 px-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition ${
+                  state.canvasMode === 'dark'
+                    ? 'bg-slate-950 border-2 border-indigo-500 text-white shadow-md shadow-indigo-500/10'
+                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
                 }`}
-                title={`${p.name} - ${p.cat}`}
               >
-                <span className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: p.color }} />
-                <span className="text-slate-300 truncate w-full text-center">{p.name}</span>
+                <Moon className="w-4 h-4 text-indigo-400" /> Modo Oscuro
               </button>
-            ))}
+              <button
+                type="button"
+                onClick={() => updateState({ canvasMode: 'light' })}
+                className={`py-2 px-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition ${
+                  state.canvasMode === 'light'
+                    ? 'bg-slate-900 border-2 border-amber-500 text-white shadow-md shadow-amber-500/10'
+                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                <Sun className="w-4 h-4 text-amber-400" /> Modo Claro
+              </button>
+            </div>
+          </div>
+
+          {/* 20 Presets Corporativos */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-[11px] text-slate-400 font-mono">Color de Acento Principal:</label>
+              <span className="text-[10px] font-mono text-indigo-400 font-bold">{state.currentColor}</span>
+            </div>
+            <div className="grid grid-cols-5 gap-1.5 text-[9px] font-mono max-h-48 overflow-y-auto pr-1">
+              {colorPresets.map((p) => (
+                <button
+                  key={p.color}
+                  type="button"
+                  onClick={() => updateState({ currentColor: p.color, category: p.cat })}
+                  className={`p-1.5 rounded-lg bg-slate-950 border flex flex-col items-center gap-1 transition ${
+                    state.currentColor.toLowerCase() === p.color.toLowerCase()
+                      ? 'border-indigo-400 ring-1 ring-indigo-400'
+                      : 'border-slate-800 hover:border-slate-600'
+                  }`}
+                  title={`${p.name} - ${p.cat}`}
+                >
+                  <span className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: p.color }} />
+                  <span className="text-slate-300 truncate w-full text-center">{p.name}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Color Hexadecimal Libre */}
           <div className="pt-2 border-t border-slate-800/80">
-            <label className="text-[11px] text-slate-400 block mb-1">Color Personalizado (Hexadecimal):</label>
+            <label className="text-[11px] text-slate-400 block mb-1 font-mono">Personalizado (Hexadecimal):</label>
             <div className="flex items-center gap-2.5 bg-slate-950 border border-slate-800 rounded-xl p-2">
               <input
                 type="color"
                 value={state.currentColor}
                 onChange={(e) => updateState({ currentColor: e.target.value })}
-                className="w-8 h-8 rounded-lg cursor-pointer border-0 bg-transparent p-0"
+                className="w-7 h-7 rounded-lg cursor-pointer border-0 bg-transparent p-0"
               />
               <span className="text-xs font-mono font-bold text-slate-200">{state.currentColor}</span>
-              <span className="text-[11px] text-slate-500 font-mono pl-2">Tono exacto de tu marca</span>
+              <span className="text-[10px] text-slate-500 font-mono pl-2">Tono exacto corporativo</span>
             </div>
           </div>
         </div>
       </AccordionSection>
 
-      {/* 2.3 Estilos de Contenedores: Header y Footer */}
+      {/* 2.2 ESTILOS DE CONTENEDORES (HEADER & FOOTER) */}
       <AccordionSection
         id="containers"
-        title="Estilo de Contenedores (Header & Footer)"
+        title="Estilo de Contenedores & Cortes"
         icon={Layout}
+        badge={`${state.headerShape || 'line'} / ${state.footerShape || 'line'}`}
         isOpen={activeSection === 'containers'}
         onToggle={() => toggleSection('containers')}
       >
