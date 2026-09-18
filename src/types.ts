@@ -186,6 +186,7 @@ export interface PostTemplate {
   tagsPosition?: TagsPosition;
   tags: string;
   tagsSize?: number;
+  tagsAlign?: TextAlign;
   tagsColorMode?: 'inherit' | 'contrast' | 'custom';
   tagsCustomColor?: string;
   ratingValue?: number;
@@ -324,6 +325,7 @@ export interface PostState {
   tagsPosition: TagsPosition;
   tags: string;
   tagsSize?: number; // 11 a 24 px
+  tagsAlign?: TextAlign;
   tagsColorMode?: 'inherit' | 'contrast' | 'custom';
   tagsCustomColor?: string;
   ratingValue: number;

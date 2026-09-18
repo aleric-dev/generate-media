@@ -196,7 +196,8 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
 
   const titleAlignClass = getAlignClasses(titleAlign);
   const subtitleAlignClass = getAlignClasses(subtitleAlign);
-  const tagsJustifyClass = titleAlign === 'left' ? 'justify-start' : (titleAlign === 'right' ? 'justify-end' : 'justify-center');
+  const tagsAlign = state.tagsAlign || titleAlign || 'center';
+  const tagsJustifyClass = tagsAlign === 'left' ? 'justify-start' : (tagsAlign === 'right' ? 'justify-end' : 'justify-center');
 
   // Badges de Tecnologías
   const tagsList = (state.tags || '').split(',').map(t => t.trim()).filter(Boolean);

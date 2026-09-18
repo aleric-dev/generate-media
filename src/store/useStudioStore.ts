@@ -51,6 +51,7 @@ export const initialPostState: PostState = {
   tagsPosition: 'below-subtitle',
   tags: 'PostgreSQL, Next.js, FastAPI, Roles Seguros',
   tagsSize: 14,
+  tagsAlign: 'center',
   tagsColorMode: 'inherit',
   tagsCustomColor: '#4F46E5',
   ratingValue: 5.0,

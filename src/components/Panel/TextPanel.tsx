@@ -586,25 +586,52 @@ export const TextPanel: React.FC<TextPanelProps> = ({
                 </div>
               </div>
 
-              {/* RANGO DE TAMAÑOS DE TAGS CON SLIDER */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
+              {/* RANGO DE TAMAÑOS Y ALINEACIÓN INDEPENDIENTE DE TAGS */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between mb-1">
                   <label className="text-[10px] text-slate-400 font-mono">
-                    Tamaño de las Tags:
+                    Tamaño & Alineación Independiente:
                   </label>
                   <span className="text-[10px] text-indigo-400 font-mono font-bold">
                     {state.tagsSize || 14} px
                   </span>
                 </div>
-                <input
-                  type="range"
-                  min={11}
-                  max={38}
-                  step={1}
-                  value={state.tagsSize || 14}
-                  onChange={(e) => updateState({ tagsSize: Number(e.target.value) })}
-                  className="w-full accent-indigo-500 bg-slate-900 h-1.5 rounded-lg cursor-pointer"
-                />
+                <div className="flex items-center gap-2.5">
+                  <input
+                    type="range"
+                    min={11}
+                    max={38}
+                    step={1}
+                    value={state.tagsSize || 14}
+                    onChange={(e) => updateState({ tagsSize: Number(e.target.value) })}
+                    className="flex-1 accent-indigo-500 bg-slate-900 h-1.5 rounded-lg cursor-pointer"
+                  />
+                  <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-0.5 shrink-0">
+                    {[
+                      { id: 'left' as TextAlign, icon: AlignLeft, title: 'Alinear a la izquierda' },
+                      { id: 'center' as TextAlign, icon: AlignCenter, title: 'Centrar' },
+                      { id: 'right' as TextAlign, icon: AlignRight, title: 'Alinear a la derecha' },
+                    ].map((align) => {
+                      const Icon = align.icon;
+                      const isSelected = (state.tagsAlign || state.titleAlign || 'center') === align.id;
+                      return (
+                        <button
+                          key={align.id}
+                          type="button"
+                          onClick={() => updateState({ tagsAlign: align.id })}
+                          title={align.title}
+                          className={`p-1.5 rounded-lg transition ${
+                            isSelected
+                              ? 'bg-indigo-600 text-white shadow-sm'
+                              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                          }`}
+                        >
+                          <Icon className="w-3.5 h-3.5" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
 
               {/* Inputs contextuales según el Tipo */}
