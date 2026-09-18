@@ -5,7 +5,7 @@ import { Maximize2, Download, CheckCircle2, Loader2, Sparkles, ExternalLink } fr
 import { GithubIcon } from '../GithubIcon';
 import { LINKS } from '../../constants/links';
 
-interface Step4ExportProps {
+interface ExportPanelProps {
   state: PostState;
   updateState: (partial: Partial<PostState>) => void;
   onExport: () => void;
@@ -13,7 +13,7 @@ interface Step4ExportProps {
   exportStatus: string;
 }
 
-export const Step4Export: React.FC<Step4ExportProps> = ({
+export const ExportPanel: React.FC<ExportPanelProps> = ({
   state,
   updateState,
   onExport,

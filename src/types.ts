@@ -21,7 +21,7 @@ export type BadgeStyle = 'pill' | 'bracket' | 'neon' | 'glass' | 'minimal-dot';
 
 export type BadgeColorMode = 'inherit' | 'contrast' | 'custom';
 
-export type TagsGroupType = 'badges' | 'rating' | 'author' | 'social-proof' | 'status-pill';
+export type TagsGroupType = 'badges' | 'rating' | 'author' | 'social-proof' | 'status-pill' | 'metrics-chip';
 
 export type TagsPosition = 'above-title' | 'below-subtitle';
 
@@ -86,7 +86,7 @@ export type LightDirection =
 export type ShapeType = string;
 export type ShapeStyleVariant = 'glass' | 'flat' | 'pastel' | 'neon-outline' | 'duotone';
 
-export type ShapeGeometry = 'orbs' | 'squares' | 'diamonds' | 'triangles' | 'tech-code' | 'abstract';
+export type ShapeGeometry = 'orbs' | 'squares' | 'diamonds' | 'triangles' | 'tech-code' | 'abstract' | 'rings' | 'crosses' | 'stars';
 
 export type ShapePlacement = 
   | 'corners' 
@@ -185,6 +185,9 @@ export interface PostTemplate {
   tagsGroupType?: TagsGroupType;
   tagsPosition?: TagsPosition;
   tags: string;
+  tagsSize?: number;
+  tagsColorMode?: 'inherit' | 'contrast' | 'custom';
+  tagsCustomColor?: string;
   ratingValue?: number;
   ratingCount?: string;
   authorName?: string;
@@ -200,18 +203,22 @@ export interface PostTemplate {
   moduleSize?: ModuleSize;
   moduleScale?: number;
   moduleFontSize?: number;
+  moduleContainerStyle?: 'glass' | 'solid' | 'neon' | 'bracket' | 'minimal';
   module?: ModuleType;
   chartType?: ChartType;
   code?: string;
   codeFilename?: string;
   codeLanguage?: string;
   codeShowLineNumbers?: boolean;
+  codeFontSize?: number;
   kpis?: KPICard[];
   chartBars?: ChartBar[];
   chatMessages?: ChatMessage[];
   chatContactName?: string;
   chatOnlineStatus?: string;
   contentHighlightText?: string;
+  contentHighlightAuthor?: string;
+  contentHighlightRole?: string;
   contentHighlightStyle?: 'card' | 'quote' | 'banner';
   ctaActionPhrase?: string;
   ctaActionBadge?: string;
@@ -272,7 +279,7 @@ export interface BrandProfile {
 export interface PostState {
   // Navigation & View (3 vistas: Landing, Bienvenida/Menú, Editor)
   viewMode: 'landing' | 'welcome' | 'editor';
-  activeStep: 1 | 2 | 3 | 4;
+  activeStep: 1 | 2 | 3 | 4 | 5;
   panelOpen: boolean;
 
   // Visual Theme
@@ -316,6 +323,9 @@ export interface PostState {
   tagsGroupType: TagsGroupType;
   tagsPosition: TagsPosition;
   tags: string;
+  tagsSize?: number; // 11 a 24 px
+  tagsColorMode?: 'inherit' | 'contrast' | 'custom';
+  tagsCustomColor?: string;
   ratingValue: number;
   ratingCount: string;
   authorName: string;
@@ -323,9 +333,13 @@ export interface PostState {
   authorAvatarUrl: string;
   socialProofText: string;
   statusPillText: string;
+  metricChipHighlight?: string;
+  metricChipLabel?: string;
 
-  // Layout Flow & Gaps Dinámicos
+  // Layout Flow & Orden de Bloques
   layoutFlow: LayoutFlow;
+  contentBlockOrder?: Array<'title' | 'subtitle' | 'tags' | 'module'>;
+  gapContentBlocks?: number;
   gapTitleSubtitle: number; // 4 a 40 px
   gapTextToTags: number; // 8 a 60 px
   gapTagsToModule: number; // 12 a 80 px
@@ -335,18 +349,28 @@ export interface PostState {
   moduleSize: ModuleSize;
   moduleScale: number; // 0.7 a 1.4
   moduleFontSize: number; // 11 a 24 px
+  moduleContainerStyle?: 'glass' | 'solid' | 'neon' | 'bracket' | 'minimal';
+  moduleBgOpacity?: number;
+  moduleBorderRadius?: 'none' | 'md' | 'xl' | '2xl' | 'full';
+  moduleBorderWidth?: number;
+  moduleGlowIntensity?: number;
+  moduleColorMode?: 'accent' | 'mono' | 'custom';
+  moduleCustomColor?: string;
   activeModule: ModuleType;
   chartType?: ChartType;
   code: string;
   codeFilename: string;
   codeLanguage: string;
   codeShowLineNumbers: boolean;
+  codeFontSize?: number;
   kpis: KPICard[];
   chartBars: ChartBar[];
   chatMessages: ChatMessage[];
   chatContactName: string;
   chatOnlineStatus: string;
   contentHighlightText: string;
+  contentHighlightAuthor?: string;
+  contentHighlightRole?: string;
   contentHighlightStyle: 'card' | 'quote' | 'banner';
   ctaActionPhrase?: string;
   ctaActionBadge?: string;
@@ -409,7 +433,6 @@ export interface PostState {
   headerBadgeStyle?: BadgeStyle;
   headerBadgeColorMode?: BadgeColorMode;
   headerBadgeCustomColor?: string;
-  codeFontSize?: number;
   ratingScore?: string;
 
   // Orden de Capas del Fondo

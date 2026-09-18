@@ -68,12 +68,13 @@ generate-media/
 │   │   ├── Canvas/
 │   │   │   └── CanvasTarget.tsx             # Lienzo Ultra HQ (1080p, 9 módulos centrales y capas de fondo)
 │   │   ├── Panel/
-│   │   │   ├── ControlPanel.tsx             # Panel lateral con pestañas 1-4 en la cabecera
+│   │   │   ├── ControlPanel.tsx             # Panel lateral con pestañas 1-5 simétricas
 │   │   │   ├── AccordionSection.tsx         # Acordeones colapsables ergonómicos (sin scroll infinito)
-│   │   │   ├── Step1Content.tsx             # Paso 1: Títulos, 9 módulos centrales, gaps y footer
-│   │   │   ├── Step2Style.tsx               # Paso 2: Branding, logos, fuentes y formas de header/footer
-│   │   │   ├── Step3Background.tsx          # Paso 3: Colores, 11 tramas, viñetas, luces y orden de capas
-│   │   │   └── Step4Export.tsx              # Paso 4: Ratios, formato de imagen y Botón Ultra HQ
+│   │   │   ├── TextPanel.tsx                # Panel 1: Cabecera, Título/Subtítulo, Tags, Orden y Footer
+│   │   │   ├── ModulePanel.tsx              # Panel 2: Los 9 módulos centrales y su personalización
+│   │   │   ├── StylePanel.tsx               # Panel 3: Colores en swatches puros y contenedores
+│   │   │   ├── BackgroundPanel.tsx          # Panel 4: Tramas en cards, luces y motivos
+│   │   │   └── ExportPanel.tsx              # Exportar: Ratios, formato de imagen y Botón Ultra HQ
 │   │   ├── LandingScreen.tsx                # Landing comercial con llamadas a la acción
 │   │   ├── WelcomeScreen.tsx                # Vista de bienvenida (Empezar de 0 vs Plantilla vs Asistente)
 │   │   ├── CreationWizardModal.tsx          # Asistente de creación de 5 pasos con guardado de marca

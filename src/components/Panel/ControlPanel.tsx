@@ -2,6 +2,7 @@ import React from 'react';
 import { PostState } from '../../types';
 import { 
   FileText, 
+  Layers,
   Palette, 
   Sparkles, 
   Download, 
@@ -9,10 +10,11 @@ import {
   BookmarkCheck,
   PanelLeftClose
 } from 'lucide-react';
-import { Step1Content } from './Step1Content';
-import { Step2Style } from './Step2Style';
-import { Step3Background } from './Step3Background';
-import { Step4Export } from './Step4Export';
+import { TextPanel } from './TextPanel';
+import { ModulePanel } from './ModulePanel';
+import { StylePanel } from './StylePanel';
+import { BackgroundPanel } from './BackgroundPanel';
+import { ExportPanel } from './ExportPanel';
 
 interface ControlPanelProps {
   state: PostState;
@@ -37,18 +39,20 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onGoHome,
   onOpenSaveModal,
 }) => {
-  const stepTitles = {
-    1: 'Paso 1: Contenido',
-    2: 'Paso 2: Estilos',
-    3: 'Paso 3: Fondos',
-    4: 'Paso 4: Exportación HQ'
+  const stepTitles: Record<number, string> = {
+    1: 'Paso 1: Textos & Estructura',
+    2: 'Paso 2: Módulo Central (Contenido)',
+    3: 'Paso 3: Estilos & Colores',
+    4: 'Paso 4: Fondos & Tramas',
+    5: 'Exportación Ultra HQ'
   };
 
   const steps = [
-    { id: 1 as const, label: '1. Contenido', icon: FileText, desc: 'Textos, Módulos y Títulos' },
-    { id: 2 as const, label: '2. Estilo', icon: Palette, desc: 'Colores, Logos y Marcos' },
-    { id: 3 as const, label: '3. Fondo', icon: Sparkles, desc: 'Tramas, Luces y Formas' },
-    { id: 4 as const, label: '4. Export', icon: Download, desc: 'Descarga Ultra HQ' },
+    { id: 1 as const, label: '1. Textos', icon: FileText, desc: 'Header, Título, Subtítulo, Tags y Footer' },
+    { id: 2 as const, label: '2. Contenido', icon: Layers, desc: 'Módulo Central (9 Tipos Especializados)' },
+    { id: 3 as const, label: '3. Estilo', icon: Palette, desc: 'Colores, Contenedores y Texto' },
+    { id: 4 as const, label: '4. Fondo', icon: Sparkles, desc: 'Tramas en Cards, Luces y Motivos' },
+    { id: 5 as const, label: 'Exportar', icon: Download, desc: 'Descarga Ultra HQ' },
   ];
 
   return (
@@ -161,28 +165,35 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           {/* Cuerpo del paso activo con scroll vertical */}
           <div className="flex-1 overflow-y-auto p-4">
             {state.activeStep === 1 && (
-              <Step1Content
+              <TextPanel
                 state={state}
                 updateState={updateState}
               />
             )}
 
             {state.activeStep === 2 && (
-              <Step2Style
+              <ModulePanel
                 state={state}
                 updateState={updateState}
               />
             )}
 
             {state.activeStep === 3 && (
-              <Step3Background
+              <StylePanel
                 state={state}
                 updateState={updateState}
               />
             )}
 
             {state.activeStep === 4 && (
-              <Step4Export
+              <BackgroundPanel
+                state={state}
+                updateState={updateState}
+              />
+            )}
+
+            {state.activeStep === 5 && (
+              <ExportPanel
                 state={state}
                 updateState={updateState}
                 onExport={onExport}

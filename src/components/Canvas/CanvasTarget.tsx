@@ -1,4 +1,4 @@
-import React, { forwardRef, useMemo } from 'react';
+import React, { forwardRef, useMemo, useState } from 'react';
 import { PostState, ShapePlacement, ShapeStyleVariant, ShapeGeometry, ShapeProximity, BackgroundLayerOrder } from '../../types';
 import { aspectRatios } from '../../constants/templates';
 import { getBrandIconComponent } from '../../constants/brandIcons';
@@ -160,9 +160,6 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
     return positions;
   }, [state.shapePlacement, state.shapeSeed, state.shapeCount, proximityOffset]);
 
-  // Clase de viñeta para la textura
-  const vignetteClass = `vignette-${state.patternVignette || 'vignette'}`;
-
   // Clase del patrón
   const patternEnabled = state.patternEnabled !== false && state.bgPattern !== 'none';
   const patternClass = !patternEnabled 
@@ -318,7 +315,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
 
     // 3. Logo / Ícono + Texto ('icon-text' o 'custom-text')
     return (
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-5" style={{ gap: '18px' }}>
         {logoImgOrIcon}
         <span
           className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'} tracking-tight`}
@@ -496,6 +493,25 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
     if (state.tagsGroupVisible === false) return null;
     const groupType = state.tagsGroupType || 'badges';
 
+    const tagPx = state.tagsSize || 14;
+    let tagTextColor = isLight ? '#1E293B' : '#F1F5F9';
+    let tagBgColor = isLight ? 'rgba(241, 245, 249, 0.95)' : 'rgba(255, 255, 255, 0.06)';
+    let tagBorderColor = isLight ? 'rgba(203, 213, 225, 0.9)' : 'rgba(255, 255, 255, 0.12)';
+
+    if (state.tagsColorMode === 'contrast') {
+      tagTextColor = isLight ? '#0F172A' : '#FFFFFF';
+      tagBgColor = isLight ? '#FFFFFF' : '#0B101B';
+      tagBorderColor = isLight ? '#94A3B8' : 'rgba(255,255,255,0.25)';
+    } else if (state.tagsColorMode === 'custom' && state.tagsCustomColor) {
+      tagTextColor = state.tagsCustomColor;
+      tagBorderColor = `${state.tagsCustomColor}66`;
+      tagBgColor = `${state.tagsCustomColor}15`;
+    } else if (state.tagsColorMode === 'inherit') {
+      tagTextColor = state.currentColor;
+      tagBorderColor = `${state.currentColor}44`;
+      tagBgColor = `${state.currentColor}12`;
+    }
+
     if (groupType === 'rating') {
       return (
         <div className={`flex items-center gap-2.5 pt-1 ${tagsJustifyClass}`}>
@@ -504,10 +520,10 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
               <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
             ))}
           </div>
-          <span className={`font-mono font-bold text-sm ${isLight ? 'text-slate-900' : 'text-white'}`}>
+          <span className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'}`} style={{ fontSize: `${tagPx}px` }}>
             {state.ratingScore || '4.9/5.0'}
           </span>
-          <span className={`text-xs font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+          <span className={`font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`} style={{ fontSize: `${Math.round(tagPx * 0.85)}px` }}>
             • {state.ratingCount || '+500 Clientes'}
           </span>
         </div>
@@ -518,20 +534,20 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
       return (
         <div className={`flex items-center gap-3 pt-1 ${tagsJustifyClass}`}>
           {state.authorAvatar ? (
-            <img src={state.authorAvatar} alt="Autor" className="w-9 h-9 rounded-full object-cover border border-white/20 shadow-sm" />
+            <img src={state.authorAvatar} alt="Autor" className="rounded-full object-cover border border-white/20 shadow-sm" style={{ width: `${tagPx * 2.5}px`, height: `${tagPx * 2.5}px` }} />
           ) : (
             <div
-              className="w-9 h-9 rounded-full flex items-center justify-center font-mono font-bold text-white text-xs shadow-sm"
-              style={{ backgroundColor: state.currentColor }}
+              className="rounded-full flex items-center justify-center font-mono font-bold text-white shadow-sm"
+              style={{ width: `${tagPx * 2.5}px`, height: `${tagPx * 2.5}px`, fontSize: `${Math.round(tagPx * 0.9)}px`, backgroundColor: state.currentColor }}
             >
               {(state.authorName || 'R').charAt(0).toUpperCase()}
             </div>
           )}
           <div className="flex flex-col text-left">
-            <span className={`font-bold text-xs tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
+            <span className={`font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`} style={{ fontSize: `${tagPx}px` }}>
               {state.authorName || 'Ricardo Zapata'}
             </span>
-            <span className={`text-[11px] font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+            <span className={`font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`} style={{ fontSize: `${Math.round(tagPx * 0.8)}px` }}>
               {state.authorRole || 'Lead Software Architect'}
             </span>
           </div>
@@ -543,14 +559,16 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
       return (
         <div className={`flex items-center gap-2 pt-1 ${tagsJustifyClass}`}>
           <div
-            className="px-4 py-1.5 rounded-full font-mono text-xs font-semibold flex items-center gap-2 shadow-sm"
+            className="rounded-full font-mono font-semibold flex items-center gap-2 shadow-sm"
             style={{
+              fontSize: `${tagPx}px`,
+              padding: `${Math.round(tagPx * 0.35)}px ${Math.round(tagPx * 0.9)}px`,
               backgroundColor: isLight ? 'rgba(255,255,255,0.9)' : 'rgba(15, 23, 42, 0.75)',
               border: `1px solid ${state.currentColor}40`,
               color: isLight ? '#0F172A' : '#F1F5F9'
             }}
           >
-            <CheckCircle2 className="w-3.5 h-3.5" style={{ color: state.currentColor }} />
+            <CheckCircle2 style={{ width: `${tagPx}px`, height: `${tagPx}px`, color: state.currentColor }} />
             <span>{state.socialProofText || '⚡ Confiado por más de 120 startups en Latam'}</span>
           </div>
         </div>
@@ -561,15 +579,49 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
       return (
         <div className={`flex items-center gap-2 pt-1 ${tagsJustifyClass}`}>
           <div
-            className="px-3.5 py-1 rounded-full font-mono text-[11px] font-bold tracking-wider uppercase flex items-center gap-2"
+            className="rounded-full font-mono font-bold tracking-wider uppercase flex items-center gap-2"
             style={{
+              fontSize: `${Math.round(tagPx * 0.85)}px`,
+              padding: `${Math.round(tagPx * 0.3)}px ${Math.round(tagPx * 0.8)}px`,
               backgroundColor: `${state.currentColor}20`,
               border: `1.5px solid ${state.currentColor}`,
               color: isLight ? '#0F172A' : '#FFFFFF'
             }}
           >
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: state.currentColor }} />
+            <span className="rounded-full animate-pulse" style={{ width: `${Math.round(tagPx * 0.55)}px`, height: `${Math.round(tagPx * 0.55)}px`, backgroundColor: state.currentColor }} />
             <span>{state.statusPillText || 'EN VIVO • NUEVA VERSIÓN'}</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (groupType === 'metrics-chip') {
+      return (
+        <div className={`flex items-center gap-2 pt-1 ${tagsJustifyClass}`}>
+          <div
+            className="rounded-xl font-mono flex items-center gap-2.5 shadow-md transition-all"
+            style={{
+              fontSize: `${tagPx}px`,
+              padding: `${Math.round(tagPx * 0.4)}px ${Math.round(tagPx * 0.95)}px`,
+              backgroundColor: isLight ? 'rgba(255,255,255,0.92)' : 'rgba(15, 23, 42, 0.85)',
+              border: `1.5px solid ${state.currentColor}50`,
+              color: isLight ? '#0F172A' : '#F8FAFC'
+            }}
+          >
+            <div
+              className="p-1 rounded-lg flex items-center justify-center shrink-0"
+              style={{ backgroundColor: `${state.currentColor}25` }}
+            >
+              <TrendingUp style={{ width: `${Math.round(tagPx * 1.1)}px`, height: `${Math.round(tagPx * 1.1)}px`, color: state.currentColor }} />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold tracking-tight" style={{ color: state.currentColor }}>
+                {state.metricChipHighlight || '⚡ +450% ARR'}
+              </span>
+              <span className={`text-[0.9em] font-medium ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
+                {state.metricChipLabel || 'Crecimiento Cloud Verificado'}
+              </span>
+            </div>
           </div>
         </div>
       );
@@ -582,11 +634,14 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
         {tagsList.map((tag, idx) => (
           <span
             key={idx}
-            className={`px-4 py-1.5 rounded-lg text-sm font-mono font-medium tracking-wide ${
-              isLight
-                ? 'bg-slate-100/95 border border-slate-300/90 text-slate-800 shadow-xs'
-                : 'bg-white/5 border border-white/10 text-slate-200'
-            }`}
+            className="rounded-lg font-mono font-medium tracking-wide shadow-xs transition-all"
+            style={{
+              fontSize: `${tagPx}px`,
+              color: tagTextColor,
+              backgroundColor: tagBgColor,
+              border: `1px solid ${tagBorderColor}`,
+              padding: `${Math.round(tagPx * 0.3)}px ${Math.round(tagPx * 0.85)}px`
+            }}
           >
             {tag}
           </span>
@@ -595,70 +650,69 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
     );
   };
 
-  // Render del Bloque de Texto (Título, Subtítulo y Grupo Intermedio)
+  // Elementos Modulares Desacoplados para Ordenamiento Libre
+  const renderTitleElement = () => (
+    <div key="block-title" className={titleAlignClass}>
+      <h2
+        className={`font-extrabold leading-[1.22] tracking-tight drop-shadow-lg transition-all ${state.titleFont || 'font-inter'}`}
+        style={{
+          fontSize: `${state.titleSize}px`,
+          color: titleColor
+        }}
+      >
+        {state.title || 'Escribe aquí tu título principal...'}
+      </h2>
+    </div>
+  );
+
+  const renderSubtitleElement = () => {
+    if (!state.subtitle) return null;
+    return (
+      <div key="block-subtitle" className={subtitleAlignClass}>
+        <p
+          className={`font-normal leading-relaxed transition-all ${state.subtitleFont || state.titleFont || 'font-inter'}`}
+          style={{
+            fontSize: `${state.subtitleSize}px`,
+            color: subtitleColor
+          }}
+        >
+          {state.subtitle}
+        </p>
+      </div>
+    );
+  };
+
+  const renderTagsElement = () => {
+    if (!state.tagsGroupVisible) return null;
+    return (
+      <div key="block-tags" className="w-full">
+        {renderIntermediateGroup()}
+      </div>
+    );
+  };
+
+  const renderBlockById = (id: 'title' | 'subtitle' | 'tags' | 'module') => {
+    if (id === 'tags') return renderTagsElement();
+    if (id === 'title') return renderTitleElement();
+    if (id === 'subtitle') return renderSubtitleElement();
+    if (id === 'module') return renderModuleBlock();
+    return null;
+  };
+
+  // Render del Bloque de Texto (para vista en 2 columnas 16:9 o fallback)
   const renderTextBlock = () => {
-    const tagsPos = state.tagsPosition || 'below-subtitle';
-    const gapTitleSub = state.gapTitleSubtitle || 12;
-    const gapTextTags = state.gapTextToTags || 16;
+    const textBlocks = (state.contentBlockOrder || ['tags', 'title', 'subtitle', 'module'])
+      .filter((b) => b !== 'module');
+    const gap = state.gapTitleSubtitle || 12;
 
     return (
-      <div id="block-text" className="flex flex-col w-full">
-        {/* Grupo Intermedio arriba del título si está configurado */}
-        {tagsPos === 'above-title' && (
-          <div style={{ marginBottom: `${gapTextTags}px` }}>
-            {renderIntermediateGroup()}
-          </div>
-        )}
-
-        {/* Subtítulo Arriba si subtitlePos === 'above' */}
-        {state.subtitlePos === 'above' && state.subtitle && (
-          <div className={subtitleAlignClass} style={{ marginBottom: `${gapTitleSub}px` }}>
-            <p
-              className={`font-normal leading-relaxed transition-all ${state.subtitleFont || state.titleFont || 'font-inter'}`}
-              style={{
-                fontSize: `${state.subtitleSize}px`,
-                color: subtitleColor
-              }}
-            >
-              {state.subtitle}
-            </p>
-          </div>
-        )}
-
-        {/* Título Principal */}
-        <div className={titleAlignClass}>
-          <h2
-            className={`font-extrabold leading-[1.22] tracking-tight drop-shadow-lg transition-all ${state.titleFont || 'font-inter'}`}
-            style={{
-              fontSize: `${state.titleSize}px`,
-              color: titleColor
-            }}
-          >
-            {state.title || 'Escribe aquí tu título principal...'}
-          </h2>
-        </div>
-
-        {/* Subtítulo Abajo si subtitlePos === 'below' */}
-        {state.subtitlePos !== 'above' && state.subtitle && (
-          <div className={subtitleAlignClass} style={{ marginTop: `${gapTitleSub}px` }}>
-            <p
-              className={`font-normal leading-relaxed transition-all ${state.subtitleFont || state.titleFont || 'font-inter'}`}
-              style={{
-                fontSize: `${state.subtitleSize}px`,
-                color: subtitleColor
-              }}
-            >
-              {state.subtitle}
-            </p>
-          </div>
-        )}
-
-        {/* Grupo Intermedio abajo del subtítulo si está configurado */}
-        {tagsPos === 'below-subtitle' && (
-          <div style={{ marginTop: `${gapTextTags}px` }}>
-            {renderIntermediateGroup()}
-          </div>
-        )}
+      <div id="block-text" className="flex flex-col w-full" style={{ gap: `${gap}px` }}>
+        {textBlocks.map((blockId) => {
+          if (blockId === 'tags') return renderTagsElement();
+          if (blockId === 'title') return renderTitleElement();
+          if (blockId === 'subtitle') return renderSubtitleElement();
+          return null;
+        })}
       </div>
     );
   };
@@ -667,13 +721,69 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
   const renderModuleBlock = () => {
     if (!state.moduleVisible) return null;
 
+    // Color de acento para el módulo
+    let moduleAccent = state.currentColor;
+    if (state.moduleColorMode === 'mono') {
+      moduleAccent = isLight ? '#475569' : '#94A3B8';
+    } else if (state.moduleColorMode === 'custom' && state.moduleCustomColor) {
+      moduleAccent = state.moduleCustomColor;
+    }
+
+    // Radio de esquinas configurable
+    let roundedClass = 'rounded-2xl';
+    if (state.moduleBorderRadius === 'none') roundedClass = 'rounded-none';
+    else if (state.moduleBorderRadius === 'md') roundedClass = 'rounded-lg';
+    else if (state.moduleBorderRadius === 'xl') roundedClass = 'rounded-xl';
+    else if (state.moduleBorderRadius === '2xl') roundedClass = 'rounded-2xl';
+    else if (state.moduleBorderRadius === 'full') roundedClass = 'rounded-[36px]';
+
+    let moduleContainerClasses = `${roundedClass} ${moduleMinH} transition-all w-full flex flex-col justify-center h-auto`;
+    let moduleContainerStyles: React.CSSProperties = {
+      padding: `${Math.round(basePadding * modScale)}px`
+    };
+
+    const bgOpacity = (state.moduleBgOpacity ?? 85) / 100;
+    const glowIntensity = (state.moduleGlowIntensity ?? 30) / 100;
+
+    if (state.moduleContainerStyle === 'solid') {
+      moduleContainerClasses += isLight ? ' border shadow-xl' : ' border shadow-2xl';
+      moduleContainerStyles.backgroundColor = isLight ? `rgba(255, 255, 255, ${bgOpacity})` : `rgba(15, 23, 42, ${bgOpacity})`;
+      moduleContainerStyles.borderColor = isLight ? 'rgba(226, 232, 240, 0.8)' : 'rgba(30, 41, 59, 0.8)';
+    } else if (state.moduleContainerStyle === 'neon') {
+      moduleContainerClasses += isLight ? ' border-2 shadow-2xl' : ' border-2 shadow-2xl';
+      moduleContainerStyles.backgroundColor = isLight ? `rgba(255, 255, 255, ${bgOpacity})` : `rgba(10, 15, 29, ${bgOpacity})`;
+      moduleContainerStyles.borderColor = moduleAccent;
+      if (glowIntensity > 0) {
+        moduleContainerStyles.boxShadow = `0 0 ${Math.round(40 * glowIntensity)}px ${moduleAccent}55`;
+      }
+    } else if (state.moduleContainerStyle === 'bracket') {
+      moduleContainerClasses += isLight ? ' border-l-4 border-r-4 shadow-xl' : ' border-l-4 border-r-4 shadow-2xl';
+      moduleContainerStyles.backgroundColor = isLight ? `rgba(248, 250, 252, ${bgOpacity})` : `rgba(15, 23, 42, ${bgOpacity})`;
+      moduleContainerStyles.borderLeftColor = moduleAccent;
+      moduleContainerStyles.borderRightColor = moduleAccent;
+    } else if (state.moduleContainerStyle === 'minimal') {
+      moduleContainerClasses += ' bg-transparent';
+    } else {
+      // 'glass' standard
+      moduleContainerClasses += isLight ? ' glass-card-light' : ' glass-card-clean';
+      if (state.moduleBgOpacity !== undefined) {
+        moduleContainerStyles.backgroundColor = isLight ? `rgba(255, 255, 255, ${bgOpacity * 0.9})` : `rgba(15, 23, 42, ${bgOpacity * 0.75})`;
+      }
+    }
+
+    if (state.moduleBorderWidth !== undefined && state.moduleContainerStyle !== 'minimal') {
+      moduleContainerStyles.borderWidth = `${state.moduleBorderWidth}px`;
+    }
+
+    if (glowIntensity > 0 && state.moduleContainerStyle !== 'neon' && state.moduleContainerStyle !== 'minimal') {
+      moduleContainerStyles.boxShadow = `0 10px 30px -10px ${moduleAccent}40`;
+    }
+
     return (
       <div
         id="block-module"
-        className={`${isLight ? 'glass-card-light' : 'glass-card-clean'} rounded-2xl ${moduleMinH} transition-all w-full flex flex-col justify-center h-auto`}
-        style={{
-          padding: `${Math.round(basePadding * modScale)}px`
-        }}
+        className={moduleContainerClasses}
+        style={moduleContainerStyles}
       >
         {/* ================================================================= */}
         {/* 1. MÓDULO DE CÓDIGO (VENTANA IDE TIPO MAC CON SEMÁFORO Y SINTAXIS) */}
@@ -734,10 +844,11 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
             <div className="p-6 font-mono text-sm overflow-x-auto leading-relaxed flex gap-5">
               {state.codeShowLineNumbers !== false && (
                 <div
-                  className="select-none flex flex-col text-right pr-4 border-r font-mono text-xs"
+                  className="select-none flex flex-col text-right pr-4 border-r font-mono"
                   style={{
                     borderColor: isLight ? '#E2E8F0' : 'rgba(255,255,255,0.08)',
-                    color: isLight ? '#94A3B8' : '#475569'
+                    color: isLight ? '#94A3B8' : '#475569',
+                    fontSize: `${state.codeFontSize || 13}px`
                   }}
                 >
                   {(state.code || "system.migrate({ from: 'Excel', to: 'CloudDB' });")
@@ -748,9 +859,10 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                 </div>
               )}
               <pre
-                className="flex-1 whitespace-pre font-mono text-sm leading-relaxed"
+                className="flex-1 whitespace-pre font-mono leading-relaxed"
                 style={{
-                  color: isLight ? '#0F172A' : '#F1F5F9'
+                  color: isLight ? '#0F172A' : '#F1F5F9',
+                  fontSize: `${state.codeFontSize || 13}px`
                 }}
               >
                 {(state.code || "system.migrate({ from: 'Excel', to: 'CloudDB' });")}
@@ -1365,6 +1477,20 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                 >
                   {state.contentHighlightText || 'Automatiza tus flujos operativos y acelera el crecimiento de tu empresa con software a la medida.'}
                 </blockquote>
+                {(state.contentHighlightAuthor || state.contentHighlightRole) && (
+                  <div className="flex items-center gap-2 pt-3 z-10 font-mono">
+                    {state.contentHighlightAuthor && (
+                      <span className={`font-bold text-xs ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                        — {state.contentHighlightAuthor}
+                      </span>
+                    )}
+                    {state.contentHighlightRole && (
+                      <span className="text-[11px] text-slate-400">
+                        • {state.contentHighlightRole}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             ) : state.contentHighlightStyle === 'banner' ? (
               <div
@@ -1392,6 +1518,20 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                 >
                   {state.contentHighlightText || '¿Listo para dar el siguiente salto tecnológico? Escríbenos y transformemos tu visión en código.'}
                 </p>
+                {(state.contentHighlightAuthor || state.contentHighlightRole) && (
+                  <div className="flex items-center gap-2 pt-1 font-mono">
+                    {state.contentHighlightAuthor && (
+                      <span className="font-bold text-xs text-white">
+                        {state.contentHighlightAuthor}
+                      </span>
+                    )}
+                    {state.contentHighlightRole && (
+                      <span className="text-[11px] text-slate-300">
+                        • {state.contentHighlightRole}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
               <div
@@ -1411,6 +1551,20 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                 >
                   {state.contentHighlightText || 'Soluciones tecnológicas escalables diseñadas para operaciones de alto rendimiento.'}
                 </p>
+                {(state.contentHighlightAuthor || state.contentHighlightRole) && (
+                  <div className="flex items-center gap-2 pt-1 font-mono">
+                    {state.contentHighlightAuthor && (
+                      <span className={`font-bold text-xs ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                        — {state.contentHighlightAuthor}
+                      </span>
+                    )}
+                    {state.contentHighlightRole && (
+                      <span className="text-[11px] text-slate-400">
+                        • {state.contentHighlightRole}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1459,13 +1613,10 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
       <div
         key="pattern"
         id="pattern-layer"
-        className={`absolute inset-0 pointer-events-none transition-all ${patternClass} ${vignetteClass}`}
+        className={`absolute inset-0 pointer-events-none transition-all ${patternClass}`}
         style={{
-          opacity: (state.patternOpacity ?? 70) / 100,
-          backgroundSize: `${state.patternScale}px ${state.patternScale}px`,
-          backgroundImage: state.bgPattern === 'custom' && state.customPatternUrl
-            ? `url('${state.customPatternUrl}')`
-            : undefined
+          opacity: 1,
+          backgroundSize: `${state.patternScale || 100}px ${state.patternScale || 100}px`,
         }}
       />
     ) : null;
@@ -1542,6 +1693,61 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
               backdropFilter: 'blur(14px)',
               boxShadow: `0 20px 50px rgba(0,0,0,0.5), inset 0 0 25px rgba(${rgb}, 0.3)`
             };
+          }
+
+          if (geo === 'rings') {
+            return (
+              <div
+                key={idx}
+                style={{
+                  ...styleProps,
+                  width: `${finalSize}px`,
+                  height: `${finalSize}px`,
+                  borderRadius: '9999px',
+                  border: `3px solid rgba(${rgb}, 0.65)`,
+                  boxShadow: `0 0 25px rgba(${rgb}, 0.35), inset 0 0 20px rgba(${rgb}, 0.25)`,
+                  background: `radial-gradient(circle, transparent 55%, rgba(${rgb}, 0.15) 100%)`
+                }}
+              />
+            );
+          }
+
+          if (geo === 'crosses') {
+            return (
+              <div
+                key={idx}
+                className="font-mono font-bold flex items-center justify-center select-none"
+                style={{
+                  ...styleProps,
+                  width: `${finalSize}px`,
+                  height: `${finalSize}px`,
+                  fontSize: `${Math.round(finalSize * 0.65)}px`,
+                  color: `rgba(${rgb}, 0.75)`,
+                  textShadow: `0 0 20px rgba(${rgb}, 0.8)`
+                }}
+              >
+                +
+              </div>
+            );
+          }
+
+          if (geo === 'stars') {
+            return (
+              <div
+                key={idx}
+                className="flex items-center justify-center select-none"
+                style={{
+                  ...styleProps,
+                  width: `${finalSize}px`,
+                  height: `${finalSize}px`,
+                  fontSize: `${Math.round(finalSize * 0.7)}px`,
+                  color: `rgba(${rgb}, 0.85)`,
+                  filter: `drop-shadow(0 0 15px rgba(${rgb}, 0.75))`
+                }}
+              >
+                ✦
+              </div>
+            );
           }
 
           if (geo === 'tech-code') {
@@ -1653,13 +1859,21 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
             }}
           />
 
-          {/* Contenedor Vertical con Prioridad layoutFlow */}
+          {/* Contenedor Vertical Dinámico que respeta contentBlockOrder */}
           <div
             id="content-container"
             className="relative z-10 flex flex-col w-full shrink-0"
-            style={{ gap: `${gapTagsToModule}px` }}
+            style={{ gap: `${state.gapContentBlocks || gapTagsToModule}px` }}
           >
-            {state.layoutFlow === 'content-first' ? (
+            {state.contentBlockOrder ? (
+              state.contentBlockOrder.map((blockId) => {
+                if (blockId === 'tags') return renderTagsElement();
+                if (blockId === 'title') return renderTitleElement();
+                if (blockId === 'subtitle') return renderSubtitleElement();
+                if (blockId === 'module') return renderModuleBlock();
+                return null;
+              })
+            ) : state.layoutFlow === 'content-first' ? (
               <>
                 {renderModuleBlock()}
                 {renderTextBlock()}
