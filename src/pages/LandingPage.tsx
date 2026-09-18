@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { LandingShowcasePreview } from '../components/LandingShowcasePreview';
 import { PageTransitionLoader } from '../components/PageTransitionLoader';
+import { fetchGlobalGenerationCount } from '../utils/generationTracker';
 
 // Preguntas frecuentes (FAQ)
 const FAQ_ITEMS = [
@@ -53,6 +54,16 @@ export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
+  const [totalGenerations, setTotalGenerations] = useState<number | null>(null);
+
+  React.useEffect(() => {
+    fetchGlobalGenerationCount().then((count) => {
+      // Solo se muestra si supera las 100 generaciones
+      if (count !== null && count >= 100) {
+        setTotalGenerations(count);
+      }
+    });
+  }, []);
 
   const handleStartCreating = () => {
     setIsTransitioning(true);
@@ -81,7 +92,11 @@ export const LandingPage: React.FC = () => {
           {/* Badge superior */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 text-xs font-mono font-medium shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-spin" style={{ animationDuration: '8s' }} />
-            <span>Estudio de Generación Visual en 1080p Nativo</span>
+            <span>
+              {totalGenerations !== null && totalGenerations >= 100
+                ? `+${totalGenerations.toLocaleString()} Diseños Exportados en 1080p Nativo`
+                : 'Estudio de Generación Visual en 1080p Nativo'}
+            </span>
           </div>
 
           {/* Titular Principal */}
@@ -123,6 +138,12 @@ export const LandingPage: React.FC = () => {
 
           {/* Badges de Confianza / Micro-Proof */}
           <div className="pt-3 flex flex-wrap items-center justify-center gap-4 sm:gap-7 text-xs font-mono text-slate-400">
+            {totalGenerations !== null && totalGenerations >= 100 && (
+              <div className="flex items-center gap-1.5 text-emerald-300 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/25 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span>+{totalGenerations.toLocaleString()} posts generados</span>
+              </div>
+            )}
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>100% Gratis & Sin Registro</span>

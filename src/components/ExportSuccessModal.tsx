@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Download, Copy, Coffee, X, Sparkles, ExternalLink } from 'lucide-react';
-import { GithubIcon } from './GithubIcon';
+import { 
+  Check, 
+  Download, 
+  Copy, 
+  Coffee, 
+  X, 
+  Sparkles, 
+  ExternalLink, 
+  Home,
+  BookmarkCheck,
+  ArrowRight
+} from 'lucide-react';
 import { LINKS } from '../constants/links';
 
 interface ExportSuccessModalProps {
@@ -9,6 +19,10 @@ interface ExportSuccessModalProps {
   dataUrl: string | null;
   filename: string;
   resolution: string;
+  postTitle?: string;
+  postTags?: string;
+  onSaveProject?: () => void;
+  onGoHome?: () => void;
 }
 
 export const ExportSuccessModal: React.FC<ExportSuccessModalProps> = ({
@@ -17,6 +31,8 @@ export const ExportSuccessModal: React.FC<ExportSuccessModalProps> = ({
   dataUrl,
   filename,
   resolution,
+  onSaveProject,
+  onGoHome,
 }) => {
   const [copied, setCopied] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
@@ -48,7 +64,7 @@ export const ExportSuccessModal: React.FC<ExportSuccessModalProps> = ({
     setTimeout(() => setDownloaded(false), 3000);
   };
 
-  // Copiar imagen PNG al portapapeles
+  // Copiar imagen PNG al portapapeles del sistema
   const handleCopyToClipboard = async () => {
     try {
       const res = await fetch(dataUrl);
@@ -64,24 +80,24 @@ export const ExportSuccessModal: React.FC<ExportSuccessModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 select-none animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 select-none animate-fadeIn">
       {/* Backdrop con desenfoque profundo */}
       <div
         className="absolute inset-0 bg-slate-950/85 backdrop-blur-md transition-opacity"
         onClick={onClose}
       />
 
-      {/* Contenedor del Modal */}
-      <div className="relative w-full max-w-lg bg-[#0B101B] border border-slate-800 rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col z-10 animate-scaleUp">
+      {/* Contenedor del Modal: 2 Columnas (Contenido a la Izquierda, Imagen a la Derecha) */}
+      <div className="relative w-full max-w-4xl xl:max-w-5xl max-h-[92vh] bg-[#0B101B] border border-slate-800 rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col z-10 animate-scaleUp">
         
         {/* Cabecera del Modal */}
-        <div className="p-4 sm:p-5 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/50">
-          <div className="flex items-center gap-2.5">
+        <div className="p-4 sm:px-6 border-b border-slate-800/80 flex items-center justify-between bg-slate-900/60 shrink-0">
+          <div className="flex items-center gap-3">
             <span className="w-8 h-8 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
               <Check className="w-4 h-4" />
             </span>
             <div>
-              <h3 className="text-sm font-bold text-white tracking-tight flex items-center gap-1.5">
+              <h3 className="text-sm sm:text-base font-bold text-white tracking-tight flex items-center gap-1.5">
                 ¡Tu imagen está lista!
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               </h3>
@@ -101,92 +117,95 @@ export const ExportSuccessModal: React.FC<ExportSuccessModalProps> = ({
           </button>
         </div>
 
-        {/* Cuerpo: Miniatura y Acciones */}
-        <div className="p-5 space-y-4 overflow-y-auto max-h-[80vh]">
+        {/* Cuerpo del Modal: 2 Columnas (Izquierda: Acciones Reales | Derecha: Imagen Grande) */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 grid grid-cols-1 md:grid-cols-12 gap-5 sm:gap-6 items-start">
           
-          {/* Miniatura con marco elegante */}
-          <div className="relative w-full max-h-56 rounded-2xl overflow-hidden bg-slate-950 border border-slate-800/80 flex items-center justify-center p-2 shadow-inner group">
-            <img
-              src={dataUrl}
-              alt="Generated Post"
-              className="max-h-52 w-auto object-contain rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-[1.02]"
-            />
-          </div>
+          {/* ========================================================================= */}
+          {/* COLUMNA IZQUIERDA: ACCIONES REALES DE IMAGEN & APOYO                      */}
+          {/* ========================================================================= */}
+          <div className="md:col-span-6 space-y-4">
+            
+            {/* Botones de Acción de Imagen Reales: Descargar y Copiar */}
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={handleDownload}
+                  className="py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-mono text-xs font-bold flex items-center justify-center gap-2 transition shadow-lg shadow-indigo-600/25 active:scale-[0.98]"
+                >
+                  {downloaded ? (
+                    <>
+                      <Check className="w-4 h-4 text-emerald-300" />
+                      <span>¡Descargada!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4" />
+                      <span>Descargar PNG</span>
+                    </>
+                  )}
+                </button>
 
-          {/* Botones de Acción Inmediata: Descargar y Copiar */}
-          <div className="grid grid-cols-2 gap-2.5">
-            <button
-              type="button"
-              onClick={handleDownload}
-              className="py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-mono text-xs font-bold flex items-center justify-center gap-2 transition shadow-lg shadow-indigo-600/20 active:scale-[0.98]"
-            >
-              {downloaded ? (
-                <>
-                  <Check className="w-4 h-4 text-emerald-300" />
-                  <span>¡Descargada!</span>
-                </>
-              ) : (
-                <>
-                  <Download className="w-4 h-4" />
-                  <span>Descargar PNG</span>
-                </>
-              )}
-            </button>
+                <button
+                  type="button"
+                  onClick={handleCopyToClipboard}
+                  className="py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 font-mono text-xs font-semibold flex items-center justify-center gap-2 transition active:scale-[0.98]"
+                  title="Copia el archivo de imagen directamente para pegar con Ctrl+V"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4 text-emerald-400" />
+                      <span className="text-emerald-400">¡Copiada!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4 text-indigo-400" />
+                      <span>Copiar (Ctrl+V)</span>
+                    </>
+                  )}
+                </button>
+              </div>
 
-            <button
-              type="button"
-              onClick={handleCopyToClipboard}
-              className="py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-800 font-mono text-xs font-semibold flex items-center justify-center gap-2 transition active:scale-[0.98]"
-            >
-              {copied ? (
-                <>
-                  <Check className="w-4 h-4 text-emerald-400" />
-                  <span className="text-emerald-400">¡Copiada!</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-4 h-4 text-slate-400" />
-                  <span>Copiar (Ctrl+V)</span>
-                </>
-              )}
-            </button>
-          </div>
+              {/* Explicación de uso para Copiar (Ctrl+V) */}
+              <p className="text-[11px] text-slate-400 px-1 leading-relaxed">
+                Usa <strong>Copiar (Ctrl+V)</strong> para pegar la imagen directamente en WhatsApp Web, Slack, Twitter o LinkedIn sin tener que guardarla en tu disco.
+              </p>
+            </div>
 
-          {/* Tarjeta de Apoyo Exclusiva en Ko-fi */}
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 via-slate-900/60 to-slate-900/90 border border-amber-500/25 space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-300 shrink-0 shadow-sm mt-0.5">
+            {/* Tarjeta de Apoyo Exclusiva en Ko-fi */}
+            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-slate-900/60 to-slate-900/90 border border-amber-500/25 space-y-2.5">
+              <div className="flex items-start gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-300 shrink-0 mt-0.5">
+                  <Coffee className="w-4 h-4" />
+                </div>
+                <div className="space-y-0.5">
+                  <h4 className="text-xs font-bold text-amber-200">
+                    ¿Te fue útil esta herramienta?
+                  </h4>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    Media Studio es <strong>100% libre y sin marcas de agua</strong>. Si te ahorró tiempo, apoya el proyecto invitando un café en Ko-fi.
+                  </p>
+                </div>
+              </div>
+
+              <a
+                href={LINKS.KOFI}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-2.5 px-4 rounded-xl bg-[#FF5E5B] hover:bg-[#ff4744] text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-md shadow-[#FF5E5B]/20 active:scale-[0.98]"
+              >
                 <Coffee className="w-4 h-4" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-xs font-bold text-amber-200">
-                  ¿Te fue útil esta herramienta?
-                </h4>
-                <p className="text-[11px] text-slate-300 leading-relaxed">
-                  Media Studio es <strong>100% gratuito y sin marcas de agua</strong>. Si te ahorró tiempo de diseño, apoya el proyecto invitando un café en Ko-fi para seguir creando herramientas abiertas libres de bloatware.
-                </p>
-              </div>
+                <span>Invitar un café en Ko-fi</span>
+                <ExternalLink className="w-3.5 h-3.5 opacity-70" />
+              </a>
             </div>
 
-            <a
-              href={LINKS.KOFI}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full py-2.5 px-4 rounded-xl bg-[#FF5E5B] hover:bg-[#ff4744] text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-md shadow-[#FF5E5B]/20 active:scale-[0.98]"
-            >
-              <Coffee className="w-4 h-4" />
-              <span>Invitar un café en Ko-fi</span>
-              <ExternalLink className="w-3.5 h-3.5 opacity-70" />
-            </a>
-          </div>
-
-          {/* Enlace para Proponer una mejora / Feedback en GitHub */}
-          <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between text-xs font-mono">
-            <div className="flex items-center gap-2 text-slate-400">
-              <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
-              <span className="text-[11px]">¿Tienes ideas para mejorar Media Studio?</span>
-            </div>
-            <div className="flex items-center gap-2">
+            {/* Enlace para Feedback / Proponer mejora */}
+            <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between text-xs font-mono">
+              <div className="flex items-center gap-2 text-slate-400">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span className="text-[11px]">¿Tienes ideas o feedback?</span>
+              </div>
               <a
                 href={LINKS.GITHUB_ISSUES}
                 target="_blank"
@@ -197,22 +216,69 @@ export const ExportSuccessModal: React.FC<ExportSuccessModalProps> = ({
                 <ExternalLink className="w-3 h-3" />
               </a>
             </div>
+
+          </div>
+
+          {/* ========================================================================= */}
+          {/* COLUMNA DERECHA: PREVISUALIZACIÓN DE LA IMAGEN GENERADA                   */}
+          {/* ========================================================================= */}
+          <div className="md:col-span-6 flex flex-col items-center justify-center h-full">
+            <div className="relative w-full rounded-2xl overflow-hidden bg-slate-950/90 border border-slate-800/90 p-3 shadow-2xl flex flex-col items-center justify-center group min-h-[320px] md:min-h-[440px]">
+              <img
+                src={dataUrl}
+                alt="Generated Post"
+                className="max-h-[380px] xl:max-h-[420px] w-auto max-w-full object-contain rounded-xl shadow-xl transition-transform duration-300 group-hover:scale-[1.01]"
+              />
+              <div className="w-full flex items-center justify-between pt-2.5 px-1 text-[10px] font-mono text-slate-500">
+                <span className="truncate max-w-[200px]">{filename}</span>
+                <span className="text-indigo-400 font-semibold">{resolution}</span>
+              </div>
+            </div>
           </div>
 
         </div>
 
-        {/* Pie del modal */}
-        <div className="p-3.5 bg-slate-950/80 border-t border-slate-800/60 flex items-center justify-between text-xs font-mono">
-          <span className="text-slate-500 text-[11px] truncate">
-            {filename}
-          </span>
+        {/* ========================================================================= */}
+        {/* FOOTER DEL MODAL: SEGUIR EDITANDO, GUARDAR PROYECTO O VOLVER AL INICIO     */}
+        {/* ========================================================================= */}
+        <div className="p-3.5 sm:px-6 bg-slate-950/90 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2.5 text-xs font-mono shrink-0">
+          
+          {/* Botón: Volver al Inicio */}
           <button
             type="button"
-            onClick={onClose}
-            className="text-indigo-400 hover:text-indigo-300 font-bold text-[11px] transition"
+            onClick={onGoHome ? onGoHome : onClose}
+            className="py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 flex items-center gap-1.5 transition active:scale-95"
+            title="Volver a la pantalla de inicio"
           >
-            Seguir editando
+            <Home className="w-3.5 h-3.5 text-slate-400" />
+            <span>Volver al inicio</span>
           </button>
+
+          {/* Grupo Derecho: Guardar Proyecto y Seguir Editando */}
+          <div className="flex items-center gap-2">
+            {onSaveProject && (
+              <button
+                type="button"
+                onClick={onSaveProject}
+                className="py-2 px-3.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5 transition font-semibold active:scale-95"
+                title="Guardar como plantilla o proyecto en tu navegador"
+              >
+                <BookmarkCheck className="w-3.5 h-3.5" />
+                <span>Guardar proyecto</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center gap-1.5 transition shadow-md shadow-indigo-600/20 active:scale-95"
+              title="Cerrar modal y seguir trabajando en el canvas"
+            >
+              <span>Seguir editando</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
         </div>
 
       </div>

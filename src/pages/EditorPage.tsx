@@ -9,6 +9,7 @@ import { AboutStudioModal } from '../components/AboutStudioModal';
 import { SaveConfigModal } from '../components/SaveConfigModal';
 import { ExportSuccessModal } from '../components/ExportSuccessModal';
 import { useStudioStore } from '../store/useStudioStore';
+import { trackImageGeneration } from '../utils/generationTracker';
 import * as htmlToImage from 'html-to-image';
 import html2canvas from 'html2canvas';
 
@@ -134,18 +135,14 @@ export const EditorPage: React.FC = () => {
         backgroundColor: bgExportColor,
       });
 
-      const link = document.createElement('a');
-      link.download = filename;
-      link.href = dataUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Registrar conteo de generación (local-first + ping global serverless)
+      trackImageGeneration();
 
       setExportedDataUrl(dataUrl);
       setExportedFilename(filename);
       setExportModalOpen(true);
 
-      setExportStatus(`¡Descargada con éxito! (${r.nativeW}x${r.nativeH})`);
+      setExportStatus(`¡Imagen generada! (${r.nativeW}x${r.nativeH})`);
       setTimeout(() => setExportStatus('100% idéntico a pantalla'), 4000);
     } catch (err) {
       console.warn('html-to-image falló, ejecutando fallback con html2canvas:', err);
@@ -157,22 +154,19 @@ export const EditorPage: React.FC = () => {
           logging: false,
         });
         const dataUrl = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.download = filename;
-        link.href = dataUrl;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+
+        // Registrar conteo de generación
+        trackImageGeneration();
 
         setExportedDataUrl(dataUrl);
         setExportedFilename(filename);
         setExportModalOpen(true);
 
-        setExportStatus('¡Descargada (Fallback)!');
+        setExportStatus('¡Imagen generada (Fallback)!');
         setTimeout(() => setExportStatus('100% idéntico a pantalla'), 4000);
       } catch (e2) {
         console.error('Error fatal al exportar:', e2);
-        alert('Hubo un error al exportar la imagen. Revisa la consola.');
+        alert('Hubo un error al generar la imagen. Revisa la consola.');
       }
     } finally {
       setIsExporting(false);
@@ -261,6 +255,16 @@ export const EditorPage: React.FC = () => {
         dataUrl={exportedDataUrl}
         filename={exportedFilename}
         resolution={r.px}
+        postTitle={postState.title}
+        postTags={postState.tags}
+        onSaveProject={() => {
+          setExportModalOpen(false);
+          setSaveModalOpen(true);
+        }}
+        onGoHome={() => {
+          setExportModalOpen(false);
+          navigate('/inicio');
+        }}
       />
     </div>
   );

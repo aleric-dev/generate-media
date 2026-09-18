@@ -2,7 +2,7 @@ import React, { forwardRef, useMemo, useState } from 'react';
 import { PostState, ShapePlacement, ShapeStyleVariant, ShapeGeometry, ShapeProximity, BackgroundLayerOrder } from '../../types';
 import { aspectRatios } from '../../constants/templates';
 import { getBrandIconComponent } from '../../constants/brandIcons';
-import { Star, CheckCircle2, Radio, User, Sparkles, Tag, ArrowRight, FileCode, Terminal, TrendingUp, TrendingDown, CheckCheck } from 'lucide-react';
+import { Star, CheckCircle2, Radio, User, Sparkles, Tag, ArrowRight, FileCode, Terminal, TrendingUp, TrendingDown, CheckCheck, Minus, Square, X } from 'lucide-react';
 
 interface CanvasTargetProps {
   state: PostState;
@@ -289,18 +289,20 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
     } else {
       // 'icon-text' o fallback: Ícono vectorial seleccionado con el acento de color
       const SelectedIcon = getBrandIconComponent(state.brandIcon);
-      const iconPx = Math.round(logoH * 0.55);
+      // Tamaño de caja e icono proporcional a la fuente de cabecera para balance simétrico 1:1 con el texto
+      const iconBoxSize = Math.max(26, Math.round(headerFontSize * 1.7));
+      const iconPx = Math.max(14, Math.round(iconBoxSize * 0.58));
       logoImgOrIcon = (
         <div
-          className="rounded-xl flex items-center justify-center shadow-lg transition-all shrink-0"
+          className="rounded-lg flex items-center justify-center shadow-md transition-all shrink-0"
           style={{
-            width: `${logoH}px`,
-            height: `${logoH}px`,
-            background: 'rgba(255,255,255,0.05)',
+            width: `${iconBoxSize}px`,
+            height: `${iconBoxSize}px`,
+            background: 'rgba(255,255,255,0.06)',
             border: `1.5px solid ${state.currentColor}`
           }}
         >
-          <SelectedIcon size={iconPx} color={state.currentColor} strokeWidth={2} />
+          <SelectedIcon size={iconPx} color={state.currentColor} strokeWidth={2.2} />
         </div>
       );
     }
@@ -316,11 +318,11 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
 
     // 3. Logo / Ícono + Texto ('icon-text' o 'custom-text')
     return (
-      <div className="flex items-center gap-5" style={{ gap: '18px' }}>
+      <div className="flex items-center" style={{ gap: '12px' }}>
         {logoImgOrIcon}
         <span
           className={`font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'} tracking-tight`}
-          style={{ fontSize: `${Math.round(headerFontSize * 1.35)}px` }}
+          style={{ fontSize: `${Math.round(headerFontSize * 1.35)}px`, lineHeight: 1 }}
         >
           {name}
         </span>
@@ -415,7 +417,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
     return (
       <div
         id="view-badge"
-        className="px-5 py-2 rounded-full font-mono font-bold tracking-wider uppercase flex items-center gap-2.5 transition-all shadow-sm shrink-0"
+        className="px-4 py-1.5 rounded-full font-mono font-bold tracking-wider uppercase flex items-center gap-2 transition-all shadow-sm shrink-0"
         style={{
           backgroundColor: isLight ? 'rgba(255,255,255,0.9)' : 'rgba(15, 23, 42, 0.85)',
           border: `1.5px solid ${badgeColor}`,
@@ -423,7 +425,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
           fontSize: `${headerFontSize}px`
         }}
       >
-        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: badgeColor }} />
+        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: badgeColor }} />
         <span>{state.category}</span>
       </div>
     );
@@ -787,90 +789,196 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
         style={moduleContainerStyles}
       >
         {/* ================================================================= */}
-        {/* 1. MÓDULO DE CÓDIGO (VENTANA IDE TIPO MAC CON SEMÁFORO Y SINTAXIS) */}
+        {/* 1. MÓDULO DE CÓDIGO (VENTANAS MACOS, WINDOWS, LINUX, BASH, CMD)  */}
         {/* ================================================================= */}
-        {state.activeModule === 'code' && (
-          <div
-            className="w-full flex flex-col rounded-2xl overflow-hidden border shadow-2xl transition-all"
-            style={{
-              backgroundColor: isLight ? '#FFFFFF' : '#0B101B',
-              borderColor: isLight ? 'rgba(0,0,0,0.1)' : `rgba(${rgb}, 0.35)`,
-              boxShadow: isLight
-                ? '0 20px 40px -10px rgba(0,0,0,0.12)'
-                : `0 25px 50px -12px rgba(0,0,0,0.8), 0 0 35px rgba(${rgb}, 0.15)`
-            }}
-          >
-            {/* Barra Superior de la Ventana IDE */}
+        {state.activeModule === 'code' && (() => {
+          const windowStyle = state.codeWindowStyle || 'macos';
+          return (
             <div
-              className="flex items-center justify-between px-5 py-3.5 border-b"
+              className="w-full flex flex-col rounded-2xl overflow-hidden border shadow-2xl transition-all"
               style={{
-                backgroundColor: isLight ? '#F8FAFC' : '#111827',
-                borderColor: isLight ? '#E2E8F0' : 'rgba(255,255,255,0.08)'
+                backgroundColor: isLight ? '#FFFFFF' : '#0B101B',
+                borderColor: isLight ? 'rgba(0,0,0,0.1)' : `rgba(${rgb}, 0.35)`,
+                boxShadow: isLight
+                  ? '0 20px 40px -10px rgba(0,0,0,0.12)'
+                  : `0 25px 50px -12px rgba(0,0,0,0.8), 0 0 35px rgba(${rgb}, 0.15)`
               }}
             >
-              <div className="flex items-center gap-2">
-                <span className="w-3.5 h-3.5 rounded-full bg-[#FF5F56] border border-[#E0443E]/50 shadow-xs" />
-                <span className="w-3.5 h-3.5 rounded-full bg-[#FFBD2E] border border-[#DEA123]/50 shadow-xs" />
-                <span className="w-3.5 h-3.5 rounded-full bg-[#27C93F] border border-[#1AAB29]/50 shadow-xs" />
-
-                {/* Pestaña de Archivo Activo */}
+              {/* Barra Superior según Estilo de Ventana */}
+              {windowStyle === 'windows' && (
                 <div
-                  className="ml-4 px-3.5 py-1 rounded-lg border flex items-center gap-2 text-xs font-mono font-medium shadow-inner"
+                  className="flex items-center justify-between px-4 py-2.5 border-b"
                   style={{
-                    backgroundColor: isLight ? '#FFFFFF' : '#0B101B',
-                    borderColor: isLight ? '#CBD5E1' : `rgba(${rgb}, 0.4)`,
-                    color: isLight ? '#0F172A' : '#E2E8F0'
+                    backgroundColor: isLight ? '#F1F5F9' : '#141A24',
+                    borderColor: isLight ? '#E2E8F0' : 'rgba(255,255,255,0.08)'
                   }}
                 >
-                  <FileCode className="w-3.5 h-3.5" style={{ color: state.currentColor }} />
-                  <span>{state.codeFilename || 'server/pipeline.ts'}</span>
+                  <div className="flex items-center gap-2 text-xs font-mono">
+                    <FileCode className="w-4 h-4" style={{ color: state.currentColor }} />
+                    <span className="font-semibold" style={{ color: isLight ? '#0F172A' : '#F1F5F9' }}>
+                      {state.codeFilename || 'pipeline.ts'}
+                    </span>
+                    <span
+                      className="ml-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+                      style={{
+                        backgroundColor: `rgba(${rgb}, 0.15)`,
+                        color: state.currentColor
+                      }}
+                    >
+                      {state.codeLanguage || 'TypeScript'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3.5 text-slate-400">
+                    <Minus className="w-3.5 h-3.5 cursor-default" />
+                    <Square className="w-3 h-3 cursor-default" />
+                    <X className="w-3.5 h-3.5 cursor-default hover:text-rose-400" />
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="flex items-center gap-2 font-mono text-[11px]">
-                <span
-                  className="px-2.5 py-0.5 rounded-md font-bold uppercase tracking-wider"
+              {windowStyle === 'linux' && (
+                <div
+                  className="flex items-center justify-between px-4 py-2.5 border-b"
                   style={{
-                    backgroundColor: `rgba(${rgb}, 0.15)`,
-                    color: state.currentColor,
-                    border: `1px solid rgba(${rgb}, 0.3)`
+                    backgroundColor: isLight ? '#E2E8F0' : '#11141B',
+                    borderColor: isLight ? '#CBD5E1' : 'rgba(255,255,255,0.08)'
                   }}
                 >
-                  {state.codeLanguage || 'TypeScript'}
-                </span>
-              </div>
-            </div>
+                  <div className="flex items-center gap-2 text-xs font-mono">
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: state.currentColor }} />
+                    <span className="font-mono text-xs font-medium" style={{ color: isLight ? '#0F172A' : '#E2E8F0' }}>
+                      {state.codeFilename || 'main.py'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="px-2 py-0.5 rounded text-[10px] font-bold uppercase"
+                      style={{
+                        backgroundColor: `rgba(${rgb}, 0.15)`,
+                        color: state.currentColor
+                      }}
+                    >
+                      {state.codeLanguage || 'Python'}
+                    </span>
+                    <div className="flex items-center gap-1.5 ml-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-slate-600/70" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-slate-600/70" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
+                    </div>
+                  </div>
+                </div>
+              )}
 
-            {/* Bloque de Código con Números de Línea y Sintaxis */}
-            <div className="p-6 font-mono text-sm overflow-x-auto leading-relaxed flex gap-5">
-              {state.codeShowLineNumbers !== false && (
+              {windowStyle === 'bash' && (
                 <div
-                  className="select-none flex flex-col text-right pr-4 border-r font-mono"
+                  className="flex items-center justify-between px-4 py-2 border-b"
                   style={{
-                    borderColor: isLight ? '#E2E8F0' : 'rgba(255,255,255,0.08)',
-                    color: isLight ? '#94A3B8' : '#475569',
+                    backgroundColor: isLight ? '#0F172A' : '#060911',
+                    borderColor: 'rgba(255,255,255,0.08)'
+                  }}
+                >
+                  <div className="flex items-center gap-2 text-xs font-mono text-emerald-400">
+                    <Terminal className="w-3.5 h-3.5" />
+                    <span>cloud-server:~$ cat {state.codeFilename || 'deploy.sh'}</span>
+                  </div>
+                  <span className="font-mono text-[10px] text-slate-400 uppercase tracking-widest font-bold">
+                    bash 5.2
+                  </span>
+                </div>
+              )}
+
+              {windowStyle === 'cmd' && (
+                <div
+                  className="flex items-center justify-between px-3 py-1.5 border-b"
+                  style={{
+                    backgroundColor: '#0C0C0C',
+                    borderColor: 'rgba(255,255,255,0.1)'
+                  }}
+                >
+                  <div className="flex items-center gap-2 text-xs font-mono text-slate-300">
+                    <Terminal className="w-3 h-3 text-slate-400" />
+                    <span>Command Prompt - {state.codeFilename || 'script.cmd'}</span>
+                  </div>
+                  <div className="flex items-center gap-2.5 text-slate-400 text-xs font-mono">
+                    <span>—</span>
+                    <span>□</span>
+                    <span className="text-slate-200">✕</span>
+                  </div>
+                </div>
+              )}
+
+              {windowStyle === 'macos' && (
+                <div
+                  className="flex items-center justify-between px-5 py-3.5 border-b"
+                  style={{
+                    backgroundColor: isLight ? '#F8FAFC' : '#111827',
+                    borderColor: isLight ? '#E2E8F0' : 'rgba(255,255,255,0.08)'
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#FF5F56] border border-[#E0443E]/50 shadow-xs" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#FFBD2E] border border-[#DEA123]/50 shadow-xs" />
+                    <span className="w-3.5 h-3.5 rounded-full bg-[#27C93F] border border-[#1AAB29]/50 shadow-xs" />
+
+                    <div
+                      className="ml-4 px-3.5 py-1 rounded-lg border flex items-center gap-2 text-xs font-mono font-medium shadow-inner"
+                      style={{
+                        backgroundColor: isLight ? '#FFFFFF' : '#0B101B',
+                        borderColor: isLight ? '#CBD5E1' : `rgba(${rgb}, 0.4)`,
+                        color: isLight ? '#0F172A' : '#E2E8F0'
+                      }}
+                    >
+                      <FileCode className="w-3.5 h-3.5" style={{ color: state.currentColor }} />
+                      <span>{state.codeFilename || 'server/pipeline.ts'}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 font-mono text-[11px]">
+                    <span
+                      className="px-2.5 py-0.5 rounded-md font-bold uppercase tracking-wider"
+                      style={{
+                        backgroundColor: `rgba(${rgb}, 0.15)`,
+                        color: state.currentColor,
+                        border: `1px solid rgba(${rgb}, 0.3)`
+                      }}
+                    >
+                      {state.codeLanguage || 'TypeScript'}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Bloque de Código con Números de Línea y Sintaxis */}
+              <div className="p-6 font-mono text-sm overflow-x-auto leading-relaxed flex gap-5">
+                {state.codeShowLineNumbers !== false && (
+                  <div
+                    className="select-none flex flex-col text-right pr-4 border-r font-mono"
+                    style={{
+                      borderColor: isLight ? '#E2E8F0' : 'rgba(255,255,255,0.08)',
+                      color: isLight ? '#94A3B8' : '#475569',
+                      fontSize: `${state.codeFontSize || 13}px`
+                    }}
+                  >
+                    {(state.code || "system.migrate({ from: 'Excel', to: 'CloudDB' });")
+                      .split('\n')
+                      .map((_, i) => (
+                        <span key={i} className="leading-relaxed">{i + 1}</span>
+                      ))}
+                  </div>
+                )}
+                <pre
+                  className="flex-1 whitespace-pre font-mono leading-relaxed"
+                  style={{
+                    color: isLight ? '#0F172A' : '#F1F5F9',
                     fontSize: `${state.codeFontSize || 13}px`
                   }}
                 >
-                  {(state.code || "system.migrate({ from: 'Excel', to: 'CloudDB' });")
-                    .split('\n')
-                    .map((_, i) => (
-                      <span key={i} className="leading-relaxed">{i + 1}</span>
-                    ))}
-                </div>
-              )}
-              <pre
-                className="flex-1 whitespace-pre font-mono leading-relaxed"
-                style={{
-                  color: isLight ? '#0F172A' : '#F1F5F9',
-                  fontSize: `${state.codeFontSize || 13}px`
-                }}
-              >
-                {(state.code || "system.migrate({ from: 'Excel', to: 'CloudDB' });")}
-              </pre>
+                  {(state.code || "system.migrate({ from: 'Excel', to: 'CloudDB' });")}
+                </pre>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* ================================================================= */}
         {/* 2. MÓDULO DE KPIS (TARJETAS DE MÉTRICAS ULTRA HQ CON GRADIENTES)  */}
@@ -878,450 +986,97 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
         {state.activeModule === 'kpi' && (
           <div
             className={`grid ${
-              state.kpis.length === 3
-                ? 'grid-cols-3'
-                : state.kpis.length >= 4
+              state.moduleKpiCols === '1'
+                ? 'grid-cols-1'
+                : state.moduleKpiCols === '2'
                 ? 'grid-cols-2'
+                : state.kpis.length === 3
+                ? 'grid-cols-3'
                 : 'grid-cols-2'
-            } gap-4.5 h-auto w-full`}
+            } h-auto w-full`}
+            style={{ gap: `${state.moduleKpiGap ?? 18}px` }}
           >
-            {state.kpis.map((kpi, idx) => (
-              <div
-                key={idx}
-                className="p-6 rounded-2xl border flex flex-col justify-center transition-all shadow-xl relative overflow-hidden backdrop-blur-xl"
-                style={{
-                  background: isLight
-                    ? `linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(${rgb}, 0.08) 100%)`
-                    : `linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(${rgb}, 0.18) 100%)`,
-                  borderColor: isLight ? 'rgba(0,0,0,0.08)' : `rgba(${rgb}, 0.35)`,
-                  borderTopColor: kpi.borderTop !== false ? state.currentColor : undefined,
-                  borderTopWidth: kpi.borderTop !== false ? '4px' : '1px',
-                  boxShadow: `0 15px 35px -10px rgba(${rgb}, 0.2)`
-                }}
-              >
-                {/* Halo decorativo de fondo */}
-                <div
-                  className="absolute -top-12 -right-12 w-32 h-32 rounded-full pointer-events-none opacity-20 blur-xl"
-                  style={{ backgroundColor: state.currentColor }}
-                />
-
-                <div className="flex items-baseline gap-2 flex-wrap z-10">
-                  {kpi.prefix && (
-                    <span
-                      className="font-mono font-bold"
-                      style={{
-                        fontSize: `${Math.round(24 * modScale)}px`,
-                        color: isLight ? '#64748B' : '#94A3B8'
-                      }}
-                    >
-                      {kpi.prefix}
-                    </span>
-                  )}
-                  <span
-                    className="font-mono font-black tracking-tight"
-                    style={{
-                      fontSize: `${Math.round(44 * modScale)}px`,
-                      color: isLight ? '#0F172A' : '#FFFFFF',
-                      textShadow: isLight ? 'none' : `0 0 20px rgba(${rgb}, 0.3)`
-                    }}
-                  >
-                    {kpi.val}
-                  </span>
-                  {kpi.suffix && (
-                    <span
-                      className="font-mono font-bold"
-                      style={{
-                        fontSize: `${Math.round(24 * modScale)}px`,
-                        color: isLight ? '#64748B' : '#94A3B8'
-                      }}
-                    >
-                      {kpi.suffix}
-                    </span>
-                  )}
-
-                  {kpi.trend === 'up' && (
-                    <span className="ml-auto text-[11px] font-mono font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm">
-                      <TrendingUp className="w-3.5 h-3.5" />
-                      <span>Crecimiento</span>
-                    </span>
-                  )}
-                  {kpi.trend === 'down' && (
-                    <span className="ml-auto text-[11px] font-mono font-bold text-rose-400 bg-rose-500/15 border border-rose-500/30 px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm">
-                      <TrendingDown className="w-3.5 h-3.5" />
-                      <span>Reducción</span>
-                    </span>
-                  )}
-                </div>
-
-                <span
-                  className="font-mono font-bold uppercase tracking-wider pt-3 truncate z-10"
-                  style={{
-                    fontSize: `${Math.max(11, Math.round(modFontSize * 0.9))}px`,
-                    color: isLight ? '#475569' : '#CBD5E1'
-                  }}
-                >
-                  {kpi.label}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* ================================================================= */}
-        {/* 3. MÓDULO DE GRÁFICOS (BARRAS, DONUT / PIE Y LÍNEA DE ÁREA)       */}
-        {/* ================================================================= */}
-        {state.activeModule === 'chart' && (
-          <div className="flex flex-col gap-4 h-auto w-full">
-            {/* Gráfico 1: BARRAS HORIZONTALES */}
-            {(!state.chartType || state.chartType === 'horizontal-bars') && (
-              <div className="flex flex-col gap-4 w-full py-2">
-                {state.chartBars.map((bar, idx) => (
-                  <div key={idx} className="flex flex-col gap-2 w-full">
-                    <div className="flex justify-between items-center text-xs font-mono">
-                      <span className={`font-bold ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
-                        {bar.label}
-                      </span>
-                      <span
-                        className="font-bold text-white px-2.5 py-0.5 rounded-lg text-xs shadow-md border border-white/20"
-                        style={{ backgroundColor: bar.color || state.currentColor }}
-                      >
-                        {bar.pct}%
-                      </span>
-                    </div>
-                    <div
-                      className="w-full h-4 rounded-full overflow-hidden p-0.5 border shadow-inner"
-                      style={{
-                        backgroundColor: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(15, 23, 42, 0.8)',
-                        borderColor: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.12)'
-                      }}
-                    >
-                      <div
-                        className="h-full rounded-full transition-all duration-700 shadow-sm relative"
-                        style={{
-                          width: `${Math.min(100, Math.max(0, bar.pct))}%`,
-                          background: `linear-gradient(90deg, ${bar.color || state.currentColor}99, ${bar.color || state.currentColor})`,
-                          boxShadow: `0 0 12px ${bar.color || state.currentColor}80`
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Gráfico 2: PASTEL / DONUT CIRCULAR */}
-            {state.chartType === 'pie' && (() => {
-              const totalPct = state.chartBars.reduce((acc, b) => acc + (b.pct || 0), 0) || 100;
-              const circumference = 251.32; // 2 * pi * 40
-              let accumulatedPct = 0;
-              const defaultPalette = [state.currentColor, '#06B6D4', '#10B981', '#F59E0B', '#EC4899', '#8B5CF6'];
-
-              return (
-                <div className="flex items-center justify-around gap-6 w-full py-3">
-                  <div className="relative w-48 h-48 shrink-0 flex items-center justify-center">
-                    <svg className="w-full h-full -rotate-90 transform filter drop-shadow-lg" viewBox="0 0 110 110">
-                      <circle
-                        cx="55"
-                        cy="55"
-                        r="40"
-                        stroke={isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}
-                        strokeWidth="16"
-                        fill="transparent"
-                      />
-                      {state.chartBars.map((bar, idx) => {
-                        const slicePct = bar.pct / totalPct;
-                        const strokeDasharray = `${(slicePct * circumference).toFixed(2)} ${circumference.toFixed(2)}`;
-                        const strokeDashoffset = `${(-(accumulatedPct / totalPct) * circumference).toFixed(2)}`;
-                        accumulatedPct += bar.pct;
-                        const sliceColor = bar.color || defaultPalette[idx % defaultPalette.length];
-
-                        return (
-                          <circle
-                            key={idx}
-                            cx="55"
-                            cy="55"
-                            r="40"
-                            stroke={sliceColor}
-                            strokeWidth="16"
-                            strokeDasharray={strokeDasharray}
-                            strokeDashoffset={strokeDashoffset}
-                            strokeLinecap="round"
-                            fill="transparent"
-                            className="transition-all duration-700"
-                          />
-                        );
-                      })}
-                    </svg>
-                    <div className="absolute flex flex-col items-center justify-center text-center">
-                      <span
-                        className="font-mono font-black text-2xl"
-                        style={{ color: isLight ? '#0F172A' : '#FFFFFF' }}
-                      >
-                        {state.chartBars[0]?.pct || 100}%
-                      </span>
-                      <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest font-bold">
-                        Líder
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Leyenda del Pastel */}
-                  <div className="flex flex-col gap-2.5 flex-1 max-w-[55%]">
-                    {state.chartBars.map((bar, idx) => {
-                      const sliceColor = bar.color || defaultPalette[idx % defaultPalette.length];
-                      return (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between gap-2 text-xs font-mono p-1.5 rounded-lg border border-white/5"
-                          style={{
-                            backgroundColor: isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.03)'
-                          }}
-                        >
-                          <div className="flex items-center gap-2 truncate">
-                            <span
-                              className="w-3 h-3 rounded-full shrink-0 shadow-sm"
-                              style={{ backgroundColor: sliceColor }}
-                            />
-                            <span className={`truncate text-xs font-medium ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
-                              {bar.label}
-                            </span>
-                          </div>
-                          <span className="font-bold text-white shrink-0 text-xs px-2 py-0.5 rounded bg-slate-900/80">
-                            {bar.pct}%
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Gráfico 3: LÍNEAS / TENDENCIA CON ÁREA */}
-            {state.chartType === 'line' && (() => {
-              const bars = state.chartBars.length > 0 ? state.chartBars : [{ label: 'Q1', pct: 40 }, { label: 'Q2', pct: 85 }];
-              const svgW = 460;
-              const svgH = 160;
-              const padX = 45;
-              const padY = 28;
-              const maxPct = Math.max(...bars.map((b) => b.pct), 100);
-
-              const points = bars.map((b, idx) => {
-                const x = padX + (idx / Math.max(1, bars.length - 1)) * (svgW - 2 * padX);
-                const y = svgH - padY - (b.pct / maxPct) * (svgH - 2 * padY);
-                return { x, y, ...b };
-              });
-
-              const pathD = points.reduce((acc, pt, i) => `${acc} ${i === 0 ? 'M' : 'L'} ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`, '');
-              const areaD = `${pathD} L ${points[points.length - 1].x.toFixed(1)} ${(svgH - padY).toFixed(1)} L ${points[0].x.toFixed(1)} ${(svgH - padY).toFixed(1)} Z`;
-
-              return (
-                <div className="w-full flex flex-col items-center py-2">
-                  <svg className="w-full h-40 overflow-visible" viewBox={`0 0 ${svgW} ${svgH}`}>
-                    <defs>
-                      <linearGradient id="chartLineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor={state.currentColor} stopOpacity="0.5" />
-                        <stop offset="100%" stopColor={state.currentColor} stopOpacity="0.0" />
-                      </linearGradient>
-                    </defs>
-
-                    {/* Guías Horizontales */}
-                    <line x1={padX} y1={padY} x2={svgW - padX} y2={padY} stroke="rgba(255,255,255,0.1)" strokeDasharray="3 3" />
-                    <line x1={padX} y1={svgH / 2} x2={svgW - padX} y2={svgH / 2} stroke="rgba(255,255,255,0.1)" strokeDasharray="3 3" />
-                    <line x1={padX} y1={svgH - padY} x2={svgW - padX} y2={svgH - padY} stroke="rgba(255,255,255,0.2)" />
-
-                    {/* Área con Relleno Degradado */}
-                    <path d={areaD} fill="url(#chartLineGrad)" />
-
-                    {/* Línea de Tendencia */}
-                    <path
-                      d={pathD}
-                      fill="none"
-                      stroke={state.currentColor}
-                      strokeWidth="4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-
-                    {/* Puntos y Etiquetas */}
-                    {points.map((pt, idx) => (
-                      <g key={idx}>
-                        <circle
-                          cx={pt.x}
-                          cy={pt.y}
-                          r="6"
-                          fill={state.currentColor}
-                          stroke="#FFFFFF"
-                          strokeWidth="2.5"
-                          className="shadow-lg"
-                        />
-                        <rect
-                          x={pt.x - 18}
-                          y={pt.y - 25}
-                          width="36"
-                          height="18"
-                          rx="5"
-                          fill="#0F172A"
-                          stroke={state.currentColor}
-                          strokeWidth="1"
-                        />
-                        <text
-                          x={pt.x}
-                          y={pt.y - 13}
-                          textAnchor="middle"
-                          fill="#FFFFFF"
-                          fontSize="10"
-                          fontFamily="monospace"
-                          fontWeight="bold"
-                        >
-                          {pt.pct}%
-                        </text>
-                        <text
-                          x={pt.x}
-                          y={svgH - padY + 18}
-                          textAnchor="middle"
-                          fill={isLight ? '#475569' : '#94A3B8'}
-                          fontSize="11"
-                          fontFamily="monospace"
-                          fontWeight="600"
-                        >
-                          {pt.label}
-                        </text>
-                      </g>
-                    ))}
-                  </svg>
-                </div>
-              );
-            })()}
-          </div>
-        )}
-
-        {/* ================================================================= */}
-        {/* 4. MÓDULO DE CHAT WHATSAPP (BURBUJAS ULTRA REALISTAS)             */}
-        {/* ================================================================= */}
-        {state.activeModule === 'chat' && (
-          <div className="flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-white/10 w-full h-auto">
-            {/* Cabecera del Chat */}
-            <div
-              className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.08]"
-              style={{
-                backgroundColor: isLight ? '#F0F2F5' : '#1F2C34'
-              }}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-mono font-bold shadow-md shrink-0 ring-2 ring-white/20"
-                  style={{ backgroundColor: state.currentColor }}
-                >
-                  {(state.chatContactName || 'A').charAt(0).toUpperCase()}
-                </div>
-                <div className="flex flex-col">
-                  <span
-                    className={`font-mono font-bold text-sm tracking-tight ${
-                      isLight ? 'text-slate-900' : 'text-white'
-                    }`}
-                  >
-                    {state.chatContactName || 'Asistente Virtual'}
-                  </span>
-                  <div className="flex items-center gap-1.5 text-xs font-mono">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-xs" />
-                    <span className="text-emerald-400 font-semibold">
-                      {state.chatOnlineStatus || 'en línea'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Mensajes del Chat */}
-            <div
-              className="p-5 space-y-3.5"
-              style={{
-                backgroundColor: isLight ? '#EFEAE2' : '#0B141A'
-              }}
-            >
-              {state.chatMessages.map((msg, idx) => {
-                const isBot = msg.sender === 'bot';
-                return (
-                  <div
-                    key={idx}
-                    className={`flex flex-col ${isBot ? 'items-end' : 'items-start'}`}
-                  >
-                    <div
-                      className={`relative max-w-[85%] px-4 py-3 rounded-2xl shadow-md transition-all ${
-                        isBot
-                          ? isLight
-                            ? 'bg-[#D9FDD3] text-[#111B21] rounded-tr-xs'
-                            : 'bg-[#005C4B] text-[#E9EDEF] rounded-tr-xs'
-                          : isLight
-                          ? 'bg-[#FFFFFF] text-[#111B21] rounded-tl-xs'
-                          : 'bg-[#202C33] text-[#E9EDEF] rounded-tl-xs'
-                      }`}
-                      style={{ fontSize: `${Math.round(modFontSize * 1.05)}px` }}
-                    >
-                      <p className="leading-relaxed whitespace-pre-wrap font-sans">{msg.text}</p>
-
-                      <div className="flex items-center justify-end gap-1.5 mt-1.5 select-none">
-                        <span
-                          className={`text-[10px] font-mono ${
-                            isLight ? 'text-slate-500' : 'text-slate-400'
-                          }`}
-                        >
-                          {msg.time}
-                        </span>
-                        {isBot && (
-                          <CheckCheck className="w-4 h-4 text-[#53BDEB]" />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* ================================================================= */}
-        {/* 5. MÓDULO DE PASOS / FASES (ROADMAP Y PROCESO ESTRUCTURADO)      */}
-        {/* ================================================================= */}
-        {state.activeModule === 'steps' && (
-          <div className="grid grid-cols-2 gap-4 w-full">
-            {(state.steps || state.stepsData || []).map((st, idx) => {
-              const stepNum = st.stepNumber || st.step || (idx + 1);
-              const stepDesc = st.description || st.desc || '';
+            {state.kpis.map((kpi, idx) => {
+              const trendText = kpi.trendLabel !== undefined
+                ? kpi.trendLabel
+                : (kpi.trend === 'up' ? 'Crecimiento' : kpi.trend === 'down' ? 'Reducción' : '');
               return (
                 <div
                   key={idx}
-                  className="p-5 rounded-2xl border flex flex-col gap-2 relative overflow-hidden shadow-xl backdrop-blur-xl transition-all"
+                  className="p-6 rounded-2xl border flex flex-col justify-center transition-all shadow-xl relative overflow-hidden backdrop-blur-xl"
                   style={{
-                    backgroundColor: isLight ? 'rgba(255,255,255,0.9)' : 'rgba(15, 23, 42, 0.85)',
+                    background: isLight
+                      ? `linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(${rgb}, 0.08) 100%)`
+                      : `linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(${rgb}, 0.18) 100%)`,
                     borderColor: isLight ? 'rgba(0,0,0,0.08)' : `rgba(${rgb}, 0.35)`,
-                    boxShadow: `0 10px 25px -5px rgba(0,0,0,0.3)`
+                    borderTopColor: kpi.borderTop !== false ? state.currentColor : undefined,
+                    borderTopWidth: kpi.borderTop !== false ? '4px' : '1px',
+                    boxShadow: `0 15px 35px -10px rgba(${rgb}, 0.2)`
                   }}
                 >
-                  <div className="flex items-center justify-between">
+                  {/* Halo decorativo de fondo */}
+                  <div
+                    className="absolute -top-12 -right-12 w-32 h-32 rounded-full pointer-events-none opacity-20 blur-xl"
+                    style={{ backgroundColor: state.currentColor }}
+                  />
+
+                  <div className="flex items-baseline gap-2 flex-wrap z-10">
+                    {kpi.prefix && (
+                      <span
+                        className="font-mono font-bold"
+                        style={{
+                          fontSize: `${Math.round(24 * modScale)}px`,
+                          color: isLight ? '#64748B' : '#94A3B8'
+                        }}
+                      >
+                        {kpi.prefix}
+                      </span>
+                    )}
                     <span
-                      className="w-7 h-7 rounded-xl flex items-center justify-center font-mono font-black text-xs text-white shadow-md ring-2 ring-white/20"
-                      style={{ backgroundColor: state.currentColor }}
-                    >
-                      {stepNum}
-                    </span>
-                    <span
-                      className="text-[10px] font-mono px-2 py-0.5 rounded-md font-bold uppercase tracking-wider"
+                      className="font-mono font-black tracking-tight"
                       style={{
-                        backgroundColor: `rgba(${rgb}, 0.12)`,
-                        color: state.currentColor
+                        fontSize: `${Math.round(44 * modScale)}px`,
+                        color: isLight ? '#0F172A' : '#FFFFFF',
+                        textShadow: isLight ? 'none' : `0 0 20px rgba(${rgb}, 0.3)`
                       }}
                     >
-                      FASE 0{stepNum}
+                      {kpi.val}
                     </span>
+                    {kpi.suffix && (
+                      <span
+                        className="font-mono font-bold"
+                        style={{
+                          fontSize: `${Math.round(24 * modScale)}px`,
+                          color: isLight ? '#64748B' : '#94A3B8'
+                        }}
+                      >
+                        {kpi.suffix}
+                      </span>
+                    )}
+
+                    {kpi.trend === 'up' && (
+                      <span className="ml-auto text-xs font-mono font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-3 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
+                        <TrendingUp className="w-3.5 h-3.5" />
+                        {trendText && <span>{trendText}</span>}
+                      </span>
+                    )}
+                    {kpi.trend === 'down' && (
+                      <span className="ml-auto text-xs font-mono font-bold text-rose-400 bg-rose-500/15 border border-rose-500/30 px-3 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
+                        <TrendingDown className="w-3.5 h-3.5" />
+                        {trendText && <span>{trendText}</span>}
+                      </span>
+                    )}
                   </div>
-                  <h4 className={`font-bold text-sm text-white ${state.titleFont || 'font-inter'}`}>
-                    {st.title}
-                  </h4>
-                  <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">
-                    {stepDesc}
-                  </p>
+
+                  <span
+                    className="font-mono font-bold uppercase tracking-wider pt-3 truncate z-10"
+                    style={{
+                      fontSize: `${Math.max(13, Math.round(modFontSize * 0.95))}px`,
+                      color: isLight ? '#334155' : '#E2E8F0'
+                    }}
+                  >
+                    {kpi.label}
+                  </span>
                 </div>
               );
             })}
@@ -1329,171 +1084,517 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
         )}
 
         {/* ================================================================= */}
-        {/* 6. MÓDULO PROMO / OFERTA / CUPÓN DE CONVERSIÓN                    */}
+        {/* 3. GRÁFICOS: BARRAS HORIZONTALES                                  */}
         {/* ================================================================= */}
-        {state.activeModule === 'promo' && (
-          <div
-            className="w-full rounded-2xl p-7 flex flex-col items-center justify-center text-center gap-3.5 border shadow-2xl relative overflow-hidden"
-            style={{
-              background: `linear-gradient(135deg, rgba(${rgb}, 0.25) 0%, rgba(15, 23, 42, 0.85) 100%)`,
-              borderColor: `rgba(${rgb}, 0.5)`
-            }}
-          >
-            <span
-              className="px-4 py-1.5 rounded-full text-xs font-mono font-bold tracking-widest uppercase shadow-md flex items-center gap-1.5"
-              style={{
-                backgroundColor: state.currentColor,
-                color: '#FFFFFF'
-              }}
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{state.promo?.badge || state.promoData?.badge || 'OFERTA DE LANZAMIENTO'}</span>
-            </span>
-
-            <h3
-              className="font-black tracking-tight text-white leading-tight"
-              style={{ fontSize: `${Math.round(28 * modScale)}px` }}
-            >
-              {state.promo?.headline || state.promoData?.headline || state.promo?.title || state.promoData?.title || '50% OFF en Tu Primer Despliegue'}
-            </h3>
-
-            {(state.promo?.subheadline || state.promoData?.subheadline || state.promo?.subtitle || state.promoData?.subtitle) && (
-              <p className="text-xs font-semibold text-indigo-200/95 max-w-[90%]">
-                {state.promo?.subheadline || state.promoData?.subheadline || state.promo?.subtitle || state.promoData?.subtitle}
-              </p>
-            )}
-
-            <p className="text-xs text-slate-300 max-w-[90%] leading-relaxed">
-              {state.promo?.description || state.promoData?.description || 'Válido para proyectos de software a la medida, migraciones cloud y automatizaciones operativas.'}
-            </p>
-
-            <div className="flex items-center gap-3 pt-2">
-              <div
-                className="px-5 py-2 rounded-xl border-2 border-dashed font-mono font-bold text-xs tracking-widest uppercase flex items-center gap-2 shadow-inner"
-                style={{
-                  borderColor: state.currentColor,
-                  color: state.currentColor,
-                  backgroundColor: 'rgba(0,0,0,0.4)'
-                }}
-              >
-                <span>🏷️ CÓDIGO:</span>
-                <span>{state.promo?.coupon || state.promoData?.coupon || state.promo?.code || state.promoData?.code || 'OFERTA2026'}</span>
-              </div>
-              <div
-                className="px-5 py-2 rounded-xl font-mono font-bold text-xs text-white shadow-lg flex items-center gap-2 transition"
-                style={{
-                  backgroundColor: state.currentColor,
-                  boxShadow: `0 8px 25px rgba(${rgb}, 0.35)`
-                }}
-              >
-                <span>{state.promo?.cta || state.promoData?.cta || 'Reclamar Oferta'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </div>
-            </div>
-
-            {(state.promo?.finePrint || state.promoData?.finePrint) && (
-              <span className="text-[11px] font-mono text-slate-400 pt-1">
-                {state.promo?.finePrint || state.promoData?.finePrint}
-              </span>
-            )}
+        {(state.activeModule === 'chart-bars' || (state.activeModule === 'chart' && (!state.chartType || state.chartType === 'horizontal-bars'))) && (
+          <div className="flex flex-col gap-4.5 w-full py-2">
+            {state.chartBars.map((bar, idx) => {
+              const barH = state.chartBarHeight || 18;
+              return (
+                <div key={idx} className="flex flex-col gap-2 w-full">
+                  <div className="flex justify-between items-center text-xs font-mono">
+                    <span className={`font-bold text-sm ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                      {bar.label}
+                    </span>
+                    <span
+                      className="font-bold text-white px-2.5 py-0.5 rounded-lg text-xs shadow-md border border-white/20"
+                      style={{ backgroundColor: bar.color || state.currentColor }}
+                    >
+                      {bar.pct}%
+                    </span>
+                  </div>
+                  <div
+                    className="w-full rounded-full overflow-hidden p-0.5 border shadow-inner"
+                    style={{
+                      height: `${barH}px`,
+                      backgroundColor: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(15, 23, 42, 0.8)',
+                      borderColor: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.12)'
+                    }}
+                  >
+                    <div
+                      className="h-full rounded-full transition-all duration-700 shadow-sm relative"
+                      style={{
+                        width: `${Math.min(100, Math.max(0, bar.pct))}%`,
+                        background: `linear-gradient(90deg, ${bar.color || state.currentColor}99, ${bar.color || state.currentColor})`,
+                        boxShadow: `0 0 12px ${bar.color || state.currentColor}80`
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
 
         {/* ================================================================= */}
-        {/* 7. MÓDULO DE CALL TO ACTION / FRASE DE ACCIÓN (SOLUCIÓN DIRECTA)  */}
+        {/* 3. GRÁFICOS: PASTEL / DONUT CIRCULAR                              */}
         {/* ================================================================= */}
-        {state.activeModule === 'cta' && (
-          <div
-            className="w-full rounded-2xl p-7 flex flex-col items-center justify-center text-center gap-4 border shadow-2xl relative overflow-hidden"
-            style={{
-              background: isLight
-                ? `linear-gradient(135deg, rgba(${rgb}, 0.12) 0%, rgba(255, 255, 255, 0.95) 100%)`
-                : `linear-gradient(135deg, rgba(${rgb}, 0.28) 0%, rgba(15, 23, 42, 0.9) 100%)`,
-              borderColor: `rgba(${rgb}, 0.45)`,
-              boxShadow: `0 20px 45px -10px rgba(${rgb}, 0.25)`
-            }}
-          >
-            <span
-              className="px-4 py-1.5 rounded-full text-xs font-mono font-bold tracking-widest uppercase shadow-md flex items-center gap-1.5"
-              style={{
-                backgroundColor: state.currentColor,
-                color: '#FFFFFF'
-              }}
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{state.ctaActionBadge || '⚡ SOLUCIÓN DIRECTA'}</span>
-            </span>
+        {(state.activeModule === 'chart-pie' || (state.activeModule === 'chart' && state.chartType === 'pie')) && (() => {
+          const totalPct = state.chartBars.reduce((acc, b) => acc + (b.pct || 0), 0) || 100;
+          const circumference = 251.32; // 2 * pi * 40
+          let accumulatedPct = 0;
+          const defaultPalette = [state.currentColor, '#06B6D4', '#10B981', '#F59E0B', '#EC4899', '#8B5CF6'];
+          const donutStroke = state.chartDonutThickness === 'thin' ? '10' : state.chartDonutThickness === 'full' ? '28' : '16';
 
-            <p
-              className="font-black tracking-tight leading-snug px-3"
-              style={{
-                fontSize: `${Math.round(25 * modScale)}px`,
-                color: isLight ? '#0F172A' : '#FFFFFF'
-              }}
-            >
-              {state.ctaActionPhrase || 'Migra hoy tus procesos a la nube y reduce tiempos de respuesta en un 60%.'}
-            </p>
+          return (
+            <div className="flex items-center justify-around gap-6 w-full py-3">
+              <div className="relative w-52 h-52 shrink-0 flex items-center justify-center">
+                <svg className="w-full h-full -rotate-90 transform filter drop-shadow-lg" viewBox="0 0 110 110">
+                  <circle
+                    cx="55"
+                    cy="55"
+                    r="40"
+                    stroke={isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}
+                    strokeWidth={donutStroke}
+                    fill="transparent"
+                  />
+                  {state.chartBars.map((bar, idx) => {
+                    const slicePct = bar.pct / totalPct;
+                    const strokeDasharray = `${(slicePct * circumference).toFixed(2)} ${circumference.toFixed(2)}`;
+                    const strokeDashoffset = `${(-(accumulatedPct / totalPct) * circumference).toFixed(2)}`;
+                    accumulatedPct += bar.pct;
+                    const sliceColor = bar.color || defaultPalette[idx % defaultPalette.length];
 
-            <div className="flex flex-col items-center gap-2 pt-1 w-full max-w-[85%]">
+                    return (
+                      <circle
+                        key={idx}
+                        cx="55"
+                        cy="55"
+                        r="40"
+                        stroke={sliceColor}
+                        strokeWidth={donutStroke}
+                        strokeDasharray={strokeDasharray}
+                        strokeDashoffset={strokeDashoffset}
+                        strokeLinecap="round"
+                        fill="transparent"
+                        className="transition-all duration-700"
+                      />
+                    );
+                  })}
+                </svg>
+                <div className="absolute flex flex-col items-center justify-center text-center">
+                  <span
+                    className="font-mono font-black text-2xl"
+                    style={{ color: isLight ? '#0F172A' : '#FFFFFF' }}
+                  >
+                    {state.chartBars[0]?.pct || 100}%
+                  </span>
+                  <span className="text-xs font-mono text-slate-400 uppercase tracking-widest font-bold pt-0.5">
+                    {state.chartDonutText || 'Total'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Leyenda del Pastel */}
+              <div className="flex flex-col gap-2.5 flex-1 max-w-[55%]">
+                {state.chartBars.map((bar, idx) => {
+                  const sliceColor = bar.color || defaultPalette[idx % defaultPalette.length];
+                  return (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between gap-2 text-xs font-mono p-2 rounded-xl border border-white/5"
+                      style={{
+                        backgroundColor: isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.03)'
+                      }}
+                    >
+                      <div className="flex items-center gap-2.5 truncate">
+                        <span
+                          className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
+                          style={{ backgroundColor: sliceColor }}
+                        />
+                        <span className={`truncate text-xs font-semibold ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                          {bar.label}
+                        </span>
+                      </div>
+                      <span className="font-bold text-white shrink-0 text-xs px-2.5 py-0.5 rounded-lg bg-slate-900/80">
+                        {bar.pct}%
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* ================================================================= */}
+        {/* 3. GRÁFICOS: LÍNEAS / TENDENCIA CON 1 O 2 SERIES                  */}
+        {/* ================================================================= */}
+        {(state.activeModule === 'chart-line' || (state.activeModule === 'chart' && state.chartType === 'line')) && (() => {
+          const bars1 = state.chartBars.length > 0 ? state.chartBars : [{ label: 'Q1', pct: 40 }, { label: 'Q2', pct: 85 }];
+          const isDualSeries = state.chartLineSeries === 2;
+          const bars2 = state.chartLineSeries2 && state.chartLineSeries2.length > 0
+            ? state.chartLineSeries2
+            : bars1.map((b) => ({ ...b, pct: Math.max(10, Math.round(b.pct * 0.7)) }));
+          const color2 = state.chartLineColor2 || '#06B6D4';
+          const strokeW = state.chartLineStroke || 4;
+
+          const svgW = 460;
+          const svgH = 170;
+          const padX = 45;
+          const padY = 28;
+          const maxPct = Math.max(100, ...bars1.map((b) => b.pct), ...(isDualSeries ? bars2.map((b) => b.pct) : []));
+
+          const points1 = bars1.map((b, idx) => {
+            const x = padX + (idx / Math.max(1, bars1.length - 1)) * (svgW - 2 * padX);
+            const y = svgH - padY - (b.pct / maxPct) * (svgH - 2 * padY);
+            return { x, y, ...b };
+          });
+
+          const pathD1 = points1.reduce((acc, pt, i) => `${acc} ${i === 0 ? 'M' : 'L'} ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`, '');
+          const areaD1 = `${pathD1} L ${points1[points1.length - 1].x.toFixed(1)} ${(svgH - padY).toFixed(1)} L ${points1[0].x.toFixed(1)} ${(svgH - padY).toFixed(1)} Z`;
+
+          let pathD2 = '';
+          let points2: typeof points1 = [];
+          if (isDualSeries) {
+            points2 = bars2.map((b, idx) => {
+              const x = padX + (idx / Math.max(1, bars2.length - 1)) * (svgW - 2 * padX);
+              const y = svgH - padY - (b.pct / maxPct) * (svgH - 2 * padY);
+              return { x, y, ...b };
+            });
+            pathD2 = points2.reduce((acc, pt, i) => `${acc} ${i === 0 ? 'M' : 'L'} ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`, '');
+          }
+
+          return (
+            <div className="w-full flex flex-col items-center py-2">
+              <svg className="w-full h-44 overflow-visible" viewBox={`0 0 ${svgW} ${svgH}`}>
+                <defs>
+                  <linearGradient id="chartLineGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor={state.currentColor} stopOpacity="0.45" />
+                    <stop offset="100%" stopColor={state.currentColor} stopOpacity="0.0" />
+                  </linearGradient>
+                </defs>
+
+                {/* Guías Horizontales */}
+                <line x1={padX} y1={padY} x2={svgW - padX} y2={padY} stroke="rgba(255,255,255,0.1)" strokeDasharray="3 3" />
+                <line x1={padX} y1={svgH / 2} x2={svgW - padX} y2={svgH / 2} stroke="rgba(255,255,255,0.1)" strokeDasharray="3 3" />
+                <line x1={padX} y1={svgH - padY} x2={svgW - padX} y2={svgH - padY} stroke="rgba(255,255,255,0.2)" />
+
+                {/* Área con Relleno Degradado de Serie 1 */}
+                <path d={areaD1} fill="url(#chartLineGrad1)" />
+
+                {/* Serie 2 (Si está activa) */}
+                {isDualSeries && (
+                  <path
+                    d={pathD2}
+                    fill="none"
+                    stroke={color2}
+                    strokeWidth={Math.max(2, strokeW - 1)}
+                    strokeDasharray="5 5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                )}
+
+                {/* Línea Principal de Serie 1 */}
+                <path
+                  d={pathD1}
+                  fill="none"
+                  stroke={state.currentColor}
+                  strokeWidth={strokeW}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+
+                {/* Puntos y Etiquetas de Serie 1 */}
+                {points1.map((pt, idx) => (
+                  <g key={idx}>
+                    <circle
+                      cx={pt.x}
+                      cy={pt.y}
+                      r="6"
+                      fill={state.currentColor}
+                      stroke="#FFFFFF"
+                      strokeWidth="2.5"
+                      className="shadow-lg"
+                    />
+                    <rect
+                      x={pt.x - 20}
+                      y={pt.y - 27}
+                      width="40"
+                      height="20"
+                      rx="6"
+                      fill="#0F172A"
+                      stroke={state.currentColor}
+                      strokeWidth="1"
+                    />
+                    <text
+                      x={pt.x}
+                      y={pt.y - 13}
+                      textAnchor="middle"
+                      fill="#FFFFFF"
+                      fontSize="11"
+                      fontFamily="monospace"
+                      fontWeight="bold"
+                    >
+                      {pt.pct}%
+                    </text>
+                    <text
+                      x={pt.x}
+                      y={svgH - padY + 18}
+                      textAnchor="middle"
+                      fill={isLight ? '#475569' : '#CBD5E1'}
+                      fontSize="12"
+                      fontFamily="monospace"
+                      fontWeight="bold"
+                    >
+                      {pt.label}
+                    </text>
+                  </g>
+                ))}
+
+                {/* Puntos de Serie 2 */}
+                {isDualSeries && points2.map((pt, idx) => (
+                  <circle
+                    key={`p2-${idx}`}
+                    cx={pt.x}
+                    cy={pt.y}
+                    r="4.5"
+                    fill={color2}
+                    stroke="#FFFFFF"
+                    strokeWidth="2"
+                  />
+                ))}
+              </svg>
+            </div>
+          );
+        })()}
+
+        {/* ================================================================= */}
+        {/* 4. MÓDULO DE CHAT WHATSAPP (CON FORMATO BOLD/ITALIC Y HORAS)      */}
+        {/* ================================================================= */}
+        {state.activeModule === 'chat' && (() => {
+          // Helper para parsear *bold* y _italic_ estilo WhatsApp
+          const renderFormattedText = (raw: string) => {
+            const tokens = raw.split(/(\*\*.*?\*\*|\*[^*]+\*|__.*?__|_.*?_)/g);
+            return tokens.map((token, i) => {
+              if ((token.startsWith('**') && token.endsWith('**')) || (token.startsWith('*') && token.endsWith('*') && token.length > 2)) {
+                const clean = token.replace(/^\*+|\*+$/g, '');
+                return <strong key={i} className="font-bold">{clean}</strong>;
+              }
+              if ((token.startsWith('__') && token.endsWith('__')) || (token.startsWith('_') && token.endsWith('_') && token.length > 2)) {
+                const clean = token.replace(/^_+|_+$/g, '');
+                return <em key={i} className="italic">{clean}</em>;
+              }
+              return token;
+            });
+          };
+
+          return (
+            <div className="flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-white/10 w-full h-auto">
+              {/* Cabecera del Chat */}
               <div
-                className="px-7 py-3 rounded-xl font-mono font-bold text-xs text-white shadow-xl flex items-center justify-center gap-2 transition"
+                className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.08]"
                 style={{
-                  backgroundColor: state.currentColor,
-                  boxShadow: `0 10px 30px rgba(${rgb}, 0.4)`
+                  backgroundColor: isLight ? '#F0F2F5' : '#1F2C34'
                 }}
               >
-                <span>{state.ctaActionButtonText || 'Solicitar Diagnóstico Técnico ➔'}</span>
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-white font-mono font-bold shadow-md shrink-0 ring-2 ring-white/20"
+                    style={{ backgroundColor: state.currentColor }}
+                  >
+                    {(state.chatContactName || 'A').charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex flex-col">
+                    <span
+                      className={`font-mono font-bold text-sm tracking-tight ${
+                        isLight ? 'text-slate-900' : 'text-white'
+                      }`}
+                    >
+                      {state.chatContactName || 'Asistente Virtual'}
+                    </span>
+                    <div className="flex items-center gap-1.5 text-xs font-mono">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-xs" />
+                      <span className="text-emerald-400 font-semibold">
+                        {state.chatOnlineStatus || 'en línea'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              {state.ctaActionBenefit && (
-                <span
-                  className="text-xs font-mono text-slate-400 text-center pt-0.5"
-                  style={{ fontSize: `${Math.max(11, Math.round(modFontSize * 0.88))}px` }}
-                >
-                  {state.ctaActionBenefit}
-                </span>
-              )}
+
+              {/* Mensajes del Chat */}
+              <div
+                className="p-5 space-y-3.5"
+                style={{
+                  backgroundColor: isLight ? '#EFEAE2' : '#0B141A'
+                }}
+              >
+                {state.chatMessages.map((msg, idx) => {
+                  const isBot = msg.sender === 'bot';
+                  return (
+                    <div
+                      key={idx}
+                      className={`flex flex-col ${isBot ? 'items-end' : 'items-start'}`}
+                    >
+                      <div
+                        className={`relative max-w-[85%] px-4 py-3 rounded-2xl shadow-md transition-all ${
+                          isBot
+                            ? isLight
+                              ? 'bg-[#D9FDD3] text-[#111B21] rounded-tr-xs'
+                              : 'bg-[#005C4B] text-[#E9EDEF] rounded-tr-xs'
+                            : isLight
+                            ? 'bg-[#FFFFFF] text-[#111B21] rounded-tl-xs'
+                            : 'bg-[#202C33] text-[#E9EDEF] rounded-tl-xs'
+                        }`}
+                        style={{ fontSize: `${Math.round(modFontSize * 1.05)}px` }}
+                      >
+                        <p className="leading-relaxed whitespace-pre-wrap font-sans">
+                          {renderFormattedText(msg.text)}
+                        </p>
+
+                        <div className="flex items-center justify-end gap-1.5 mt-1.5 select-none">
+                          <span
+                            className={`text-xs font-mono ${
+                              isLight ? 'text-slate-500' : 'text-slate-400'
+                            }`}
+                          >
+                            {msg.time}
+                          </span>
+                          {isBot && (
+                            <CheckCheck className="w-4 h-4 text-[#53BDEB]" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* ================================================================= */}
-        {/* 8. MÓDULO DE TEXTO / GRAN CITA / BANNER DE AUTOR                 */}
+        {/* 5. MÓDULO DE PASOS / FASES (CON GAP Y ETIQUETA FLEXIBLE)          */}
         {/* ================================================================= */}
-        {state.activeModule === 'text' && (
-          <div className="flex flex-col items-center justify-center text-center p-3 w-full h-auto">
-            {state.contentHighlightStyle === 'quote' ? (
-              <div className="relative w-full flex flex-col items-center py-4">
+        {state.activeModule === 'steps' && (() => {
+          const formatLabel = (num: number, fmt?: string) => {
+            const pad = num < 10 ? `0${num}` : `${num}`;
+            switch (fmt) {
+              case 'number': return `#${pad}`;
+              case 'paso': return `PASO ${pad}`;
+              case 'sprint': return `SPRINT ${pad}`;
+              case 'hito': return `HITO ${String.fromCharCode(64 + num)}`;
+              case 'minimal': return `${num}`;
+              case 'fase':
+              default:
+                return `FASE ${pad}`;
+            }
+          };
+
+          return (
+            <div
+              className="grid grid-cols-2 w-full"
+              style={{ gap: `${state.stepsGap ?? 16}px` }}
+            >
+              {(state.steps || state.stepsData || []).map((st, idx) => {
+                const stepNum = st.stepNumber || (idx + 1);
+                const stepDesc = st.description || st.desc || '';
+                return (
+                  <div
+                    key={idx}
+                    className="p-5 rounded-2xl border flex flex-col gap-2 relative overflow-hidden shadow-xl backdrop-blur-xl transition-all"
+                    style={{
+                      backgroundColor: isLight ? 'rgba(255,255,255,0.9)' : 'rgba(15, 23, 42, 0.85)',
+                      borderColor: isLight ? 'rgba(0,0,0,0.08)' : `rgba(${rgb}, 0.35)`,
+                      boxShadow: `0 10px 25px -5px rgba(0,0,0,0.3)`
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span
+                        className="w-7 h-7 rounded-xl flex items-center justify-center font-mono font-black text-xs text-white shadow-md ring-2 ring-white/20"
+                        style={{ backgroundColor: state.currentColor }}
+                      >
+                        {stepNum}
+                      </span>
+                      <span
+                        className="text-xs font-mono px-2.5 py-0.5 rounded-md font-bold uppercase tracking-wider"
+                        style={{
+                          backgroundColor: `rgba(${rgb}, 0.12)`,
+                          color: state.currentColor
+                        }}
+                      >
+                        {formatLabel(stepNum, state.stepsFormat)}
+                      </span>
+                    </div>
+                    <h4 className={`font-bold text-sm text-white ${state.titleFont || 'font-inter'}`}>
+                      {st.title}
+                    </h4>
+                    <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">
+                      {stepDesc}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
+
+        {/* ================================================================= */}
+        {/* 6. MÓDULO UNIFICADO: IMPACTO / GRAN CITA / FRASE ACCIÓN           */}
+        {/* ================================================================= */}
+        {(state.activeModule === 'quote-cta' || state.activeModule === 'text' || state.activeModule === 'cta' || state.activeModule === 'promo') && (() => {
+          const mode = state.quoteCtaMode || (state.activeModule === 'cta' ? 'cta' : state.contentHighlightStyle === 'banner' ? 'banner' : 'quote');
+
+          if (mode === 'cta') {
+            return (
+              <div
+                className="w-full rounded-2xl p-7 flex flex-col items-center justify-center text-center gap-4 border shadow-2xl relative overflow-hidden"
+                style={{
+                  background: isLight
+                    ? `linear-gradient(135deg, rgba(${rgb}, 0.12) 0%, rgba(255, 255, 255, 0.95) 100%)`
+                    : `linear-gradient(135deg, rgba(${rgb}, 0.28) 0%, rgba(15, 23, 42, 0.9) 100%)`,
+                  borderColor: `rgba(${rgb}, 0.45)`,
+                  boxShadow: `0 20px 45px -10px rgba(${rgb}, 0.25)`
+                }}
+              >
                 <span
-                  className="font-serif font-black select-none pointer-events-none absolute -top-8 left-4 opacity-25"
-                  style={{ fontSize: `${Math.round(96 * modScale)}px`, color: state.currentColor }}
-                >
-                  “
-                </span>
-                <blockquote
-                  className="italic font-medium leading-relaxed z-10 px-8 max-w-[92%]"
+                  className="px-4 py-1.5 rounded-full text-xs font-mono font-bold tracking-widest uppercase shadow-md flex items-center gap-1.5"
                   style={{
-                    fontSize: `${Math.round(modFontSize * 1.55)}px`,
-                    color: isLight ? '#0F172A' : '#F8FAFC'
+                    backgroundColor: state.currentColor,
+                    color: '#FFFFFF'
                   }}
                 >
-                  {state.contentHighlightText || 'Automatiza tus flujos operativos y acelera el crecimiento de tu empresa con software a la medida.'}
-                </blockquote>
-                {(state.contentHighlightAuthor || state.contentHighlightRole) && (
-                  <div className="flex items-center gap-2 pt-3 z-10 font-mono">
-                    {state.contentHighlightAuthor && (
-                      <span className={`font-bold text-xs ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
-                        — {state.contentHighlightAuthor}
-                      </span>
-                    )}
-                    {state.contentHighlightRole && (
-                      <span className="text-[11px] text-slate-400">
-                        • {state.contentHighlightRole}
-                      </span>
-                    )}
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>{state.ctaActionBadge || '⚡ SOLUCIÓN DIRECTA'}</span>
+                </span>
+
+                <p
+                  className="font-black tracking-tight leading-snug px-3"
+                  style={{
+                    fontSize: `${Math.round(25 * modScale)}px`,
+                    color: isLight ? '#0F172A' : '#FFFFFF'
+                  }}
+                >
+                  {state.ctaActionPhrase || 'Migra hoy tus procesos a la nube y reduce tiempos de respuesta en un 60%.'}
+                </p>
+
+                <div className="flex flex-col items-center gap-2 pt-1 w-full max-w-[85%]">
+                  <div
+                    className="px-7 py-3 rounded-xl font-mono font-bold text-xs text-white shadow-xl flex items-center justify-center gap-2 transition"
+                    style={{
+                      backgroundColor: state.currentColor,
+                      boxShadow: `0 10px 30px rgba(${rgb}, 0.4)`
+                    }}
+                  >
+                    <span>{state.ctaActionButtonText || 'Solicitar Diagnóstico Técnico ➔'}</span>
                   </div>
-                )}
+                  {state.ctaActionBenefit && (
+                    <span
+                      className="text-xs font-mono text-slate-400 text-center pt-0.5"
+                      style={{ fontSize: `${Math.max(11, Math.round(modFontSize * 0.88))}px` }}
+                    >
+                      {state.ctaActionBenefit}
+                    </span>
+                  )}
+                </div>
               </div>
-            ) : state.contentHighlightStyle === 'banner' ? (
+            );
+          }
+
+          if (mode === 'banner') {
+            return (
               <div
                 className="w-full rounded-2xl p-6 flex flex-col items-center justify-center gap-3 border shadow-xl"
                 style={{
@@ -1508,7 +1609,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                     color: '#FFFFFF'
                   }}
                 >
-                  LLAMADO A LA ACCIÓN
+                  {state.ctaActionBadge || 'LLAMADO A LA ACCIÓN'}
                 </span>
                 <p
                   className="font-extrabold tracking-tight text-center leading-snug px-4"
@@ -1527,58 +1628,80 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                       </span>
                     )}
                     {state.contentHighlightRole && (
-                      <span className="text-[11px] text-slate-300">
+                      <span className="text-xs text-slate-300">
                         • {state.contentHighlightRole}
                       </span>
                     )}
                   </div>
                 )}
               </div>
-            ) : (
-              <div
-                className="w-full rounded-2xl p-6 flex flex-col items-center justify-center gap-3 border shadow-2xl"
+            );
+          }
+
+          // Default 'quote'
+          return (
+            <div className="relative w-full flex flex-col items-center py-4">
+              <span
+                className="font-serif font-black select-none pointer-events-none absolute -top-8 left-4 opacity-25"
+                style={{ fontSize: `${Math.round(96 * modScale)}px`, color: state.currentColor }}
+              >
+                “
+              </span>
+              <blockquote
+                className={`italic font-medium leading-relaxed z-10 px-8 max-w-[92%] ${state.subtitleFont || state.titleFont || 'font-inter'}`}
                 style={{
-                  backgroundColor: isLight ? 'rgba(255,255,255,0.85)' : 'rgba(15, 23, 42, 0.65)',
-                  borderColor: isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255, 255, 255, 0.12)',
-                  boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
+                  fontSize: `${Math.round((state.moduleFontSize || 16) * 1.45)}px`,
+                  color: isLight ? '#0F172A' : '#F8FAFC'
                 }}
               >
-                <p
-                  className="font-bold tracking-tight text-center leading-relaxed max-w-[95%]"
-                  style={{
-                    fontSize: `${Math.round(modFontSize * 1.45)}px`,
-                    color: isLight ? '#0F172A' : '#F1F5F9'
-                  }}
-                >
-                  {state.contentHighlightText || 'Soluciones tecnológicas escalables diseñadas para operaciones de alto rendimiento.'}
-                </p>
-                {(state.contentHighlightAuthor || state.contentHighlightRole) && (
-                  <div className="flex items-center gap-2 pt-1 font-mono">
-                    {state.contentHighlightAuthor && (
-                      <span className={`font-bold text-xs ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
-                        — {state.contentHighlightAuthor}
-                      </span>
-                    )}
-                    {state.contentHighlightRole && (
-                      <span className="text-[11px] text-slate-400">
-                        • {state.contentHighlightRole}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+                {state.contentHighlightText || 'Automatiza tus flujos operativos y acelera el crecimiento de tu empresa con software a la medida.'}
+              </blockquote>
+              {(state.contentHighlightAuthor || state.contentHighlightRole) && (
+                <div className="flex items-center gap-2 pt-3 z-10 font-mono">
+                  {state.contentHighlightAuthor && (
+                    <span className={`font-bold text-xs ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                      — {state.contentHighlightAuthor}
+                    </span>
+                  )}
+                  {state.contentHighlightRole && (
+                    <span className="text-xs text-slate-400">
+                      • {state.contentHighlightRole}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* ================================================================= */}
-        {/* 9. MÓDULO DE IMÁGENES (MOCKUPS MULTI-BORDE Y PNG TRANSPARENTE)   */}
+        {/* 7. MÓDULO DE IMÁGENES (CON PROPORCIÓN ASPECT RATIO & FIT)         */}
         {/* ================================================================= */}
         {state.activeModule === 'image' && (
           <div className="flex flex-col gap-3 h-auto w-full">
             <div className="w-full flex items-center justify-center transition-all">
               {state.images.map((img, idx) => {
                 const isRaw = state.imageBorderStyle === 'raw';
+                const ar = state.imageAspectRatio || 'auto';
+                const fit = state.imageFit || 'cover';
+
+                let containerStyle: React.CSSProperties = {
+                  maxHeight: `${Math.round(380 * modScale)}px`
+                };
+
+                if (ar === '1:1') {
+                  containerStyle.aspectRatio = '1 / 1';
+                  containerStyle.maxHeight = '420px';
+                } else if (ar === '16:9') {
+                  containerStyle.aspectRatio = '16 / 9';
+                  containerStyle.maxHeight = '360px';
+                } else if (ar === '4:5') {
+                  containerStyle.aspectRatio = '4 / 5';
+                  containerStyle.maxHeight = '440px';
+                } else if (ar === '4:3') {
+                  containerStyle.aspectRatio = '4 / 3';
+                  containerStyle.maxHeight = '380px';
+                }
 
                 return (
                   <div
@@ -1586,15 +1709,18 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                     className={`w-full flex items-center justify-center transition-all ${
                       isRaw ? 'p-0 bg-transparent border-0 shadow-none' : `overflow-hidden ${imgBorderClass}`
                     }`}
-                    style={{ maxHeight: `${Math.round(380 * modScale)}px` }}
+                    style={containerStyle}
                   >
                     <img
                       src={img.url}
                       alt={img.caption || 'Preview'}
                       className={`w-full h-full transition-all ${
-                        isRaw ? 'object-contain filter drop-shadow-2xl' : 'object-cover rounded-xl'
+                        isRaw ? 'filter drop-shadow-2xl' : 'rounded-xl'
                       }`}
-                      style={{ maxHeight: `${Math.round(380 * modScale)}px` }}
+                      style={{
+                        objectFit: isRaw ? 'contain' : fit,
+                        maxHeight: `${Math.round(420 * modScale)}px`
+                      }}
                     />
                   </div>
                 );

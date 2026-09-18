@@ -7,7 +7,23 @@ export interface AspectRatioConfig {
   label: string;
 }
 
-export type ModuleType = 'kpi' | 'chart' | 'chat' | 'image' | 'text' | 'steps' | 'promo' | 'cta' | 'code';
+export type ModuleType = 
+  | 'code' 
+  | 'kpi' 
+  | 'chart-bars' 
+  | 'chart-pie' 
+  | 'chart-line' 
+  | 'chat' 
+  | 'steps' 
+  | 'quote-cta' 
+  | 'image'
+  // Retrocompatibilidad con plantillas existentes:
+  | 'chart' 
+  | 'text' 
+  | 'cta' 
+  | 'promo';
+
+export type CodeWindowStyle = 'macos' | 'windows' | 'linux' | 'bash' | 'cmd';
 
 export type ChartType = 'horizontal-bars' | 'pie' | 'line';
 
@@ -110,6 +126,7 @@ export interface KPICard {
   prefix?: string;
   suffix?: string;
   trend?: 'up' | 'down' | 'none';
+  trendLabel?: string;
   borderTop?: boolean;
 }
 
@@ -212,8 +229,18 @@ export interface PostTemplate {
   codeLanguage?: string;
   codeShowLineNumbers?: boolean;
   codeFontSize?: number;
+  codeWindowStyle?: CodeWindowStyle;
+  moduleKpiGap?: number;
+  moduleKpiCols?: 'auto' | '2' | '1';
   kpis?: KPICard[];
   chartBars?: ChartBar[];
+  chartBarHeight?: number;
+  chartLineSeries?: 1 | 2;
+  chartLineStroke?: number;
+  chartLineSeries2?: ChartBar[];
+  chartLineColor2?: string;
+  chartDonutText?: string;
+  chartDonutThickness?: 'thin' | 'medium' | 'full';
   chatMessages?: ChatMessage[];
   chatContactName?: string;
   chatOnlineStatus?: string;
@@ -221,12 +248,17 @@ export interface PostTemplate {
   contentHighlightAuthor?: string;
   contentHighlightRole?: string;
   contentHighlightStyle?: 'card' | 'quote' | 'banner';
+  quoteCtaMode?: 'quote' | 'cta' | 'banner';
   ctaActionPhrase?: string;
   ctaActionBadge?: string;
   ctaActionButtonText?: string;
   ctaActionBenefit?: string;
   steps?: StepItem[];
+  stepsGap?: number;
+  stepsFormat?: 'number' | 'fase' | 'paso' | 'sprint' | 'hito' | 'minimal';
   promo?: PromoData;
+  imageAspectRatio?: 'auto' | '1:1' | '16:9' | '4:5' | '4:3';
+  imageFit?: 'cover' | 'contain';
   bgPattern?: PatternType;
   patternEnabled?: boolean;
   patternOpacity?: number;
@@ -365,8 +397,18 @@ export interface PostState {
   codeLanguage: string;
   codeShowLineNumbers: boolean;
   codeFontSize?: number;
+  codeWindowStyle?: CodeWindowStyle;
+  moduleKpiGap?: number;
+  moduleKpiCols?: 'auto' | '2' | '1';
   kpis: KPICard[];
   chartBars: ChartBar[];
+  chartBarHeight?: number;
+  chartLineSeries?: 1 | 2;
+  chartLineStroke?: number;
+  chartLineSeries2?: ChartBar[];
+  chartLineColor2?: string;
+  chartDonutText?: string;
+  chartDonutThickness?: 'thin' | 'medium' | 'full';
   chatMessages: ChatMessage[];
   chatContactName: string;
   chatOnlineStatus: string;
@@ -374,14 +416,19 @@ export interface PostState {
   contentHighlightAuthor?: string;
   contentHighlightRole?: string;
   contentHighlightStyle: 'card' | 'quote' | 'banner';
+  quoteCtaMode?: 'quote' | 'cta' | 'banner';
   ctaActionPhrase?: string;
   ctaActionBadge?: string;
   ctaActionButtonText?: string;
   ctaActionBenefit?: string;
   steps: StepItem[];
+  stepsGap?: number;
+  stepsFormat?: 'number' | 'fase' | 'paso' | 'sprint' | 'hito' | 'minimal';
   promo: PromoData;
   images: CustomImage[];
   imageBorderStyle: ImageBorderStyle;
+  imageAspectRatio?: 'auto' | '1:1' | '16:9' | '4:5' | '4:3';
+  imageFit?: 'cover' | 'contain';
 
   // Footer in Step 1
   cta: string;
