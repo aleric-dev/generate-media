@@ -140,7 +140,15 @@ export const CreationWizardModal: React.FC<CreationWizardModalProps> = ({
       steps: tpl.steps || wizardState.steps,
       promo: tpl.promo || wizardState.promo,
       tags: tpl.tags || wizardState.tags,
-      bgPattern: tpl.bgPattern || wizardState.bgPattern,
+      bgPattern: 'grid',
+      patternEnabled: true,
+      patternScale: 100,
+      shapeEnabled: false,
+      shapesEnabled: false,
+      lightEnabled: true,
+      lightsEnabled: true,
+      lightType: 'glow',
+      lightDirection: 'dual-corners-1',
       category: tpl.category || wizardState.category,
     });
   };
@@ -159,16 +167,16 @@ export const CreationWizardModal: React.FC<CreationWizardModalProps> = ({
   ];
 
   const patterns: PatternType[] = [
-    'circuit',
-    'hexagons',
-    'matrix',
-    'neural',
     'grid',
+    'grid-dot',
     'dots',
+    'excel-grid',
+    'git-graph',
+    'horizontal-lines',
     'waves',
-    'isometric',
-    'topographic',
-    'none',
+    'diagonal',
+    'blueprint',
+    'crosses',
   ];
 
   const modules: { id: ModuleType; label: string }[] = [
@@ -753,20 +761,34 @@ export const CreationWizardModal: React.FC<CreationWizardModalProps> = ({
                 <div className="space-y-2 text-xs font-mono">
                   <label className="text-slate-300 font-semibold">Trama de Fondo</label>
                   <div className="grid grid-cols-5 gap-2">
-                    {patterns.map((p) => (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => updateWizard({ bgPattern: p })}
-                        className={`p-2 rounded-xl border text-center transition capitalize text-[11px] ${
-                          wizardState.bgPattern === p
-                            ? 'bg-indigo-600/20 border-indigo-500 text-white font-bold'
-                            : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    ))}
+                    {patterns.map((p) => {
+                      const labels: Record<string, string> = {
+                        'grid': 'Cuadrícula',
+                        'grid-dot': 'Grid + Punto',
+                        'dots': 'Puntos',
+                        'excel-grid': 'Celdas Excel',
+                        'git-graph': 'Ramas Git',
+                        'horizontal-lines': 'Renglones',
+                        'waves': 'Ondas',
+                        'diagonal': 'Diagonal',
+                        'blueprint': 'Blueprint',
+                        'crosses': 'Cruces',
+                      };
+                      return (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => updateWizard({ bgPattern: p })}
+                          className={`p-2 rounded-xl border text-center transition capitalize text-[11px] ${
+                            wizardState.bgPattern === p
+                              ? 'bg-indigo-600/20 border-indigo-500 text-white font-bold'
+                              : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          {labels[p] || p}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 

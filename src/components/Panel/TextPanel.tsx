@@ -2,16 +2,12 @@ import React, { useState } from 'react';
 import { 
   PostState, 
   TextAlign, 
-  CtaOrder, 
-  CtaAlign, 
-  HeaderBrandMode,
-  LogoAspectRatio,
+  BadgeStyle,
   TagsGroupType
 } from '../../types';
 import { 
   Type, 
   Heading, 
-  Upload, 
   Star, 
   User, 
   CheckCircle2, 
@@ -23,11 +19,11 @@ import {
   AlignCenter, 
   AlignRight, 
   Layers, 
-  Sliders, 
-  MessageSquare,
-  GripVertical
+  GripVertical,
+  Pipette,
+  Palette,
+  Upload
 } from 'lucide-react';
-import { BRAND_ICONS } from '../../constants/brandIcons';
 import { FONT_OPTIONS } from '../../constants/fonts';
 import { AccordionSection } from './AccordionSection';
 
@@ -40,7 +36,7 @@ export const TextPanel: React.FC<TextPanelProps> = ({
   state,
   updateState
 }) => {
-  const [activeSection, setActiveSection] = useState<string | null>('header');
+  const [activeSection, setActiveSection] = useState<string | null>('title');
 
   const toggleSection = (key: string) => {
     setActiveSection((prev) => (prev === key ? null : key));
@@ -48,22 +44,7 @@ export const TextPanel: React.FC<TextPanelProps> = ({
 
   const fontOptions = FONT_OPTIONS;
 
-  // Helpers para Logo Custom
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      updateState({
-        customLogoUrl: ev.target?.result as string,
-        logoType: 'custom',
-        headerShowLogo: true
-      });
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // Helpers para Avatar de Autor
+  // Helpers para Avatar de Autor en Badges
   const handleAuthorAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -125,405 +106,335 @@ export const TextPanel: React.FC<TextPanelProps> = ({
     setDropTargetPill(null);
   };
 
-  // Escala Coordinada de Cabecera (Texto + Logo Armónicos)
-  const headerScalePresets = [
-    { text: 11, logo: 32, label: '11 px texto • 32 px logo (Ultra Compacta)' },
-    { text: 13, logo: 40, label: '13 px texto • 40 px logo (Discreta)' },
-    { text: 16, logo: 48, label: '16 px texto • 48 px logo (Equilibrada - Estándar)' },
-    { text: 20, logo: 60, label: '20 px texto • 60 px logo (Destacada)' },
-    { text: 24, logo: 72, label: '24 px texto • 72 px logo (Presencia Fuerte)' },
-    { text: 28, logo: 84, label: '28 px texto • 84 px logo (Gran Editorial)' },
-    { text: 34, logo: 100, label: '34 px texto • 100 px logo (Máximo Impacto)' },
-  ];
-
-  const currentHeaderMatch = headerScalePresets.find(
-    (p) => p.text === (state.headerSize || 13)
-  ) || headerScalePresets[1];
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-3.5">
 
       {/* ========================================================================= */}
-      {/* 1. CABECERA DE MARCA (EMPRESA + BADGE EN UNA FILA Y ESCALA COORDINADA)    */}
+      {/* 1. TITULAR PRINCIPAL + COLOR DE TEXTO DEDICADO                             */}
       {/* ========================================================================= */}
       <AccordionSection
-        id="header"
-        title="Cabecera de Marca (Header)"
+        id="title"
+        title="1. Titular Principal"
         icon={Heading}
-        badge={state.companyName || 'Tu Empresa'}
-        isOpen={activeSection === 'header'}
-        onToggle={() => toggleSection('header')}
+        badge={`${state.titleSize || 48}px • ${state.titleFont?.replace('font-', '') || 'inter'}`}
+        isOpen={activeSection === 'title'}
+        onToggle={() => toggleSection('title')}
       >
-        <div className="space-y-3.5">
-          {/* NOMBRE DE LA EMPRESA Y BADGE SUPERIOR EN UNA SOLA FILA */}
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-[10px] text-slate-300 font-semibold block mb-1">
-                Empresa o Marca:
-              </label>
-              <input
-                type="text"
-                value={state.companyName}
-                onChange={(e) => updateState({ companyName: e.target.value })}
-                placeholder="Ej: Aleric.dev"
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-medium"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] text-slate-300 font-semibold block mb-1">
-                Badge / Categoría:
-              </label>
-              <input
-                type="text"
-                value={state.category}
-                onChange={(e) => updateState({ category: e.target.value })}
-                placeholder="Ej: DESARROLLO A LA MEDIDA"
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono tracking-wide uppercase"
-              />
-            </div>
+        <div className="space-y-3.5 p-3.5 bg-slate-950/60 rounded-xl border border-slate-800/80">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <span className="text-xs text-slate-200 font-bold flex items-center gap-1.5">
+              <Heading className="w-3.5 h-3.5 text-indigo-400" /> Contenido del Titular
+            </span>
+            <span className="text-[10px] font-mono text-indigo-400 font-bold">
+              {state.titleSize || 48} px
+            </span>
           </div>
 
-          {/* ESCALA COORDINADA DE CABECERA CON SLIDER (TEXTO + LOGO CRECEN JUNTOS) */}
+          <textarea
+            rows={2}
+            value={state.title ?? ''}
+            onChange={(e) => updateState({ title: e.target.value })}
+            placeholder="Escribe aquí el titular principal..."
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none leading-relaxed font-semibold"
+          />
+
+          {/* FILA: FUENTE + ALINEACIÓN + TAMAÑO */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-[10px] text-slate-400 font-mono">
-                Escala Coordinada (Texto & Logo):
-              </label>
-              <span className="text-[10px] text-indigo-400 font-mono font-bold">
-                {state.headerSize || 13} px texto • {state.logoSize || 40} px logo
-              </span>
-            </div>
-            <input
-              type="range"
-              min={11}
-              max={34}
-              step={1}
-              value={state.headerSize || 13}
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                updateState({
-                  headerSize: val,
-                  logoSize: Math.round(val * 2.9)
-                });
-              }}
-              className="w-full accent-indigo-500 bg-slate-900 h-1.5 rounded-lg cursor-pointer"
-            />
-          </div>
-
-
-          {/* Modo de Composición de Marca */}
-          <div className="pt-2 border-t border-slate-800/80">
-            <label className="text-[10px] text-slate-400 block mb-1.5 font-mono">
-              Composición de Identidad:
+            <label className="text-[10px] text-slate-400 font-mono block mb-1">
+              Tipografía, Alineación & Tamaño:
             </label>
-            <div className="grid grid-cols-2 gap-1.5 text-xs font-mono">
-              {[
-                { id: 'icon-text' as HeaderBrandMode, label: 'Ícono + Nombre' },
-                { id: 'only-text' as HeaderBrandMode, label: 'Solo Nombre' },
-                { id: 'custom-text' as HeaderBrandMode, label: 'Nombre + Logo Subido' },
-                { id: 'only-custom' as HeaderBrandMode, label: 'Solo Logo Subido' },
-              ].map((mode) => (
-                <button
-                  key={mode.id}
-                  type="button"
-                  onClick={() => updateState({ 
-                    headerBrandMode: mode.id,
-                    headerShowLogo: mode.id !== 'only-text',
-                    logoType: (mode.id === 'custom-text' || mode.id === 'only-custom') ? 'custom' : 'generic'
-                  })}
-                  className={`py-2 px-2 rounded-xl text-center transition text-[11px] ${
-                    (state.headerBrandMode || 'icon-text') === mode.id
-                      ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400'
-                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900'
-                  }`}
-                >
-                  {mode.label}
-                </button>
-              ))}
-            </div>
-          </div>
+            <div className="flex items-center gap-1.5">
+              <select
+                value={state.titleFont || 'font-inter'}
+                onChange={(e) => updateState({ titleFont: e.target.value })}
+                className="flex-1 min-w-0 bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
+              >
+                {fontOptions.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.label}
+                  </option>
+                ))}
+              </select>
 
-          {/* Selector de Ícono: SOLO ÍCONOS EN CUADRÍCULA LIMPIA */}
-          {(state.headerBrandMode || 'icon-text') === 'icon-text' && (
-            <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-xl space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-slate-300 font-medium">Ícono de Cabecera:</span>
-                <span className="text-[10px] font-mono text-indigo-400 font-bold">
-                  {BRAND_ICONS.find((i) => i.id === (state.brandIcon || 'terminal'))?.label || 'Terminal'}
-                </span>
-              </div>
-              <div className="grid grid-cols-6 gap-1.5 max-h-36 overflow-y-auto p-1 custom-scrollbar">
-                {BRAND_ICONS.map((iconItem) => {
-                  const IconCmp = iconItem.icon;
-                  const isSelected = (state.brandIcon || 'terminal') === iconItem.id;
+              <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-0.5 shrink-0">
+                {[
+                  { id: 'left' as TextAlign, icon: AlignLeft, title: 'Izquierda' },
+                  { id: 'center' as TextAlign, icon: AlignCenter, title: 'Centro' },
+                  { id: 'right' as TextAlign, icon: AlignRight, title: 'Derecha' },
+                ].map((align) => {
+                  const Icon = align.icon;
+                  const isSelected = (state.titleAlign || state.textAlign || 'center') === align.id;
                   return (
                     <button
-                      key={iconItem.id}
+                      key={align.id}
                       type="button"
-                      onClick={() => updateState({ brandIcon: iconItem.id })}
-                      title={iconItem.label}
-                      className={`h-9 rounded-lg border flex items-center justify-center transition-all ${
+                      onClick={() => updateState({ titleAlign: align.id, textAlign: align.id })}
+                      title={align.title}
+                      className={`p-1.5 rounded-lg transition ${
                         isSelected
-                          ? 'bg-indigo-600 border-indigo-400 text-white shadow-sm ring-1 ring-indigo-300'
-                          : 'bg-slate-900/90 border-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-800 hover:border-slate-700'
+                          ? 'bg-indigo-600 text-white shadow-sm'
+                          : 'text-slate-400 hover:text-white hover:bg-slate-800'
                       }`}
                     >
-                      <IconCmp className="w-4 h-4" />
+                      <Icon className="w-3.5 h-3.5" />
                     </button>
                   );
                 })}
               </div>
-            </div>
-          )}
 
-          {/* Carga de Logo Custom */}
-          {(state.headerBrandMode === 'custom-text' || state.headerBrandMode === 'only-custom') && (
-            <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-xl space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-slate-300 font-medium">Subir Logo Oficial:</span>
-                <label className="cursor-pointer text-[10px] font-mono bg-indigo-600 hover:bg-indigo-500 text-white py-1 px-2.5 rounded-lg flex items-center gap-1 transition">
-                  <Upload className="w-3 h-3" /> Subir PNG
+              <select
+                value={state.titleSize || 48}
+                onChange={(e) => updateState({ titleSize: Number(e.target.value) })}
+                className="w-24 bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white font-mono focus:outline-none focus:border-indigo-500 shrink-0"
+              >
+                {[32, 40, 48, 56, 64, 72, 80, 88].map((size) => (
+                  <option key={size} value={size}>
+                    {size} px
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* SELECTOR DE COLOR DEL TITULAR (3 OPCIONES CANÓNICAS) */}
+          <div className="pt-2 border-t border-slate-800/80">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-[10px] text-slate-300 font-semibold flex items-center gap-1">
+                <Palette className="w-3 h-3 text-indigo-400" /> Color del Titular:
+              </label>
+              <span className="text-[10px] font-mono text-slate-400">
+                {state.titleColorMode === 'category' ? 'Color Principal' : state.titleColorMode === 'contrast' ? 'Alto Contraste' : (state.titleCustomColor || '#FFFFFF')}
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5 text-xs font-mono">
+              <button
+                type="button"
+                onClick={() => updateState({ titleColorMode: 'category' })}
+                className={`py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 ${
+                  state.titleColorMode === 'category'
+                    ? 'bg-indigo-600 text-white font-bold shadow-sm'
+                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: state.currentColor }} />
+                <span>Principal</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => updateState({ titleColorMode: 'contrast' })}
+                className={`py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 ${
+                  state.titleColorMode === 'contrast'
+                    ? 'bg-indigo-600 text-white font-bold shadow-sm'
+                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                <span className="w-2.5 h-2.5 rounded-full bg-white border border-slate-400" />
+                <span>Contraste</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => updateState({ titleColorMode: 'custom' })}
+                className={`py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 ${
+                  state.titleColorMode === 'custom'
+                    ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400'
+                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                <Pipette className="w-3 h-3" />
+                <span>Personalizado</span>
+              </button>
+            </div>
+
+            {/* COLORPICKER VISIBLE E INTUITIVO AL SELECCIONAR PERSONALIZADO */}
+            {state.titleColorMode === 'custom' && (
+              <div className="mt-2 p-2 bg-slate-900 border border-indigo-500/40 rounded-xl flex items-center justify-between">
+                <div className="flex items-center gap-2">
                   <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoUpload}
-                    className="hidden"
+                    type="color"
+                    value={state.titleCustomColor || '#FFFFFF'}
+                    onChange={(e) => updateState({ titleCustomColor: e.target.value })}
+                    className="w-7 h-7 rounded-lg cursor-pointer border-0 bg-transparent p-0"
                   />
-                </label>
-              </div>
-
-              {state.customLogoUrl && (
-                <div className="flex items-center justify-between p-2 bg-slate-900 rounded-lg border border-slate-800">
-                  <img
-                    src={state.customLogoUrl}
-                    alt="Logo Subido"
-                    className="h-7 w-auto object-contain max-w-[120px]"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => updateState({ customLogoUrl: null })}
-                    className="text-slate-400 hover:text-rose-400 text-[10px] font-mono flex items-center gap-0.5 p-1 rounded hover:bg-rose-500/10 transition"
-                    title="Quitar logo"
-                  >
-                    <X className="w-3.5 h-3.5" /> Quitar
-                  </button>
+                  <span className="text-xs font-mono font-bold text-white">
+                    {state.titleCustomColor || '#FFFFFF'}
+                  </span>
                 </div>
-              )}
-
-              {/* Proporción del Logo */}
-              <div>
-                <span className="text-[10px] text-slate-400 block mb-1 font-mono">Proporción del Logo:</span>
-                <div className="grid grid-cols-4 gap-1 text-[10px] font-mono">
-                  {[
-                    { id: 'auto' as LogoAspectRatio, label: 'Auto' },
-                    { id: 'square' as LogoAspectRatio, label: '1:1 Cuad.' },
-                    { id: 'horizontal' as LogoAspectRatio, label: 'Horiz.' },
-                    { id: 'vertical' as LogoAspectRatio, label: 'Vert.' },
-                  ].map((ratio) => (
-                    <button
-                      key={ratio.id}
-                      type="button"
-                      onClick={() => updateState({ logoAspectRatio: ratio.id })}
-                      className={`py-1 px-1 rounded text-center transition ${
-                        (state.logoAspectRatio || 'auto') === ratio.id
-                          ? 'bg-indigo-600 text-white font-bold'
-                          : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      {ratio.label}
-                    </button>
-                  ))}
-                </div>
+                <span className="text-[10px] text-slate-400 font-mono">Haz clic para cambiar tono</span>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+
         </div>
       </AccordionSection>
 
       {/* ========================================================================= */}
-      {/* 2. TÍTULO Y SUBTÍTULO (FILA ÚNICA: FUENTE + ALINEACIÓN + TAMAÑO)           */}
+      {/* 2. SUBTÍTULO / BAJADA DESCRIPTIVA + COLOR DEDICADO                         */}
       {/* ========================================================================= */}
       <AccordionSection
-        id="typography"
-        title="Título & Subtítulo"
+        id="subtitle"
+        title="2. Subtítulo / Bajada Descriptiva"
         icon={Type}
-        badge={`${state.titleSize}px • ${state.titleFont?.replace('font-', '') || 'inter'}`}
-        isOpen={activeSection === 'typography'}
-        onToggle={() => toggleSection('typography')}
+        badge={`${state.subtitleSize || 24}px • ${state.subtitleFont?.replace('font-', '') || 'inter'}`}
+        isOpen={activeSection === 'subtitle'}
+        onToggle={() => toggleSection('subtitle')}
       >
-        <div className="space-y-4">
-          
-          {/* 2.1 TÍTULAR PRINCIPAL (H1) */}
-          <div className="space-y-2.5 p-3.5 bg-slate-950/60 rounded-xl border border-slate-800/80">
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-              <span className="text-xs text-slate-200 font-bold flex items-center gap-1.5">
-                <Heading className="w-3.5 h-3.5 text-indigo-400" /> Titular Principal (H1)
-              </span>
-              <span className="text-[10px] font-mono text-indigo-400 font-bold">
-                {state.titleSize} px
-              </span>
-            </div>
+        <div className="space-y-3.5 p-3.5 bg-slate-950/60 rounded-xl border border-slate-800/80">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <span className="text-xs text-slate-200 font-bold flex items-center gap-1.5">
+              <Type className="w-3.5 h-3.5 text-indigo-400" /> Contenido del Subtítulo
+            </span>
+            <span className="text-[10px] font-mono text-indigo-400 font-bold">
+              {state.subtitleSize || 24} px
+            </span>
+          </div>
 
-            <textarea
-              rows={2}
-              value={state.title}
-              onChange={(e) => updateState({ title: e.target.value })}
-              placeholder="Escribe aquí el titular principal..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none leading-relaxed font-semibold"
-            />
+          <textarea
+            rows={2}
+            value={state.subtitle ?? ''}
+            onChange={(e) => updateState({ subtitle: e.target.value })}
+            placeholder="Escribe el subtítulo o argumento secundario..."
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none leading-relaxed"
+          />
 
-            {/* FILA ÚNICA COMPACTA: FUENTE + ALINEACIÓN + TAMAÑO */}
-            <div>
-              <label className="text-[10px] text-slate-400 font-mono block mb-1">
-                Tipografía, Alineación & Tamaño:
-              </label>
-              <div className="flex items-center gap-1.5">
-                {/* 1. Fuente (flex-1) ordenada de A-Z */}
-                <select
-                  value={state.titleFont || 'font-inter'}
-                  onChange={(e) => updateState({ titleFont: e.target.value })}
-                  className="flex-1 min-w-0 bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
-                >
-                  {fontOptions.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.label}
-                    </option>
-                  ))}
-                </select>
+          {/* FILA: FUENTE + ALINEACIÓN + TAMAÑO */}
+          <div>
+            <label className="text-[10px] text-slate-400 font-mono block mb-1">
+              Tipografía, Alineación & Tamaño:
+            </label>
+            <div className="flex items-center gap-1.5">
+              <select
+                value={state.subtitleFont || state.titleFont || 'font-inter'}
+                onChange={(e) => updateState({ subtitleFont: e.target.value })}
+                className="flex-1 min-w-0 bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
+              >
+                {fontOptions.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.label}
+                  </option>
+                ))}
+              </select>
 
-                {/* 2. Alineación (3 icon buttons) */}
-                <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-0.5 shrink-0">
-                  {[
-                    { id: 'left' as TextAlign, icon: AlignLeft, title: 'Izquierda' },
-                    { id: 'center' as TextAlign, icon: AlignCenter, title: 'Centro' },
-                    { id: 'right' as TextAlign, icon: AlignRight, title: 'Derecha' },
-                  ].map((align) => {
-                    const Icon = align.icon;
-                    const isSelected = (state.titleAlign || state.textAlign || 'center') === align.id;
-                    return (
-                      <button
-                        key={align.id}
-                        type="button"
-                        onClick={() => updateState({ titleAlign: align.id, textAlign: align.id })}
-                        title={align.title}
-                        className={`p-1.5 rounded-lg transition ${
-                          isSelected
-                            ? 'bg-indigo-600 text-white shadow-sm'
-                            : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                        }`}
-                      >
-                        <Icon className="w-3.5 h-3.5" />
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* 3. Tamaño (w-24 select) con opciones amplias */}
-                <select
-                  value={state.titleSize || 56}
-                  onChange={(e) => updateState({ titleSize: Number(e.target.value) })}
-                  className="w-24 bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white font-mono focus:outline-none focus:border-indigo-500 shrink-0"
-                >
-                  {[32, 40, 48, 56, 64, 72, 80, 88].map((size) => (
-                    <option key={size} value={size}>
-                      {size} px
-                    </option>
-                  ))}
-                </select>
+              <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-0.5 shrink-0">
+                {[
+                  { id: 'left' as TextAlign, icon: AlignLeft, title: 'Izquierda' },
+                  { id: 'center' as TextAlign, icon: AlignCenter, title: 'Centro' },
+                  { id: 'right' as TextAlign, icon: AlignRight, title: 'Derecha' },
+                ].map((align) => {
+                  const Icon = align.icon;
+                  const isSelected = (state.subtitleAlign || state.textAlign || 'center') === align.id;
+                  return (
+                    <button
+                      key={align.id}
+                      type="button"
+                      onClick={() => updateState({ subtitleAlign: align.id })}
+                      title={align.title}
+                      className={`p-1.5 rounded-lg transition ${
+                        isSelected
+                          ? 'bg-indigo-600 text-white shadow-sm'
+                          : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                    </button>
+                  );
+                })}
               </div>
+
+              <select
+                value={state.subtitleSize || 24}
+                onChange={(e) => updateState({ subtitleSize: Number(e.target.value) })}
+                className="w-24 bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white font-mono focus:outline-none focus:border-indigo-500 shrink-0"
+              >
+                {[14, 16, 18, 20, 24, 28, 32, 36].map((size) => (
+                  <option key={size} value={size}>
+                    {size} px
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
-          {/* 2.2 SUBTÍTULO / BAJADA DESCRIPTIVA */}
-          <div className="space-y-2.5 p-3.5 bg-slate-950/60 rounded-xl border border-slate-800/80">
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-              <span className="text-xs text-slate-200 font-bold flex items-center gap-1.5">
-                <Type className="w-3.5 h-3.5 text-indigo-400" /> Subtítulo / Bajada
-              </span>
-              <span className="text-[10px] font-mono text-indigo-400 font-bold">
-                {state.subtitleSize} px
-              </span>
-            </div>
-
-            <textarea
-              rows={2}
-              value={state.subtitle}
-              onChange={(e) => updateState({ subtitle: e.target.value })}
-              placeholder="Escribe el subtítulo o argumento secundario..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none leading-relaxed"
-            />
-
-            {/* FILA ÚNICA COMPACTA: FUENTE + ALINEACIÓN + TAMAÑO (SIN SELECTOR OBSOLETO DE POSICIÓN) */}
-            <div>
-              <label className="text-[10px] text-slate-400 font-mono block mb-1">
-                Tipografía, Alineación & Tamaño:
+          {/* SELECTOR DE COLOR DEL SUBTÍTULO (3 OPCIONES CANÓNICAS) */}
+          <div className="pt-2 border-t border-slate-800/80">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-[10px] text-slate-300 font-semibold flex items-center gap-1">
+                <Palette className="w-3 h-3 text-indigo-400" /> Color del Subtítulo:
               </label>
-              <div className="flex items-center gap-1.5">
-                {/* 1. Fuente (flex-1) */}
-                <select
-                  value={state.subtitleFont || state.titleFont || 'font-inter'}
-                  onChange={(e) => updateState({ subtitleFont: e.target.value })}
-                  className="flex-1 min-w-0 bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
-                >
-                  {fontOptions.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.label}
-                    </option>
-                  ))}
-                </select>
-
-                {/* 2. Alineación (3 icon buttons) */}
-                <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-0.5 shrink-0">
-                  {[
-                    { id: 'left' as TextAlign, icon: AlignLeft, title: 'Izquierda' },
-                    { id: 'center' as TextAlign, icon: AlignCenter, title: 'Centro' },
-                    { id: 'right' as TextAlign, icon: AlignRight, title: 'Derecha' },
-                  ].map((align) => {
-                    const Icon = align.icon;
-                    const isSelected = (state.subtitleAlign || state.textAlign || 'center') === align.id;
-                    return (
-                      <button
-                        key={align.id}
-                        type="button"
-                        onClick={() => updateState({ subtitleAlign: align.id })}
-                        title={align.title}
-                        className={`p-1.5 rounded-lg transition ${
-                          isSelected
-                            ? 'bg-indigo-600 text-white shadow-sm'
-                            : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                        }`}
-                      >
-                        <Icon className="w-3.5 h-3.5" />
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* 3. Tamaño (w-24 select) con opciones amplias */}
-                <select
-                  value={state.subtitleSize || 18}
-                  onChange={(e) => updateState({ subtitleSize: Number(e.target.value) })}
-                  className="w-24 bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white font-mono focus:outline-none focus:border-indigo-500 shrink-0"
-                >
-                  {[14, 16, 18, 20, 24, 28, 32, 36].map((size) => (
-                    <option key={size} value={size}>
-                      {size} px
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <span className="text-[10px] font-mono text-slate-400">
+                {state.subtitleColorMode === 'category' ? 'Color Principal' : state.subtitleColorMode === 'contrast' ? 'Contraste' : (state.subtitleCustomColor || '#94A3B8')}
+              </span>
             </div>
+            <div className="grid grid-cols-3 gap-1.5 text-xs font-mono">
+              <button
+                type="button"
+                onClick={() => updateState({ subtitleColorMode: 'category' })}
+                className={`py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 ${
+                  state.subtitleColorMode === 'category'
+                    ? 'bg-indigo-600 text-white font-bold shadow-sm'
+                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: state.currentColor }} />
+                <span>Principal</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => updateState({ subtitleColorMode: 'contrast' })}
+                className={`py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 ${
+                  (state.subtitleColorMode || 'contrast') === 'contrast'
+                    ? 'bg-indigo-600 text-white font-bold shadow-sm'
+                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                <span className="w-2.5 h-2.5 rounded-full bg-slate-300 border border-slate-500" />
+                <span>Contraste</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => updateState({ subtitleColorMode: 'custom' })}
+                className={`py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 ${
+                  state.subtitleColorMode === 'custom'
+                    ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400'
+                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                <Pipette className="w-3 h-3" />
+                <span>Personalizado</span>
+              </button>
+            </div>
+
+            {/* COLORPICKER VISIBLE PARA SUBTÍTULO */}
+            {state.subtitleColorMode === 'custom' && (
+              <div className="mt-2 p-2 bg-slate-900 border border-indigo-500/40 rounded-xl flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={state.subtitleCustomColor || '#94A3B8'}
+                    onChange={(e) => updateState({ subtitleCustomColor: e.target.value })}
+                    className="w-7 h-7 rounded-lg cursor-pointer border-0 bg-transparent p-0"
+                  />
+                  <span className="text-xs font-mono font-bold text-white">
+                    {state.subtitleCustomColor || '#94A3B8'}
+                  </span>
+                </div>
+                <span className="text-[10px] text-slate-400 font-mono">Haz clic para cambiar tono</span>
+              </div>
+            )}
           </div>
 
         </div>
       </AccordionSection>
 
       {/* ========================================================================= */}
-      {/* 3. TAGS & GRUPO INTERMEDIO (6 OPCIONES CON RANGO DE TAMAÑOS AMPLIADO)     */}
+      {/* 3. BADGES & METADATOS (ELEMENTOS INTERMEDIOS)                              */}
       {/* ========================================================================= */}
       <AccordionSection
         id="tags"
-        title="Tags & Grupo Intermedio"
+        title="3. Badges & Metadatos (Elementos Intermedios)"
         icon={Tag}
         badge={state.tagsGroupVisible ? `${state.tagsSize || 14}px • ${state.tagsGroupType || 'badges'}` : 'Oculto'}
         isOpen={activeSection === 'tags'}
@@ -532,7 +443,7 @@ export const TextPanel: React.FC<TextPanelProps> = ({
         <div className="space-y-3.5">
           <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
             <label className="text-xs text-white font-bold flex items-center gap-1.5">
-              <Tag className="w-3.5 h-3.5 text-indigo-400" /> Visibilidad de Tags
+              <Tag className="w-3.5 h-3.5 text-indigo-400" /> Visibilidad de Metadatos
             </label>
             <button
               type="button"
@@ -551,7 +462,7 @@ export const TextPanel: React.FC<TextPanelProps> = ({
 
           {state.tagsGroupVisible && (
             <div className="space-y-3.5">
-              {/* Selector de las 6 Opciones */}
+              {/* Selector de los 6 Estilos */}
               <div>
                 <label className="text-[10px] text-slate-400 block mb-1 font-mono">
                   Tipo de Elemento (6 Estilos Curados):
@@ -575,7 +486,7 @@ export const TextPanel: React.FC<TextPanelProps> = ({
                         className={`py-2 px-1 rounded-xl flex items-center justify-center gap-1 transition ${
                           isSelected
                             ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400'
-                            : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                            : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900'
                         }`}
                       >
                         <Icon className="w-3.5 h-3.5" />
@@ -586,7 +497,7 @@ export const TextPanel: React.FC<TextPanelProps> = ({
                 </div>
               </div>
 
-              {/* RANGO DE TAMAÑOS Y ALINEACIÓN INDEPENDIENTE DE TAGS */}
+              {/* Rango de Tamaños y Alineación */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-[10px] text-slate-400 font-mono">
@@ -600,7 +511,7 @@ export const TextPanel: React.FC<TextPanelProps> = ({
                   <input
                     type="range"
                     min={11}
-                    max={38}
+                    max={24}
                     step={1}
                     value={state.tagsSize || 14}
                     onChange={(e) => updateState({ tagsSize: Number(e.target.value) })}
@@ -608,9 +519,9 @@ export const TextPanel: React.FC<TextPanelProps> = ({
                   />
                   <div className="flex items-center bg-slate-950 border border-slate-800 rounded-xl p-0.5 shrink-0">
                     {[
-                      { id: 'left' as TextAlign, icon: AlignLeft, title: 'Alinear a la izquierda' },
-                      { id: 'center' as TextAlign, icon: AlignCenter, title: 'Centrar' },
-                      { id: 'right' as TextAlign, icon: AlignRight, title: 'Alinear a la derecha' },
+                      { id: 'left' as TextAlign, icon: AlignLeft, title: 'Izquierda' },
+                      { id: 'center' as TextAlign, icon: AlignCenter, title: 'Centro' },
+                      { id: 'right' as TextAlign, icon: AlignRight, title: 'Derecha' },
                     ].map((align) => {
                       const Icon = align.icon;
                       const isSelected = (state.tagsAlign || state.titleAlign || 'center') === align.id;
@@ -634,7 +545,106 @@ export const TextPanel: React.FC<TextPanelProps> = ({
                 </div>
               </div>
 
-              {/* Inputs contextuales según el Tipo */}
+              {/* Estilo Visual del Badge (6 Opciones en 2 Filas de 3) */}
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1 font-mono">
+                  Estilo Visual del Marco / Badge (2 filas de 3):
+                </label>
+                <div className="grid grid-cols-3 gap-1.5 text-[11px] font-mono">
+                  {[
+                    { id: 'pill' as BadgeStyle, label: 'Pastilla' },
+                    { id: 'bracket' as BadgeStyle, label: '[ Bracket ]' },
+                    { id: 'neon' as BadgeStyle, label: 'Neón Glow' },
+                    { id: 'glass' as BadgeStyle, label: 'Glass' },
+                    { id: 'minimal-dot' as BadgeStyle, label: '• Minimal' },
+                    { id: 'outline' as BadgeStyle, label: 'Contorno' },
+                  ].map((badge) => (
+                    <button
+                      key={badge.id}
+                      type="button"
+                      onClick={() => updateState({ badgeStyle: badge.id, headerBadgeStyle: badge.id })}
+                      className={`py-2 px-1.5 rounded-xl text-center transition font-semibold truncate ${
+                        (state.badgeStyle || 'pill') === badge.id
+                          ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400'
+                          : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900'
+                      }`}
+                    >
+                      {badge.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* SELECTOR DE COLOR DE TAGS (3 OPCIONES CANÓNICAS) */}
+              <div className="pt-2 border-t border-slate-800/80">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[10px] text-slate-300 font-semibold flex items-center gap-1">
+                    <Palette className="w-3 h-3 text-indigo-400" /> Color de Badges / Metadatos:
+                  </label>
+                  <span className="text-[10px] font-mono text-slate-400">
+                    {state.tagsColorMode === 'inherit' ? 'Color Principal' : state.tagsColorMode === 'contrast' ? 'Contraste' : (state.tagsCustomColor || state.currentColor)}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-1.5 text-xs font-mono">
+                  <button
+                    type="button"
+                    onClick={() => updateState({ tagsColorMode: 'inherit' })}
+                    className={`py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 ${
+                      (state.tagsColorMode || 'inherit') === 'inherit'
+                        ? 'bg-indigo-600 text-white font-bold shadow-sm'
+                        : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: state.currentColor }} />
+                    <span>Principal</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => updateState({ tagsColorMode: 'contrast' })}
+                    className={`py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 ${
+                      state.tagsColorMode === 'contrast'
+                        ? 'bg-indigo-600 text-white font-bold shadow-sm'
+                        : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <span className="w-2.5 h-2.5 rounded-full bg-slate-300 border border-slate-500" />
+                    <span>Contraste</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => updateState({ tagsColorMode: 'custom' })}
+                    className={`py-2 px-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 ${
+                      state.tagsColorMode === 'custom'
+                        ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400'
+                        : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <Pipette className="w-3 h-3" />
+                    <span>Personalizado</span>
+                  </button>
+                </div>
+
+                {state.tagsColorMode === 'custom' && (
+                  <div className="mt-2 p-2 bg-slate-900 border border-indigo-500/40 rounded-xl flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={state.tagsCustomColor || state.currentColor}
+                        onChange={(e) => updateState({ tagsCustomColor: e.target.value })}
+                        className="w-7 h-7 rounded-lg cursor-pointer border-0 bg-transparent p-0"
+                      />
+                      <span className="text-xs font-mono font-bold text-white">
+                        {state.tagsCustomColor || state.currentColor}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-slate-400 font-mono">Haz clic para cambiar tono</span>
+                  </div>
+                )}
+              </div>
+
+              {/* INPUTS CONTEXTUALES SEGÚN EL TIPO (SIN DATOS POR DEFECTO FORZADOS) */}
               {(!state.tagsGroupType || state.tagsGroupType === 'badges') && (
                 <div>
                   <label className="text-[10px] text-slate-400 block mb-1 font-mono">
@@ -642,7 +652,7 @@ export const TextPanel: React.FC<TextPanelProps> = ({
                   </label>
                   <input
                     type="text"
-                    value={state.tags}
+                    value={state.tags ?? ''}
                     onChange={(e) => updateState({ tags: e.target.value })}
                     placeholder="Ej: PostgreSQL, Next.js, Cloudflare, Docker"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
@@ -656,7 +666,7 @@ export const TextPanel: React.FC<TextPanelProps> = ({
                     <label className="text-[10px] text-slate-400 block mb-1 font-mono">Puntuación:</label>
                     <input
                       type="text"
-                      value={state.ratingScore || '4.9/5.0'}
+                      value={state.ratingScore ?? ''}
                       onChange={(e) => updateState({ ratingScore: e.target.value })}
                       placeholder="4.9/5.0"
                       className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white font-mono"
@@ -666,7 +676,7 @@ export const TextPanel: React.FC<TextPanelProps> = ({
                     <label className="text-[10px] text-slate-400 block mb-1 font-mono">Texto Reseña:</label>
                     <input
                       type="text"
-                      value={state.ratingCount || '+500 Clientes'}
+                      value={state.ratingCount ?? ''}
                       onChange={(e) => updateState({ ratingCount: e.target.value })}
                       placeholder="+500 Clientes"
                       className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white font-mono"
@@ -682,8 +692,9 @@ export const TextPanel: React.FC<TextPanelProps> = ({
                       <label className="text-[10px] text-slate-400 block mb-1 font-mono">Nombre Autor:</label>
                       <input
                         type="text"
-                        value={state.authorName || 'Ricardo Zapata'}
+                        value={state.authorName ?? ''}
                         onChange={(e) => updateState({ authorName: e.target.value })}
+                        placeholder="Nombre Apellido"
                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white"
                       />
                     </div>
@@ -691,8 +702,9 @@ export const TextPanel: React.FC<TextPanelProps> = ({
                       <label className="text-[10px] text-slate-400 block mb-1 font-mono">Cargo / Rol:</label>
                       <input
                         type="text"
-                        value={state.authorRole || 'Lead Cloud Architect'}
+                        value={state.authorRole ?? ''}
                         onChange={(e) => updateState({ authorRole: e.target.value })}
+                        placeholder="Cargo o Rol"
                         className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white"
                       />
                     </div>
@@ -702,7 +714,7 @@ export const TextPanel: React.FC<TextPanelProps> = ({
                     <div className="flex items-center gap-2">
                       <input
                         type="text"
-                        value={state.authorAvatarUrl || ''}
+                        value={state.authorAvatarUrl ?? ''}
                         onChange={(e) => updateState({ authorAvatarUrl: e.target.value, authorAvatar: e.target.value })}
                         placeholder="https://... o sube una imagen"
                         className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-white"
@@ -721,8 +733,9 @@ export const TextPanel: React.FC<TextPanelProps> = ({
                   <label className="text-[10px] text-slate-400 block mb-1 font-mono">Texto de Prueba Social:</label>
                   <input
                     type="text"
-                    value={state.socialProofText || '⚡ Confiado por más de 120 startups en Latam'}
+                    value={state.socialProofText ?? ''}
                     onChange={(e) => updateState({ socialProofText: e.target.value })}
+                    placeholder="⚡ Confiado por más de 120 startups en Latam"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white"
                   />
                 </div>
@@ -733,21 +746,21 @@ export const TextPanel: React.FC<TextPanelProps> = ({
                   <label className="text-[10px] text-slate-400 block mb-1 font-mono">Texto de Estado:</label>
                   <input
                     type="text"
-                    value={state.statusPillText || 'EN VIVO • NUEVA VERSIÓN'}
+                    value={state.statusPillText ?? ''}
                     onChange={(e) => updateState({ statusPillText: e.target.value })}
+                    placeholder="EN VIVO • NUEVA VERSIÓN"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white font-mono"
                   />
                 </div>
               )}
 
-              {/* 6. Métrica Clave / Impact Chip */}
               {state.tagsGroupType === 'metrics-chip' && (
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <label className="text-[10px] text-slate-400 block mb-1 font-mono">Métrica Clave:</label>
                     <input
                       type="text"
-                      value={state.metricChipHighlight || '⚡ +450% ARR'}
+                      value={state.metricChipHighlight ?? ''}
                       onChange={(e) => updateState({ metricChipHighlight: e.target.value })}
                       placeholder="⚡ +450% ARR"
                       className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white font-mono font-bold"
@@ -757,7 +770,7 @@ export const TextPanel: React.FC<TextPanelProps> = ({
                     <label className="text-[10px] text-slate-400 block mb-1 font-mono">Texto Descriptivo:</label>
                     <input
                       type="text"
-                      value={state.metricChipLabel || 'Crecimiento Verificado'}
+                      value={state.metricChipLabel ?? ''}
                       onChange={(e) => updateState({ metricChipLabel: e.target.value })}
                       placeholder="Crecimiento Verificado"
                       className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white"
@@ -771,25 +784,24 @@ export const TextPanel: React.FC<TextPanelProps> = ({
       </AccordionSection>
 
       {/* ========================================================================= */}
-      {/* 4. JERARQUÍA & REORDENAMIENTO DE BLOQUES (PRESETS - SECUENCIA EN 2 COLUMNAS) */}
+      {/* 4. SECUENCIA & ORDEN DEL POST                                              */}
       {/* ========================================================================= */}
       <AccordionSection
         id="order"
-        title="Ubicaciones, Orden & Espaciados"
+        title="4. Secuencia & Orden del Post"
         icon={Layers}
         badge="Reordenar & Espacios"
         isOpen={activeSection === 'order'}
         onToggle={() => toggleSection('order')}
       >
         <div className="space-y-4">
-          {/* Layout en 2 Columnas: Presets (Izquierda) - Secuencia Activa (Derecha) */}
           <div className="grid grid-cols-2 gap-3 items-start">
             {/* COLUMNA 1: PRESETS RÁPIDOS */}
             <div>
               <label className="text-[10px] text-slate-400 block mb-1.5 font-mono">
                 Presets de Disposición:
               </label>
-              <div className="flex flex-col gap-1.5 text-[11px] font-mono">
+              <div className="flex flex-col gap-1.5 text-xs font-mono">
                 <button
                   type="button"
                   onClick={() => setPresetOrder(['title', 'subtitle', 'tags', 'module'])}
@@ -841,7 +853,7 @@ export const TextPanel: React.FC<TextPanelProps> = ({
               </div>
             </div>
 
-            {/* COLUMNA 2: SECUENCIA ACTIVA ARRASTRABLE EN COLUMNA VERTICAL */}
+            {/* COLUMNA 2: SECUENCIA ACTIVA ARRASTRABLE */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-[10px] text-slate-400 font-mono flex items-center gap-1">
@@ -906,141 +918,6 @@ export const TextPanel: React.FC<TextPanelProps> = ({
               onChange={(e) => updateState({ gapContentBlocks: Number(e.target.value) })}
               className="w-full accent-indigo-500 bg-slate-900 h-1.5 rounded-lg cursor-pointer"
             />
-          </div>
-        </div>
-      </AccordionSection>
-
-
-      {/* ========================================================================= */}
-      {/* 5. PIE DE IMAGEN (FOOTER & CTA CON RANGO DE TAMAÑOS AMPLIADO)              */}
-      {/* ========================================================================= */}
-      <AccordionSection
-        id="footer"
-        title="Pie de Imagen (Footer & CTA)"
-        icon={MessageSquare}
-        badge={state.handle || 'tumarca.dev'}
-        isOpen={activeSection === 'footer'}
-        onToggle={() => toggleSection('footer')}
-      >
-        <div className="space-y-3.5">
-          <div>
-            <label className="text-[11px] text-slate-300 font-medium block mb-1">
-              Texto del CTA (Llamado a la Acción):
-            </label>
-            <input
-              type="text"
-              value={state.cta}
-              onChange={(e) => updateState({ cta: e.target.value })}
-              placeholder="Ej: Escríbenos y migramos tu operación a la nube."
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-
-          <div>
-            <label className="text-[11px] text-slate-300 font-medium block mb-1 font-mono">
-              Handle / Identificador / Sitio Web:
-            </label>
-            <input
-              type="text"
-              value={state.handle}
-              onChange={(e) => updateState({ handle: e.target.value })}
-              placeholder="Ej: tumarca.dev o @tuempresa"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
-            />
-          </div>
-
-          {/* RANGO DE TAMAÑOS DE FOOTER CON SLIDER */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-[10px] text-slate-400 font-mono">
-                Tamaño de Texto del Footer:
-              </label>
-              <span className="text-[10px] text-indigo-400 font-mono font-bold">
-                {state.footerSize || 13} px
-              </span>
-            </div>
-            <input
-              type="range"
-              min={11}
-              max={34}
-              step={1}
-              value={state.footerSize || 13}
-              onChange={(e) => updateState({ footerSize: Number(e.target.value) })}
-              className="w-full accent-indigo-500 bg-slate-900 h-1.5 rounded-lg cursor-pointer"
-            />
-          </div>
-
-          {/* Orden y Alineación del CTA y Handle */}
-          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800/80 text-xs font-mono">
-            <div>
-              <label className="text-[10px] text-slate-400 block mb-1">Orden de Elementos:</label>
-              <div className="grid grid-cols-2 gap-1">
-                <button
-                  type="button"
-                  onClick={() => updateState({ ctaOrder: 'cta-first' })}
-                  className={`py-2 px-1 rounded-xl text-center transition text-[11px] ${
-                    (state.ctaOrder || 'cta-first') === 'cta-first'
-                      ? 'bg-indigo-600 text-white font-bold shadow-sm'
-                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                  }`}
-                >
-                  CTA ➔ Web
-                </button>
-                <button
-                  type="button"
-                  onClick={() => updateState({ ctaOrder: 'handle-first' })}
-                  className={`py-2 px-1 rounded-xl text-center transition text-[11px] ${
-                    state.ctaOrder === 'handle-first'
-                      ? 'bg-indigo-600 text-white font-bold shadow-sm'
-                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                  }`}
-                >
-                  Web ➔ CTA
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="text-[10px] text-slate-400 block mb-1">Alineación en Canvas:</label>
-              <div className="grid grid-cols-3 gap-1">
-                <button
-                  type="button"
-                  onClick={() => updateState({ ctaAlign: 'left' })}
-                  className={`py-2 px-1 rounded-xl flex items-center justify-center transition ${
-                    state.ctaAlign === 'left'
-                      ? 'bg-indigo-600 text-white font-bold'
-                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                  }`}
-                  title="Izquierda"
-                >
-                  <AlignLeft className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => updateState({ ctaAlign: 'center' })}
-                  className={`py-2 px-1 rounded-xl flex items-center justify-center transition ${
-                    (state.ctaAlign || 'center') === 'center'
-                      ? 'bg-indigo-600 text-white font-bold'
-                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                  }`}
-                  title="Centrado"
-                >
-                  <AlignCenter className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => updateState({ ctaAlign: 'between' })}
-                  className={`py-2 px-1 rounded-xl flex items-center justify-center transition text-[10px] ${
-                    state.ctaAlign === 'between'
-                      ? 'bg-indigo-600 text-white font-bold'
-                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                  }`}
-                  title="Extremos (Separados)"
-                >
-                  Extremos
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </AccordionSection>

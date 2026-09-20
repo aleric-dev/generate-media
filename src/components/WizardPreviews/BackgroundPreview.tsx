@@ -92,8 +92,8 @@ export const BackgroundPreview: React.FC<BackgroundPreviewProps> = ({
           <div
             className={`absolute inset-0 pointer-events-none transition-all ${
               isDark ? `pattern-${bgPattern}` : `pattern-${bgPattern}-light`
-            } vignette-${patternVignette || 'none'}`}
-            style={{ opacity: patternOpacity / 100 }}
+            } vignette-${patternVignette || 'gradient-diagonal'}`}
+            style={{ opacity: (patternOpacity / 100) * 0.20 }}
           />
         )}
 

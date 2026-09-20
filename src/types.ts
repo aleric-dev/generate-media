@@ -33,7 +33,7 @@ export type HeaderBrandMode = 'icon-text' | 'only-text' | 'custom-text' | 'only-
 
 export type LogoAspectRatio = 'square' | 'horizontal' | 'vertical' | 'auto';
 
-export type BadgeStyle = 'pill' | 'bracket' | 'neon' | 'glass' | 'minimal-dot';
+export type BadgeStyle = 'pill' | 'bracket' | 'neon' | 'glass' | 'minimal-dot' | 'outline';
 
 export type BadgeColorMode = 'inherit' | 'contrast' | 'custom';
 
@@ -64,27 +64,49 @@ export type HeaderShape = 'line' | 'pill' | 'card' | 'minimal' | 'accent-bar' | 
 export type FooterShape = 'line' | 'card' | 'pill' | 'minimal' | 'accent-bar' | 'floating-dock' | 'bracket-frame' | 'neon-glow';
 
 export type PatternType = 
-  | 'circuit' 
-  | 'hexagons' 
-  | 'matrix' 
-  | 'neural' 
-  | 'isometric' 
   | 'grid' 
+  | 'grid-dot'
   | 'dots' 
+  | 'excel-grid'
+  | 'git-graph'
+  | 'code-lines'
+  | 'horizontal-lines'
+  | 'code-syntax'
+  | 'business-marketing'
   | 'waves' 
   | 'diagonal' 
+  | 'blueprint'
+  | 'crosses' 
+  | 'circuit' 
+  | 'isometric' 
+  | 'hexagons' 
+  | 'custom' 
+  | 'none'
+  | 'matrix' 
+  | 'neural' 
   | 'topographic' 
   | 'noise' 
-  | 'custom' 
-  | 'none';
+  | 'constellation'
+  | 'honeycomb'
+  | 'audio-waves'
+  | 'zigzag'
+  | 'cubes-3d'
+  | 'radial-halftone';
+
+export type FullBackgroundType = 
+  | 'none' 
+  | 'mesh-aurora' 
+  | 'horizon-3d' 
+  | 'terminal-wall' 
+  | 'custom-image';
 
 export type PatternVignette = 
   | 'none' 
   | 'vignette' 
+  | 'gradient-diagonal'
   | 'gradient-top' 
   | 'gradient-bottom' 
-  | 'gradient-lateral' 
-  | 'mask-center';
+  | 'gradient-lateral';
 
 // Luces ambientales independientes
 export type LightType = 'glow' | 'spotlight' | 'aurora' | 'dual-beams' | 'none';
@@ -100,9 +122,24 @@ export type LightDirection =
 
 // Formas geométricas decorativas enriquecidas
 export type ShapeType = string;
-export type ShapeStyleVariant = 'glass' | 'flat' | 'pastel' | 'neon-outline' | 'duotone';
+export type ShapeStyleVariant = 'glass' | 'flat' | 'pastel' | 'neon-outline' | 'duotone' | 'holographic';
 
-export type ShapeGeometry = 'orbs' | 'squares' | 'diamonds' | 'triangles' | 'tech-code' | 'abstract' | 'rings' | 'crosses' | 'stars';
+export type ShapeGeometry = 
+  | 'orbs' 
+  | 'triangles' 
+  | 'hexagons' 
+  | 'crosses' 
+  | 'stars' 
+  | 'custom-icons'
+  // Retrocompatibilidad con estados anteriores:
+  | 'capsules'
+  | 'rings'
+  | 'tech-code'
+  | 'squares' 
+  | 'diamonds' 
+  | 'abstract';
+
+export type ShapeIconCategory = 'tech' | 'growth' | 'creative' | 'social' | 'security' | 'finance';
 
 export type ShapePlacement = 
   | 'corners' 
@@ -128,18 +165,28 @@ export interface KPICard {
   trend?: 'up' | 'down' | 'none';
   trendLabel?: string;
   borderTop?: boolean;
+  icon?: string;
+  progressPct?: number; // 0 a 100
+  progressValue?: number;
+  showProgress?: boolean;
+  benchmark?: string;
 }
 
 export interface ChartBar {
   label: string;
   pct: number;
   color?: string;
+  unit?: string;
+  secondaryVal?: string;
 }
 
 export interface ChatMessage {
   sender: 'client' | 'bot';
   text: string;
   time: string;
+  isVoiceNote?: boolean;
+  voiceDuration?: string;
+  reaction?: string;
 }
 
 export interface CustomImage {
@@ -153,6 +200,9 @@ export interface StepItem {
   title: string;
   desc?: string;
   description?: string;
+  status?: 'completed' | 'in-progress' | 'pending';
+  tag?: string;
+  icon?: string;
 }
 
 export interface PromoData {
@@ -181,9 +231,13 @@ export interface PostTemplate {
   logoAspectRatio?: LogoAspectRatio;
   headerShowLogo?: boolean;
   headerSize?: number;
+  headerTitleColorMode?: 'contrast' | 'inherit' | 'custom';
+  headerTitleCustomColor?: string;
   badgeStyle?: BadgeStyle;
   badgeColorMode?: BadgeColorMode;
   badgeCustomColor?: string;
+  headerBadgeColorMode?: BadgeColorMode;
+  headerBadgeCustomColor?: string;
   titleFont?: string;
   subtitleFont?: string;
   title: string;
@@ -248,7 +302,7 @@ export interface PostTemplate {
   contentHighlightAuthor?: string;
   contentHighlightRole?: string;
   contentHighlightStyle?: 'card' | 'quote' | 'banner';
-  quoteCtaMode?: 'quote' | 'cta' | 'banner';
+  quoteCtaMode?: 'quote' | 'cta' | 'banner' | 'promo';
   ctaActionPhrase?: string;
   ctaActionBadge?: string;
   ctaActionButtonText?: string;
@@ -264,6 +318,10 @@ export interface PostTemplate {
   patternOpacity?: number;
   patternScale?: number;
   patternVignette?: PatternVignette;
+  fullBgType?: FullBackgroundType;
+  customWallpaperUrl?: string | null;
+  wallpaperOpacity?: number; // 0 a 100
+  wallpaperBlur?: number; // 0 a 20px
   lightEnabled?: boolean;
   lightType?: LightType;
   lightDirection?: LightDirection;
@@ -333,6 +391,8 @@ export interface PostState {
   headerShowLogo: boolean;
   headerSize: number; // 10 a 24 px
   logoSize: number; // 24 a 96 px
+  headerTitleColorMode?: 'contrast' | 'inherit' | 'custom';
+  headerTitleCustomColor?: string;
   badgeStyle: BadgeStyle;
   badgeColorMode: BadgeColorMode;
   badgeCustomColor: string;
@@ -416,7 +476,7 @@ export interface PostState {
   contentHighlightAuthor?: string;
   contentHighlightRole?: string;
   contentHighlightStyle: 'card' | 'quote' | 'banner';
-  quoteCtaMode?: 'quote' | 'cta' | 'banner';
+  quoteCtaMode?: 'quote' | 'cta' | 'banner' | 'promo';
   ctaActionPhrase?: string;
   ctaActionBadge?: string;
   ctaActionButtonText?: string;
@@ -426,6 +486,54 @@ export interface PostState {
   stepsFormat?: 'number' | 'fase' | 'paso' | 'sprint' | 'hito' | 'minimal';
   promo: PromoData;
   images: CustomImage[];
+  // Module 1 (Code)
+  codeTheme?: 'tokyo-night' | 'monokai' | 'cyber-emerald' | 'one-dark' | 'github-dark';
+  codeHighlightLine?: number;
+  codeShowTabs?: boolean;
+  codeShowStatusBar?: boolean;
+
+  // Module 2 (KPIs)
+  kpiLayout?: 'grid' | 'bento' | 'stack';
+
+  // Module 3 (Chart Bars)
+  chartUnit?: string;
+  chartShowRank?: boolean;
+  chartCardStyle?: 'glass' | 'minimal' | 'neon';
+
+  // Module 4 (Chart Pie / Donut)
+  chartPieMode?: 'donut' | 'gauge';
+  chartDonutHeroText?: string;
+  chartDonutHeroSub?: string;
+
+  // Module 5 (Chart Line)
+  chartLineCurved?: boolean;
+  chartLineShowAth?: boolean;
+  chartLineAthLabel?: string;
+  chartLineShowGrid?: boolean;
+
+  // Module 6 (Chat)
+  chatPlatform?: 'whatsapp' | 'imessage' | 'slack';
+  chatShowVoiceNote?: boolean;
+  chatVoiceNoteDuration?: string;
+  chatReaction?: string;
+
+  // Module 7 (Steps)
+  stepsLayout?: 'connected-timeline' | 'bento-cards' | 'grid';
+
+  // Module 8 (Quote / CTA / Promo)
+  quoteAuthorAvatar?: string;
+  quoteAuthorCompany?: string;
+  quoteRatingStars?: number;
+  ctaGuarantees?: string[];
+  promoCouponCode?: string;
+  promoDiscountBadge?: string;
+
+  // Module 9 (Image)
+  imageMockupType?: 'safari-browser' | 'mobile-frame' | 'glass-card' | 'clean-raw';
+  imageBrowserUrl?: string;
+  imageShowcaseBadge?: string;
+  imageZoom?: number;
+
   imageBorderStyle: ImageBorderStyle;
   imageAspectRatio?: 'auto' | '1:1' | '16:9' | '4:5' | '4:3';
   imageFit?: 'cover' | 'contain';
@@ -436,6 +544,10 @@ export interface PostState {
   ctaOrder: CtaOrder;
   ctaAlign: CtaAlign;
   footerSize: number; // 10 a 24 px
+  ctaColorMode?: 'inherit' | 'contrast' | 'custom';
+  ctaCustomColor?: string;
+  handleColorMode?: 'inherit' | 'contrast' | 'custom';
+  handleCustomColor?: string;
 
   // Style, Logo & Containers (Step 2)
   logoType: LogoType;
@@ -449,7 +561,12 @@ export interface PostState {
   patternScale: number;
   patternOpacity: number; // 0 a 100
   patternVignette: PatternVignette;
+  patternVignetteIntensity?: number; // 20 a 100 (default 70)
   customPatternUrl: string | null;
+  fullBgType?: FullBackgroundType;
+  customWallpaperUrl?: string | null;
+  wallpaperOpacity?: number; // 0 a 100
+  wallpaperBlur?: number; // 0 a 20px
   
   // Luces
   lightEnabled: boolean;
@@ -462,16 +579,19 @@ export interface PostState {
   shapeEnabled: boolean;
   shapesEnabled?: boolean;
   shapeType: any; // retrocompatibilidad
-  shapeCount?: number; // 4 a 12 formas
+  shapeCount?: number; // 2 a 12 formas
   shapeStyleVariant: ShapeStyleVariant;
   shapeGeometry: ShapeGeometry;
   shapePlacement: ShapePlacement;
   shapeProximity: ShapeProximity;
   shapeSizeVariant: ShapeSizeVariant;
+  shapeSizeScale?: number; // 40 a 180 (slider de escala)
   shapeOpacity: number; // 10 a 100
   shapeSeed: number; // semilla determinista
   shapeSecondaryColor: string;
   shapeDuotoneColor?: string;
+  shapeIconCategory?: ShapeIconCategory;
+  shapeCustomIcon?: string;
 
   // Aliases & Extended Properties
   logoStyle?: any;

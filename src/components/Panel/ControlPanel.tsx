@@ -1,18 +1,18 @@
 import React from 'react';
 import { PostState } from '../../types';
 import { 
+  Building2,
   FileText, 
-  Layers,
-  Palette, 
+  Layers, 
   Sparkles, 
   Download, 
   Home, 
   BookmarkCheck,
   PanelLeftClose
 } from 'lucide-react';
+import { BrandPanel } from './BrandPanel';
 import { TextPanel } from './TextPanel';
 import { ModulePanel } from './ModulePanel';
-import { StylePanel } from './StylePanel';
 import { BackgroundPanel } from './BackgroundPanel';
 import { ExportPanel } from './ExportPanel';
 
@@ -40,17 +40,17 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onOpenSaveModal,
 }) => {
   const stepTitles: Record<number, string> = {
-    1: 'Paso 1: Textos & Estructura',
-    2: 'Paso 2: Módulo Central (Contenido)',
-    3: 'Paso 3: Estilos & Colores',
+    1: 'Paso 1: Marca & Marco Editorial',
+    2: 'Paso 2: Textos & Jerarquía',
+    3: 'Paso 3: Módulo Central & Contenedor',
     4: 'Paso 4: Fondos & Tramas',
     5: 'Exportación Ultra HQ'
   };
 
   const steps = [
-    { id: 1 as const, label: '1. Textos', icon: FileText, desc: 'Header, Título, Subtítulo, Tags y Footer' },
-    { id: 2 as const, label: '2. Contenido', icon: Layers, desc: 'Módulo Central (9 Tipos Especializados)' },
-    { id: 3 as const, label: '3. Estilo', icon: Palette, desc: 'Colores, Contenedores y Texto' },
+    { id: 1 as const, label: '1. Marca', icon: Building2, desc: 'Color, Header, Footer y Logo' },
+    { id: 2 as const, label: '2. Textos', icon: FileText, desc: 'Titular, Subtítulo, Tags y Jerarquía' },
+    { id: 3 as const, label: '3. Contenido', icon: Layers, desc: 'Módulo Central y Contenedor' },
     { id: 4 as const, label: '4. Fondo', icon: Sparkles, desc: 'Tramas en Cards, Luces y Motivos' },
     { id: 5 as const, label: 'Exportar', icon: Download, desc: 'Descarga Ultra HQ' },
   ];
@@ -165,21 +165,21 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           {/* Cuerpo del paso activo con scroll vertical */}
           <div className="flex-1 overflow-y-auto p-4">
             {state.activeStep === 1 && (
-              <TextPanel
+              <BrandPanel
                 state={state}
                 updateState={updateState}
               />
             )}
 
             {state.activeStep === 2 && (
-              <ModulePanel
+              <TextPanel
                 state={state}
                 updateState={updateState}
               />
             )}
 
             {state.activeStep === 3 && (
-              <StylePanel
+              <ModulePanel
                 state={state}
                 updateState={updateState}
               />

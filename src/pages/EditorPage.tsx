@@ -24,6 +24,7 @@ export const EditorPage: React.FC = () => {
 
   const postState = useStudioStore((s) => s.postState);
   const updatePostState = useStudioStore((s) => s.updatePostState);
+  const loadProjectState = useStudioStore((s) => s.loadProjectState);
   const setWizardModalOpen = useStudioStore((s) => s.setWizardModalOpen);
 
   const exportModalOpen = useStudioStore((s) => s.exportModalOpen);
@@ -234,12 +235,13 @@ export const EditorPage: React.FC = () => {
         <FloatingBrandBadge onClick={() => setAboutModalOpen(true)} />
       </main>
 
-      {/* MODAL DE GUARDAR CONFIGURACIÓN / PLANTILLA / MARCA / JSON */}
+      {/* MODAL DE GUARDAR PROYECTO / CONFIGURACIÓN / MARCA / JSON */}
       <SaveConfigModal
         isOpen={saveModalOpen}
         onClose={() => setSaveModalOpen(false)}
         state={postState}
-        onLoadPreset={(savedState) => updatePostState(savedState)}
+        onLoadPreset={(savedState) => loadProjectState(savedState)}
+        onUpdateState={updatePostState}
       />
 
       {/* MODAL ABOUT US / ACERCA DE MEDIA STUDIO */}

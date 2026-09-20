@@ -56,8 +56,8 @@ export const initialPostState: PostState = {
   tagsCustomColor: '#4F46E5',
   ratingValue: 5.0,
   ratingCount: '+500 clientes satisfechos',
-  authorName: 'Ricardo Zapata',
-  authorRole: 'Lead Cloud Architect',
+  authorName: 'Nombre Apellido',
+  authorRole: 'Cargo o Rol',
   authorAvatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
   socialProofText: '👥 +10,000 usuarios activos',
   statusPillText: '🟢 Production Ready',
@@ -112,8 +112,8 @@ export const initialPostState: PostState = {
   chatContactName: 'Asistente Digital',
   chatOnlineStatus: 'en línea',
   contentHighlightText: 'Automatiza tu operación y escala sin límites con software diseñado a tu medida.',
-  contentHighlightAuthor: 'Ricardo Zapata',
-  contentHighlightRole: 'Lead Cloud Architect',
+  contentHighlightAuthor: 'Nombre Apellido',
+  contentHighlightRole: 'Cargo o Rol',
   contentHighlightStyle: 'card',
   ctaActionBadge: '⚡ SOLUCIÓN DIRECTA',
   ctaActionPhrase: 'Migra hoy tus procesos manuales a la nube y reduce tiempos de respuesta en un 60%.',
@@ -152,11 +152,16 @@ export const initialPostState: PostState = {
   footerShape: defaultBrand?.footerShape || 'line',
 
   patternEnabled: true,
-  bgPattern: 'circuit',
+  bgPattern: 'grid',
   patternScale: 100,
   patternOpacity: 100,
-  patternVignette: 'none',
+  patternVignette: 'gradient-diagonal',
   customPatternUrl: null,
+
+  fullBgType: 'none',
+  customWallpaperUrl: null,
+  wallpaperOpacity: 100,
+  wallpaperBlur: 0,
 
   // Luces
   lightEnabled: true,
@@ -164,8 +169,9 @@ export const initialPostState: PostState = {
   lightDirection: 'dual-corners-1',
   lightIntensity: 40,
 
-  // Formas decorativas
-  shapeEnabled: true,
+  // Formas decorativas (desactivadas por defecto)
+  shapeEnabled: false,
+  shapesEnabled: false,
   shapeType: 'glass-orbs',
   shapeCount: 6,
   shapeStyleVariant: 'glass',
@@ -176,6 +182,7 @@ export const initialPostState: PostState = {
   shapeOpacity: 60,
   shapeSeed: 48192,
   shapeSecondaryColor: '#06B6D4',
+  shapeIconCategory: 'tech',
 
   backgroundLayerOrder: 'pattern-lights-shapes',
   zoomMode: 'fit-height',
@@ -210,6 +217,7 @@ interface StudioStore {
   applyBrandProfile: (brand: BrandProfile) => void;
   resetToScratch: () => void;
   setZoom: (level: number, mode?: 'fit-height' | 'fit-width' | 'manual') => void;
+  loadProjectState: (projectState: PostState) => void;
 }
 
 export const useStudioStore = create<StudioStore>((set) => ({
@@ -219,6 +227,15 @@ export const useStudioStore = create<StudioStore>((set) => ({
     set((state) => ({
       postState: { ...state.postState, ...partial },
     })),
+
+  loadProjectState: (projectState) =>
+    set({
+      postState: {
+        ...initialPostState,
+        ...projectState,
+        viewMode: 'editor',
+      },
+    }),
 
   templatesModalOpen: false,
   setTemplatesModalOpen: (open) => set({ templatesModalOpen: open }),
@@ -251,7 +268,17 @@ export const useStudioStore = create<StudioStore>((set) => ({
         subtitleFont: tpl.subtitleFont || state.postState.subtitleFont,
         currentColor: tpl.color || state.postState.currentColor,
         category: tpl.category || state.postState.category,
-        bgPattern: tpl.bgPattern || state.postState.bgPattern,
+        bgPattern: 'grid',
+        patternEnabled: true,
+        patternScale: 100,
+        patternVignette: 'gradient-diagonal',
+        shapeEnabled: false,
+        shapesEnabled: false,
+        lightEnabled: true,
+        lightsEnabled: true,
+        lightType: 'glow',
+        lightDirection: 'dual-corners-1',
+        fullBgType: 'none',
         activeModule: tpl.module || 'code',
         code: tpl.code || state.postState.code,
         codeFilename: tpl.codeFilename || state.postState.codeFilename,
