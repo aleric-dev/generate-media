@@ -9,6 +9,7 @@ interface FloatingWorkspaceCardProps {
   zoomMode: 'fit-height' | 'fit-width' | '100%' | 'manual';
   zoomLevel: number;
   onZoomChange: (modeOrValue: 'fit-height' | 'fit-width' | 1.0 | number) => void;
+  className?: string;
 }
 
 export const FloatingWorkspaceCard: React.FC<FloatingWorkspaceCardProps> = ({
@@ -17,6 +18,7 @@ export const FloatingWorkspaceCard: React.FC<FloatingWorkspaceCardProps> = ({
   zoomMode,
   zoomLevel,
   onZoomChange,
+  className,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const pct = Math.round(zoomLevel * 100);
@@ -30,32 +32,11 @@ export const FloatingWorkspaceCard: React.FC<FloatingWorkspaceCardProps> = ({
 
   return (
     <div
-      className={`absolute top-6 right-6 sm:top-8 sm:right-8 z-30 flex flex-col gap-2 p-2 bg-slate-900/90 hover:bg-slate-900/95 border border-slate-800/90 rounded-2xl backdrop-blur-xl shadow-2xl select-none transition-all duration-300 ease-in-out ${
-        isExpanded ? 'w-[250px]' : 'w-[190px]'
-      }`}
+      className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex flex-col-reverse gap-2 p-1.5 bg-slate-900/90 hover:bg-slate-900/95 border border-slate-800/90 rounded-2xl backdrop-blur-xl shadow-2xl select-none transition-all duration-300 ease-in-out ${
+        isExpanded ? 'w-[260px]' : 'w-[195px]'
+      } ${className || ''}`}
     >
-      {/* FILA 1: Tamaños de aspecto (Visible solo cuando está expandido) */}
-      {isExpanded && (
-        <div className="grid grid-cols-4 gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800/80 text-xs font-mono w-full animate-in fade-in slide-in-from-top-1 duration-200">
-          {ratios.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onAspectRatioChange(item.id)}
-              title={`Formato ${item.label} (${aspectRatios[item.id].px})`}
-              className={`py-1.5 rounded-lg transition text-[11px] font-bold text-center ${
-                aspectRatio === item.id
-                  ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400/50'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* FILA 2: Controles de Zoom Manual (SIEMPRE VISIBLE) + Botón de Comprimir/Expandir */}
+      {/* BARRA PRINCIPAL: Controles de Zoom Manual (SIEMPRE VISIBLE EN EL FONDO DEL DOCK) */}
       <div className="flex items-center justify-between gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800/80 text-xs font-mono w-full">
         <button
           type="button"
@@ -84,24 +65,45 @@ export const FloatingWorkspaceCard: React.FC<FloatingWorkspaceCardProps> = ({
           <Plus className="w-3.5 h-3.5" />
         </button>
 
-        {/* Botón Squircle para comprimir / expandir */}
+        {/* Botón Squircle para expandir hacia arriba */}
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          title={isExpanded ? 'Comprimir panel de zoom' : 'Expandir opciones de ratio y vista'}
+          title={isExpanded ? 'Comprimir panel' : 'Expandir opciones de ratio y vista'}
           className="w-7 h-7 rounded-lg bg-slate-900/90 hover:bg-slate-800 text-slate-400 hover:text-indigo-300 flex items-center justify-center transition border border-slate-800/80 shrink-0"
         >
           {isExpanded ? (
-            <ChevronUp className="w-3.5 h-3.5" />
-          ) : (
             <ChevronDown className="w-3.5 h-3.5" />
+          ) : (
+            <ChevronUp className="w-3.5 h-3.5" />
           )}
         </button>
       </div>
 
-      {/* FILA 3: Alto, Ancho y 100% (Visible solo cuando está expandido) */}
+      {/* FILA SUPERIOR 1 (Al expandir): Formatos de Aspect Ratio */}
       {isExpanded && (
-        <div className="grid grid-cols-3 gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800/80 text-xs font-mono w-full animate-in fade-in slide-in-from-top-1 duration-200">
+        <div className="grid grid-cols-4 gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800/80 text-xs font-mono w-full animate-in fade-in slide-in-from-bottom-2 duration-200">
+          {ratios.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onAspectRatioChange(item.id)}
+              title={`Formato ${item.label} (${aspectRatios[item.id].px})`}
+              className={`py-1.5 rounded-lg transition text-[11px] font-bold text-center ${
+                aspectRatio === item.id
+                  ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400/50'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* FILA SUPERIOR 2 (Al expandir): Alto, Ancho y 100% */}
+      {isExpanded && (
+        <div className="grid grid-cols-3 gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800/80 text-xs font-mono w-full animate-in fade-in slide-in-from-bottom-2 duration-200">
           <button
             type="button"
             onClick={() => onZoomChange('fit-height')}

@@ -1,15 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutTemplate, Sparkles, ArrowRight } from 'lucide-react';
+import {
+  LayoutTemplate,
+  Sparkles,
+  ArrowRight,
+  FolderArchive,
+} from 'lucide-react';
 import { BrandLogo } from '../components/BrandLogo';
 import { DesktopOnlyNotice } from '../components/DesktopOnlyNotice';
+import { ProjectsModal } from '../components/ProjectsModal';
 import { useStudioStore } from '../store/useStudioStore';
+import {
+  getSavedProjects,
+  deleteProject,
+  SavedProject,
+  MAX_SAVED_PROJECTS,
+} from '../utils/customPresetsStorage';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const setWizardModalOpen = useStudioStore((s) => s.setWizardModalOpen);
   const setTemplatesModalOpen = useStudioStore((s) => s.setTemplatesModalOpen);
   const resetToScratch = useStudioStore((s) => s.resetToScratch);
+  const loadProjectState = useStudioStore((s) => s.loadProjectState);
+
+  const [savedProjects, setSavedProjects] = useState<SavedProject[]>([]);
+  const [isProjectsModalOpen, setIsProjectsModalOpen] = useState(false);
+
+  useEffect(() => {
+    setSavedProjects(getSavedProjects());
+  }, []);
 
   const handleStartFromScratch = () => {
     resetToScratch();
@@ -24,6 +44,16 @@ export const HomePage: React.FC = () => {
     setWizardModalOpen(true);
   };
 
+  const handleOpenProject = (project: SavedProject) => {
+    loadProjectState(project.postState, project.id, project.name);
+    navigate('/editor');
+  };
+
+  const handleDeleteProject = (projectId: string) => {
+    deleteProject(projectId);
+    setSavedProjects(getSavedProjects());
+  };
+
   return (
     <>
       {/* VISTA MÓVIL (< 1024px): AVISO DE PANTALLA DE ESCRITORIO REQUERIDA */}
@@ -31,12 +61,13 @@ export const HomePage: React.FC = () => {
         <DesktopOnlyNotice showHeader={false} showFooter={false} />
       </div>
 
-      {/* VISTA ESCRITORIO (>= 1024px): PANEL DE CREACIÓN CON LAS 3 OPCIONES */}
-      <div className="hidden lg:flex w-full flex-1 flex-col items-center justify-center p-6 sm:p-10 select-none relative my-auto">
-        {/* CONTENIDO PRINCIPAL: 100% CENTRADO VERTICAL Y HORIZONTAL */}
-        <main className="relative z-10 max-w-3xl w-full text-center space-y-7 sm:space-y-8 py-6 flex flex-col items-center justify-center">
+      {/* VISTA ESCRITORIO (>= 1024px): PANEL DE CREACIÓN CON LAS 4 OPCIONES */}
+      <div className="hidden lg:flex w-full flex-1 flex-col items-center justify-center p-6 sm:p-10 select-none relative my-auto overflow-y-auto">
+        
+        {/* CONTENIDO PRINCIPAL: 100% CENTRADO */}
+        <main className="relative z-10 max-w-6xl w-full text-center space-y-7 sm:space-y-8 py-4 flex flex-col items-center justify-center">
           {/* Logo & Título */}
-          <div className="space-y-3 flex flex-col items-center">
+          <div className="space-y-2.5 flex flex-col items-center">
             <div className="pb-1">
               <BrandLogo size="xl" />
             </div>
@@ -45,17 +76,18 @@ export const HomePage: React.FC = () => {
               Panel de Creación
             </h1>
             <p className="text-slate-400 text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
-              Generador de contenido visual en 1080p nativo. Elige cómo deseas comenzar tu publicación hoy:
+              Generador editorial en 1080p nativo. Inicia un nuevo diseño o retoma tus proyectos guardados:
             </p>
           </div>
 
-          {/* Las 3 Grandes Opciones de Entrada */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-left w-full">
+          {/* Las 4 Grandes Opciones de Entrada (Cards Uniformes) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left w-full items-stretch">
+            
             {/* OPCIÓN 1: ASISTENTE PASO A PASO (DESTACADO) */}
             <button
               type="button"
               onClick={handleOpenWizard}
-              className="group relative p-5 rounded-2xl bg-gradient-to-b from-[#0F172A] to-[#0A0F1D] hover:from-[#131D35] hover:to-[#0D1426] border-2 border-indigo-500/60 hover:border-indigo-400 transition-all duration-300 flex flex-col justify-between space-y-5 shadow-xl hover:shadow-indigo-500/20 sm:scale-105 z-10 cursor-pointer"
+              className="group relative p-5 rounded-2xl bg-gradient-to-b from-[#0F172A] to-[#0A0F1D] hover:from-[#131D35] hover:to-[#0D1426] border-2 border-indigo-500/60 hover:border-indigo-400 transition-all duration-300 flex flex-col justify-between space-y-5 shadow-xl hover:shadow-indigo-500/20 z-10 cursor-pointer h-full"
             >
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
@@ -84,7 +116,7 @@ export const HomePage: React.FC = () => {
             <button
               type="button"
               onClick={handleOpenTemplates}
-              className="group relative p-5 rounded-2xl bg-[#0B101B]/80 hover:bg-[#0E1524] border border-slate-800 hover:border-indigo-500/60 text-left transition-all duration-300 flex flex-col justify-between space-y-5 shadow-xl hover:shadow-indigo-500/10 cursor-pointer"
+              className="group relative p-5 rounded-2xl bg-[#0B101B]/80 hover:bg-[#0E1524] border border-slate-800 hover:border-indigo-500/60 text-left transition-all duration-300 flex flex-col justify-between space-y-5 shadow-xl hover:shadow-indigo-500/10 cursor-pointer h-full"
             >
               <div className="space-y-2.5">
                 <div className="w-11 h-11 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 flex items-center justify-center transition-transform group-hover:scale-110">
@@ -108,7 +140,7 @@ export const HomePage: React.FC = () => {
             <button
               type="button"
               onClick={handleStartFromScratch}
-              className="group relative p-5 rounded-2xl bg-[#0B101B]/80 hover:bg-[#0E1524] border border-slate-800 hover:border-emerald-500/60 text-left transition-all duration-300 flex flex-col justify-between space-y-5 shadow-xl hover:shadow-emerald-500/10 cursor-pointer"
+              className="group relative p-5 rounded-2xl bg-[#0B101B]/80 hover:bg-[#0E1524] border border-slate-800 hover:border-emerald-500/60 text-left transition-all duration-300 flex flex-col justify-between space-y-5 shadow-xl hover:shadow-emerald-500/10 cursor-pointer h-full"
             >
               <div className="space-y-2.5">
                 <div className="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center justify-center transition-transform group-hover:scale-110">
@@ -127,8 +159,81 @@ export const HomePage: React.FC = () => {
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </span>
             </button>
+
+            {/* OPCIÓN 4: MIS PROYECTOS (CARD CON CAPACIDAD RESTANTE Y MODAL DE TABLA) */}
+            <button
+              type="button"
+              onClick={() => setIsProjectsModalOpen(true)}
+              className="group relative p-5 rounded-2xl bg-[#0B101B]/80 hover:bg-[#0E1524] border border-slate-800 hover:border-indigo-500/60 text-left transition-all duration-300 flex flex-col justify-between space-y-5 shadow-xl hover:shadow-indigo-500/10 cursor-pointer h-full"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="w-11 h-11 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 flex items-center justify-center transition-transform group-hover:scale-110">
+                    <FolderArchive className="w-5 h-5" />
+                  </div>
+                  {/* Badge de Capacidad Restante */}
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
+                    savedProjects.length >= MAX_SAVED_PROJECTS
+                      ? 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+                      : savedProjects.length > 0
+                      ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30'
+                      : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                  }`}>
+                    {savedProjects.length >= MAX_SAVED_PROJECTS
+                      ? '0 disponibles (Lleno)'
+                      : `${MAX_SAVED_PROJECTS - savedProjects.length} restantes`}
+                  </span>
+                </div>
+
+                <div>
+                  <h2 className="text-base font-bold text-white group-hover:text-indigo-300 transition-colors">
+                    Mis Proyectos
+                  </h2>
+                  <p className="text-xs text-slate-400 leading-relaxed mt-1">
+                    {savedProjects.length === 0
+                      ? 'Sin proyectos guardados. Guarda hasta 5 diseños completos en tu navegador.'
+                      : `Gestiona tus ${savedProjects.length} proyecto(s) guardado(s). Abre o elimina en tabla.`}
+                  </p>
+                </div>
+
+                {/* Micro Barra de Slots de Capacidad */}
+                <div className="pt-1">
+                  <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1.5">
+                    <span>Slots usados:</span>
+                    <span className="text-slate-300 font-bold">{savedProjects.length}/{MAX_SAVED_PROJECTS}</span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {[...Array(MAX_SAVED_PROJECTS)].map((_, i) => (
+                      <span
+                        key={i}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                          i < savedProjects.length
+                            ? 'bg-indigo-500 shadow-xs shadow-indigo-500/50'
+                            : 'bg-slate-800/90 border border-slate-700/60'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <span className="text-xs font-mono font-bold text-indigo-400 flex items-center gap-1.5 pt-2">
+                <span>Ver Proyectos ({savedProjects.length})</span>
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </span>
+            </button>
+
           </div>
         </main>
+
+        {/* MODAL CON TABLA DE PROYECTOS */}
+        <ProjectsModal
+          isOpen={isProjectsModalOpen}
+          onClose={() => setIsProjectsModalOpen(false)}
+          savedProjects={savedProjects}
+          onOpenProject={handleOpenProject}
+          onDeleteProject={handleDeleteProject}
+        />
       </div>
     </>
   );

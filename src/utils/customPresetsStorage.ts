@@ -4,6 +4,7 @@ export interface SavedProject {
   id: string;
   name: string;
   createdAt: number;
+  updatedAt?: number;
   postState: PostState;
 }
 
@@ -38,15 +39,44 @@ export const getSavedProjects = (): SavedProject[] => {
 
 export const getSavedCustomPresets = getSavedProjects;
 
-export const saveProject = (
+export const saveOrUpdateProject = (
   name: string,
-  state: PostState
-): { success: boolean; project?: SavedProject; error?: string } => {
+  state: PostState,
+  existingId?: string | null
+): { success: boolean; project?: SavedProject; isUpdate: boolean; error?: string } => {
   const currentProjects = getSavedProjects();
+  const trimmedName = name.trim() || `Proyecto ${new Date().toLocaleDateString('es-ES')}`;
 
+  // 1. CASO: Actualizar proyecto existente
+  if (existingId) {
+    const existingIndex = currentProjects.findIndex((p) => p.id === existingId);
+    if (existingIndex >= 0) {
+      const existing = currentProjects[existingIndex];
+      const updatedProject: SavedProject = {
+        ...existing,
+        name: trimmedName,
+        updatedAt: Date.now(),
+        postState: JSON.parse(JSON.stringify(state)),
+      };
+
+      const updatedList = [...currentProjects];
+      updatedList[existingIndex] = updatedProject;
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedList));
+        return { success: true, project: updatedProject, isUpdate: true };
+      } catch (e) {
+        console.error('Error al actualizar proyecto:', e);
+        return { success: false, isUpdate: true, error: 'Error al acceder a localStorage.' };
+      }
+    }
+  }
+
+  // 2. CASO: Crear nuevo proyecto (validar límite de 5)
   if (currentProjects.length >= MAX_SAVED_PROJECTS) {
     return {
       success: false,
+      isUpdate: false,
       error: `Has alcanzado el límite máximo de ${MAX_SAVED_PROJECTS} proyectos guardados. Elimina uno para continuar.`,
     };
   }
@@ -54,21 +84,28 @@ export const saveProject = (
   const id = `project_${Date.now()}`;
   const newProject: SavedProject = {
     id,
-    name: name.trim() || `Proyecto ${new Date().toLocaleDateString('es-ES')}`,
+    name: trimmedName,
     createdAt: Date.now(),
-    // Clonado profundo para garantizar integridad absoluta del proyecto
+    updatedAt: Date.now(),
     postState: JSON.parse(JSON.stringify(state)),
   };
 
   const updated = [newProject, ...currentProjects];
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    return { success: true, project: newProject, isUpdate: false };
   } catch (e) {
     console.error('Error al guardar proyecto en localStorage:', e);
-    return { success: false, error: 'Error al acceder a localStorage.' };
+    return { success: false, isUpdate: false, error: 'Error al acceder a localStorage.' };
   }
+};
 
-  return { success: true, project: newProject };
+export const saveProject = (
+  name: string,
+  state: PostState
+): { success: boolean; project?: SavedProject; error?: string } => {
+  const res = saveOrUpdateProject(name, state, null);
+  return { success: res.success, project: res.project, error: res.error };
 };
 
 export const saveCustomPreset = (name: string, state: PostState): SavedProject => {

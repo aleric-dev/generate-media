@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Folder, Save } from 'lucide-react';
 import { aspectRatios } from '../constants/templates';
 import { ControlPanel } from '../components/Panel/ControlPanel';
 import { CanvasTarget } from '../components/Canvas/CanvasTarget';
@@ -25,6 +26,9 @@ export const EditorPage: React.FC = () => {
   const postState = useStudioStore((s) => s.postState);
   const updatePostState = useStudioStore((s) => s.updatePostState);
   const loadProjectState = useStudioStore((s) => s.loadProjectState);
+  const currentProjectId = useStudioStore((s) => s.currentProjectId);
+  const currentProjectName = useStudioStore((s) => s.currentProjectName);
+  const setCurrentProject = useStudioStore((s) => s.setCurrentProject);
   const setWizardModalOpen = useStudioStore((s) => s.setWizardModalOpen);
 
   const exportModalOpen = useStudioStore((s) => s.exportModalOpen);
@@ -197,7 +201,31 @@ export const EditorPage: React.FC = () => {
 
       {/* 2. COLUMNA DERECHA: ÁREA DE TRABAJO Y PREVISUALIZACIÓN */}
       <main className="flex-1 min-w-0 h-full flex flex-col p-2 sm:p-4 bg-gradient-to-b from-[#070A0F] to-[#020408] overflow-hidden relative">
-        {/* TARJETA FLOTANTE VERTICAL DE HERRAMIENTAS (RATIOS, ZOOM Y ATAJOS) */}
+        
+        {/* BADGE FLOTANTE DE NOMBRE DE PROYECTO (SUPERIOR CENTRADO, INTERACTIVO) */}
+        <div className="absolute top-3 sm:top-5 left-1/2 -translate-x-1/2 z-30 animate-fade-in pointer-events-auto">
+          <button
+            type="button"
+            onClick={() => setSaveModalOpen(true)}
+            className="px-3.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-850 border border-slate-800/90 hover:border-indigo-500/50 backdrop-blur-xl shadow-xl flex items-center gap-2 transition group cursor-pointer"
+            title="Haz clic para guardar, renombrar o actualizar este proyecto"
+          >
+            <Folder className="w-3.5 h-3.5 text-indigo-400 group-hover:scale-110 transition-transform shrink-0" />
+            <span className="text-xs font-mono font-bold text-white max-w-[180px] sm:max-w-[300px] truncate">
+              {currentProjectName || 'Proyecto sin guardar'}
+            </span>
+            <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-semibold ${
+              currentProjectId
+                ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+            }`}>
+              {currentProjectId ? 'Guardado' : 'Borrador'}
+            </span>
+            <Save className="w-3 h-3 text-slate-500 group-hover:text-indigo-300 transition shrink-0 ml-0.5" />
+          </button>
+        </div>
+
+        {/* DOCK INFERIOR DE HERRAMIENTAS DE LIENZO (RATIOS, ZOOM Y VISTA) */}
         <FloatingWorkspaceCard
           aspectRatio={postState.aspectRatio}
           onAspectRatioChange={(ratio) => updatePostState({ aspectRatio: ratio })}
@@ -231,7 +259,7 @@ export const EditorPage: React.FC = () => {
           </div>
         </div>
 
-        {/* BOTÓN FLOTANTE CON LOGO DE MARCA Y MODAL ABOUT US (REEMPLAZA AL ANTIGUO FOOTER) */}
+        {/* BOTÓN FLOTANTE CON LOGO DE MARCA Y MODAL ABOUT US */}
         <FloatingBrandBadge onClick={() => setAboutModalOpen(true)} />
       </main>
 
@@ -240,7 +268,9 @@ export const EditorPage: React.FC = () => {
         isOpen={saveModalOpen}
         onClose={() => setSaveModalOpen(false)}
         state={postState}
-        onLoadPreset={(savedState) => loadProjectState(savedState)}
+        currentProjectId={currentProjectId}
+        currentProjectName={currentProjectName}
+        onProjectSaved={(id, name) => setCurrentProject(id, name)}
         onUpdateState={updatePostState}
       />
 

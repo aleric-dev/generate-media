@@ -194,6 +194,11 @@ interface StudioStore {
   postState: PostState;
   updatePostState: (partial: Partial<PostState>) => void;
 
+  // Traqueo del proyecto actual
+  currentProjectId: string | null;
+  currentProjectName: string | null;
+  setCurrentProject: (id: string | null, name: string | null) => void;
+
   // Modales
   templatesModalOpen: boolean;
   setTemplatesModalOpen: (open: boolean) => void;
@@ -217,24 +222,30 @@ interface StudioStore {
   applyBrandProfile: (brand: BrandProfile) => void;
   resetToScratch: () => void;
   setZoom: (level: number, mode?: 'fit-height' | 'fit-width' | 'manual') => void;
-  loadProjectState: (projectState: PostState) => void;
+  loadProjectState: (projectState: PostState, projectId?: string | null, projectName?: string | null) => void;
 }
 
 export const useStudioStore = create<StudioStore>((set) => ({
   postState: initialPostState,
+
+  currentProjectId: null,
+  currentProjectName: null,
+  setCurrentProject: (id, name) => set({ currentProjectId: id, currentProjectName: name }),
 
   updatePostState: (partial) =>
     set((state) => ({
       postState: { ...state.postState, ...partial },
     })),
 
-  loadProjectState: (projectState) =>
+  loadProjectState: (projectState, projectId = null, projectName = null) =>
     set({
       postState: {
         ...initialPostState,
         ...projectState,
         viewMode: 'editor',
       },
+      currentProjectId: projectId,
+      currentProjectName: projectName,
     }),
 
   templatesModalOpen: false,
@@ -307,6 +318,8 @@ export const useStudioStore = create<StudioStore>((set) => ({
         moduleVisible: true,
         activeStep: 1,
       },
+      currentProjectId: null,
+      currentProjectName: null,
       templatesModalOpen: false,
     })),
 
@@ -340,6 +353,8 @@ export const useStudioStore = create<StudioStore>((set) => ({
         activeStep: 1,
         panelOpen: true,
       },
+      currentProjectId: null,
+      currentProjectName: null,
     })),
 
   setZoom: (level, mode) =>
