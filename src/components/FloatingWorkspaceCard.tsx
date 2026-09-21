@@ -3,6 +3,9 @@ import { Minus, Plus, ArrowUpDown, ArrowLeftRight, ChevronDown, ChevronUp } from
 import { aspectRatios } from '../constants/templates';
 import { AspectRatioKey } from '../types';
 
+export const MIN_ZOOM = 0.30;
+export const MAX_ZOOM = 2.00;
+
 interface FloatingWorkspaceCardProps {
   aspectRatio: AspectRatioKey;
   onAspectRatioChange: (ratio: AspectRatioKey) => void;
@@ -22,6 +25,8 @@ export const FloatingWorkspaceCard: React.FC<FloatingWorkspaceCardProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const pct = Math.round(zoomLevel * 100);
+  const isMin = zoomLevel <= MIN_ZOOM + 0.005;
+  const isMax = zoomLevel >= MAX_ZOOM - 0.005;
 
   const ratios: { id: AspectRatioKey; label: string }[] = [
     { id: '4:5', label: '4:5' },
@@ -30,19 +35,30 @@ export const FloatingWorkspaceCard: React.FC<FloatingWorkspaceCardProps> = ({
     { id: '16:9', label: '16:9' },
   ];
 
+  const handleMinus = () => {
+    const next = Math.max(MIN_ZOOM, Number((zoomLevel - 0.1).toFixed(2)));
+    onZoomChange(next);
+  };
+
+  const handlePlus = () => {
+    const next = Math.min(MAX_ZOOM, Number((zoomLevel + 0.1).toFixed(2)));
+    onZoomChange(next);
+  };
+
   return (
     <div
-      className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex flex-col-reverse gap-2 p-1.5 bg-slate-900/90 hover:bg-slate-900/95 border border-slate-800/90 rounded-2xl backdrop-blur-xl shadow-2xl select-none transition-all duration-300 ease-in-out ${
+      className={`flex flex-col-reverse gap-2 p-1.5 bg-slate-900/90 hover:bg-slate-900/95 border border-slate-800/90 rounded-2xl backdrop-blur-xl shadow-2xl select-none transition-all duration-300 ease-in-out ${
         isExpanded ? 'w-[260px]' : 'w-[195px]'
-      } ${className || ''}`}
+      } ${className || 'absolute bottom-6 left-6 sm:bottom-8 sm:left-8 z-30'}`}
     >
       {/* BARRA PRINCIPAL: Controles de Zoom Manual (SIEMPRE VISIBLE EN EL FONDO DEL DOCK) */}
       <div className="flex items-center justify-between gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800/80 text-xs font-mono w-full">
         <button
           type="button"
-          onClick={() => onZoomChange(zoomLevel - 0.1)}
-          title="Alejar (-10%)"
-          className="w-7 h-7 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center transition shrink-0"
+          onClick={handleMinus}
+          disabled={isMin}
+          title={isMin ? `Zoom mínimo alcanzado (${Math.round(MIN_ZOOM * 100)}%)` : "Alejar (-10%)"}
+          className="w-7 h-7 rounded-lg bg-slate-900 hover:bg-slate-800 disabled:opacity-35 disabled:hover:bg-slate-900 disabled:cursor-not-allowed text-slate-300 hover:text-white flex items-center justify-center transition shrink-0 cursor-pointer"
         >
           <Minus className="w-3.5 h-3.5" />
         </button>
@@ -51,16 +67,17 @@ export const FloatingWorkspaceCard: React.FC<FloatingWorkspaceCardProps> = ({
           type="button"
           onClick={() => onZoomChange(zoomMode === 'fit-height' ? 'fit-width' : 'fit-height')}
           title="Ajustar al lienzo"
-          className="flex-1 py-1 px-1 rounded-lg text-indigo-300 font-bold hover:text-white text-xs transition text-center truncate"
+          className="flex-1 py-1 px-1 rounded-lg text-indigo-300 font-bold hover:text-white text-xs transition text-center truncate cursor-pointer"
         >
           {pct}%
         </button>
 
         <button
           type="button"
-          onClick={() => onZoomChange(zoomLevel + 0.1)}
-          title="Acercar (+10%)"
-          className="w-7 h-7 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center transition shrink-0"
+          onClick={handlePlus}
+          disabled={isMax}
+          title={isMax ? `Zoom máximo alcanzado (${Math.round(MAX_ZOOM * 100)}%)` : "Acercar (+10%)"}
+          className="w-7 h-7 rounded-lg bg-slate-900 hover:bg-slate-800 disabled:opacity-35 disabled:hover:bg-slate-900 disabled:cursor-not-allowed text-slate-300 hover:text-white flex items-center justify-center transition shrink-0 cursor-pointer"
         >
           <Plus className="w-3.5 h-3.5" />
         </button>

@@ -12,6 +12,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { LINKS } from '../constants/links';
+import { useStudioStore } from '../store/useStudioStore';
 
 interface ExportSuccessModalProps {
   isOpen: boolean;
@@ -34,6 +35,7 @@ export const ExportSuccessModal: React.FC<ExportSuccessModalProps> = ({
   onSaveProject,
   onGoHome,
 }) => {
+  const showToast = useStudioStore((s) => s.showToast);
   const [copied, setCopied] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
 
@@ -61,6 +63,7 @@ export const ExportSuccessModal: React.FC<ExportSuccessModalProps> = ({
     link.click();
     document.body.removeChild(link);
     setDownloaded(true);
+    showToast('¡Descargando imagen Ultra HQ!', 'success');
     setTimeout(() => setDownloaded(false), 3000);
   };
 
@@ -73,9 +76,11 @@ export const ExportSuccessModal: React.FC<ExportSuccessModalProps> = ({
         new ClipboardItem({ [blob.type]: blob })
       ]);
       setCopied(true);
+      showToast('¡Imagen copiada al portapapeles!', 'success');
       setTimeout(() => setCopied(false), 2500);
     } catch (err) {
       console.error('Error al copiar al portapapeles:', err);
+      showToast('No se pudo copiar al portapapeles', 'error');
     }
   };
 

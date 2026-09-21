@@ -189,15 +189,27 @@ export const initialPostState: PostState = {
   zoomLevel: 0.5,
 };
 
-interface StudioStore {
-  // Estado del post
-  postState: PostState;
-  updatePostState: (partial: Partial<PostState>) => void;
+export const extractSavableState = (state: PostState): Partial<PostState> => {
+  const {
+    viewMode,
+    activeStep,
+    panelOpen,
+    zoomLevel,
+    zoomMode,
+    ...rest
+  } = state;
+  return rest;
+};
 
-  // Traqueo del proyecto actual
+interface StudioStore {
+  postState: PostState;
   currentProjectId: string | null;
   currentProjectName: string | null;
-  setCurrentProject: (id: string | null, name: string | null) => void;
+  lastSavedSnapshot: string | null;
+  setCurrentProject: (id: string | null, name: string | null, snapshot?: string | null) => void;
+  setLastSavedSnapshot: (snapshot: string | null) => void;
+  recordCurrentSnapshot: () => void;
+  updatePostState: (partial: Partial<PostState>) => void;
 
   // Modales
   templatesModalOpen: boolean;
@@ -217,6 +229,11 @@ interface StudioStore {
   exportedFilename: string;
   setExportedFilename: (filename: string) => void;
 
+  // Notificaciones Toast
+  toast: { id: number; message: string; type: 'success' | 'info' | 'error' } | null;
+  showToast: (message: string, type?: 'success' | 'info' | 'error') => void;
+  hideToast: () => void;
+
   // Acciones de alto nivel
   applyTemplate: (tpl: PostTemplate) => void;
   applyBrandProfile: (brand: BrandProfile) => void;
@@ -225,28 +242,43 @@ interface StudioStore {
   loadProjectState: (projectState: PostState, projectId?: string | null, projectName?: string | null) => void;
 }
 
-export const useStudioStore = create<StudioStore>((set) => ({
+export const useStudioStore = create<StudioStore>((set, get) => ({
   postState: initialPostState,
 
   currentProjectId: null,
   currentProjectName: null,
-  setCurrentProject: (id, name) => set({ currentProjectId: id, currentProjectName: name }),
+  lastSavedSnapshot: null,
+  setCurrentProject: (id, name, snapshot) =>
+    set((state) => ({
+      currentProjectId: id,
+      currentProjectName: name,
+      lastSavedSnapshot:
+        snapshot !== undefined ? snapshot : JSON.stringify(extractSavableState(state.postState)),
+    })),
+  setLastSavedSnapshot: (snapshot) => set({ lastSavedSnapshot: snapshot }),
+  recordCurrentSnapshot: () =>
+    set((state) => ({
+      lastSavedSnapshot: JSON.stringify(extractSavableState(state.postState)),
+    })),
 
   updatePostState: (partial) =>
     set((state) => ({
       postState: { ...state.postState, ...partial },
     })),
 
-  loadProjectState: (projectState, projectId = null, projectName = null) =>
+  loadProjectState: (projectState, projectId = null, projectName = null) => {
+    const finalState: PostState = {
+      ...initialPostState,
+      ...projectState,
+      viewMode: 'editor',
+    };
     set({
-      postState: {
-        ...initialPostState,
-        ...projectState,
-        viewMode: 'editor',
-      },
+      postState: finalState,
       currentProjectId: projectId,
       currentProjectName: projectName,
-    }),
+      lastSavedSnapshot: projectId ? JSON.stringify(extractSavableState(finalState)) : null,
+    });
+  },
 
   templatesModalOpen: false,
   setTemplatesModalOpen: (open) => set({ templatesModalOpen: open }),
@@ -268,6 +300,14 @@ export const useStudioStore = create<StudioStore>((set) => ({
 
   exportedFilename: '',
   setExportedFilename: (exportedFilename) => set({ exportedFilename }),
+
+  // Notificaciones Toast
+  toast: null,
+  showToast: (message, type = 'success') => {
+    const id = Date.now();
+    set({ toast: { id, message, type } });
+  },
+  hideToast: () => set({ toast: null }),
 
   applyTemplate: (tpl) =>
     set((state) => ({
@@ -320,6 +360,7 @@ export const useStudioStore = create<StudioStore>((set) => ({
       },
       currentProjectId: null,
       currentProjectName: null,
+      lastSavedSnapshot: null,
       templatesModalOpen: false,
     })),
 
@@ -355,6 +396,7 @@ export const useStudioStore = create<StudioStore>((set) => ({
       },
       currentProjectId: null,
       currentProjectName: null,
+      lastSavedSnapshot: null,
     })),
 
   setZoom: (level, mode) =>

@@ -16,6 +16,7 @@ const STORAGE_KEY = 'media_studio_saved_projects';
 const LEGACY_STORAGE_KEY = 'media_studio_custom_presets';
 
 export const MAX_SAVED_PROJECTS = 5;
+export const MAX_PROJECT_NAME_LENGTH = 25;
 
 export const getSavedProjects = (): SavedProject[] => {
   if (typeof window === 'undefined') return [];
@@ -45,7 +46,8 @@ export const saveOrUpdateProject = (
   existingId?: string | null
 ): { success: boolean; project?: SavedProject; isUpdate: boolean; error?: string } => {
   const currentProjects = getSavedProjects();
-  const trimmedName = name.trim() || `Proyecto ${new Date().toLocaleDateString('es-ES')}`;
+  const rawName = name.trim() || `Proyecto ${new Date().toLocaleDateString('es-ES')}`;
+  const trimmedName = rawName.slice(0, MAX_PROJECT_NAME_LENGTH);
 
   // 1. CASO: Actualizar proyecto existente
   if (existingId) {

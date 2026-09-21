@@ -160,65 +160,26 @@ export const HomePage: React.FC = () => {
               </span>
             </button>
 
-            {/* OPCIÓN 4: MIS PROYECTOS (CARD CON CAPACIDAD RESTANTE Y MODAL DE TABLA) */}
+            {/* OPCIÓN 4: MIS PROYECTOS (CARD UNIFORME, GESTIÓN Y DETALLES EN EL MODAL) */}
             <button
               type="button"
               onClick={() => setIsProjectsModalOpen(true)}
               className="group relative p-5 rounded-2xl bg-[#0B101B]/80 hover:bg-[#0E1524] border border-slate-800 hover:border-indigo-500/60 text-left transition-all duration-300 flex flex-col justify-between space-y-5 shadow-xl hover:shadow-indigo-500/10 cursor-pointer h-full"
             >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="w-11 h-11 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 flex items-center justify-center transition-transform group-hover:scale-110">
-                    <FolderArchive className="w-5 h-5" />
-                  </div>
-                  {/* Badge de Capacidad Restante */}
-                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
-                    savedProjects.length >= MAX_SAVED_PROJECTS
-                      ? 'bg-rose-500/15 text-rose-300 border-rose-500/30'
-                      : savedProjects.length > 0
-                      ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30'
-                      : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                  }`}>
-                    {savedProjects.length >= MAX_SAVED_PROJECTS
-                      ? '0 disponibles (Lleno)'
-                      : `${MAX_SAVED_PROJECTS - savedProjects.length} restantes`}
-                  </span>
+              <div className="space-y-2.5">
+                <div className="w-11 h-11 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <FolderArchive className="w-5 h-5" />
                 </div>
-
-                <div>
-                  <h2 className="text-base font-bold text-white group-hover:text-indigo-300 transition-colors">
-                    Mis Proyectos
-                  </h2>
-                  <p className="text-xs text-slate-400 leading-relaxed mt-1">
-                    {savedProjects.length === 0
-                      ? 'Sin proyectos guardados. Guarda hasta 5 diseños completos en tu navegador.'
-                      : `Gestiona tus ${savedProjects.length} proyecto(s) guardado(s). Abre o elimina en tabla.`}
-                  </p>
-                </div>
-
-                {/* Micro Barra de Slots de Capacidad */}
-                <div className="pt-1">
-                  <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1.5">
-                    <span>Slots usados:</span>
-                    <span className="text-slate-300 font-bold">{savedProjects.length}/{MAX_SAVED_PROJECTS}</span>
-                  </div>
-                  <div className="grid grid-cols-5 gap-1.5">
-                    {[...Array(MAX_SAVED_PROJECTS)].map((_, i) => (
-                      <span
-                        key={i}
-                        className={`h-1.5 rounded-full transition-all duration-300 ${
-                          i < savedProjects.length
-                            ? 'bg-indigo-500 shadow-xs shadow-indigo-500/50'
-                            : 'bg-slate-800/90 border border-slate-700/60'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
+                <h2 className="text-base font-bold text-white group-hover:text-indigo-300 transition-colors">
+                  Mis Proyectos
+                </h2>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Accede a tus diseños guardados, edítalos, duplícalos o continúa trabajando en tus proyectos.
+                </p>
               </div>
 
-              <span className="text-xs font-mono font-bold text-indigo-400 flex items-center gap-1.5 pt-2">
-                <span>Ver Proyectos ({savedProjects.length})</span>
+              <span className="text-xs font-mono font-bold text-indigo-400 flex items-center gap-1.5 pt-1">
+                <span>Ver Proyectos</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </span>
             </button>

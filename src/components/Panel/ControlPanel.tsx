@@ -7,7 +7,6 @@ import {
   Sparkles, 
   Download, 
   Home, 
-  BookmarkCheck,
   PanelLeftClose
 } from 'lucide-react';
 import { BrandPanel } from './BrandPanel';
@@ -25,7 +24,7 @@ interface ControlPanelProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   onGoHome: () => void;
-  onOpenSaveModal: () => void;
+  onOpenSaveModal?: () => void;
 }
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -37,7 +36,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   isCollapsed,
   onToggleCollapse,
   onGoHome,
-  onOpenSaveModal,
 }) => {
   const stepTitles: Record<number, string> = {
     1: 'Paso 1: Marca & Marco Editorial',
@@ -113,18 +111,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               );
             })}
           </div>
-
-          <div className="w-8 h-[1px] bg-slate-800/80 my-0.5" />
-
-          {/* BOTÓN GUARDAR CONFIGURACIÓN */}
-          <button
-            type="button"
-            onClick={onOpenSaveModal}
-            title="Guardar Configuración Actual (Plantilla, Marca o JSON)"
-            className="w-11 h-11 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 border border-emerald-500/30 flex items-center justify-center transition shadow-md hover:scale-105 active:scale-95"
-          >
-            <BookmarkCheck className="w-5 h-5" />
-          </button>
         </div>
       </div>
 

@@ -19,8 +19,10 @@ import {
   getSavedProjects,
   SavedProject,
   MAX_SAVED_PROJECTS,
+  MAX_PROJECT_NAME_LENGTH,
 } from '../utils/customPresetsStorage';
 import { saveBrand } from '../utils/brandStorage';
+import { useStudioStore } from '../store/useStudioStore';
 
 interface SaveConfigModalProps {
   isOpen: boolean;
@@ -41,10 +43,11 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
   onProjectSaved,
   onUpdateState,
 }) => {
+  const showToast = useStudioStore((s) => s.showToast);
   const [activeTab, setActiveTab] = useState<'project' | 'brand' | 'json'>('project');
   const [projectName, setProjectName] = useState('');
-  const [brandName, setBrandName] = useState(state.companyName || 'Mi Marca');
-  const [brandHandle, setBrandHandle] = useState(state.handle || 'tumarca.dev');
+  const [brandName, setBrandName] = useState('');
+  const [brandHandle, setBrandHandle] = useState('');
   const [copied, setCopied] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState<string | null>(null);
   const [savedProjects, setSavedProjects] = useState<SavedProject[]>([]);
@@ -80,17 +83,20 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
 
   // Guardar (actualizar si existe, o crear nuevo si no existe)
   const handleSave = (asCopy = false) => {
-    if (!projectName.trim()) return;
+    const cleanName = projectName.trim().slice(0, MAX_PROJECT_NAME_LENGTH);
+    if (!cleanName) return;
 
     const targetId = asCopy ? null : currentProjectId;
 
     if (!targetId && savedProjects.length >= MAX_SAVED_PROJECTS) {
+      showToast(`⚠️ Límite de ${MAX_SAVED_PROJECTS} proyectos alcanzado.`, 'error');
       setSavedSuccess(`⚠️ Límite de ${MAX_SAVED_PROJECTS} proyectos alcanzado. Gestiona tus proyectos en el inicio para liberar espacio.`);
       return;
     }
 
-    const res = saveOrUpdateProject(projectName, state, targetId);
+    const res = saveOrUpdateProject(cleanName, state, targetId);
     if (!res.success || !res.project) {
+      showToast(res.error || 'No se pudo guardar el proyecto.', 'error');
       setSavedSuccess(`❌ ${res.error || 'No se pudo guardar el proyecto.'}`);
       return;
     }
@@ -102,15 +108,16 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
       onProjectSaved(res.project.id, res.project.name);
     }
 
-    setSavedSuccess(
-      res.isUpdate
-        ? `¡Cambios actualizados en "${res.project.name}"!`
-        : `¡Proyecto "${res.project.name}" guardado exitosamente!`
+    showToast(
+      asCopy
+        ? `¡Copia de "${res.project.name}" guardada!`
+        : res.isUpdate
+        ? `¡Cambios guardados en "${res.project.name}"!`
+        : `¡Proyecto "${res.project.name}" guardado con éxito!`,
+      'success'
     );
 
-    setTimeout(() => {
-      onClose();
-    }, 1200);
+    onClose();
   };
 
   const handleSaveBrand = (e: React.FormEvent) => {
@@ -142,6 +149,7 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
       });
     }
 
+    showToast(`¡Perfil de marca "${trimmedName}" guardado y sincronizado!`, 'success');
     setSavedSuccess(`¡Perfil de marca "${trimmedName}" (Web: ${trimmedHandle}) guardado y sincronizado!`);
     setTimeout(() => setSavedSuccess(null), 3000);
   };
@@ -151,6 +159,7 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
   const handleCopyJson = () => {
     navigator.clipboard.writeText(jsonString);
     setCopied(true);
+    showToast('¡Configuración JSON copiada al portapapeles!', 'info');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -164,6 +173,7 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    showToast('¡Archivo JSON del proyecto descargado!', 'success');
   };
 
   return (
@@ -217,7 +227,7 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
             }`}
           >
             <FolderPlus className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">{isExisting ? 'Actualizar Proyecto' : 'Guardar Proyecto'}</span>
+            <span className="truncate">Guardar Proyecto</span>
           </button>
 
           <button
@@ -251,7 +261,7 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
         <div className="p-6 overflow-y-auto flex-1">
           
           {/* ========================================================================= */}
-          {/* 1. GUARDAR / ACTUALIZAR PROYECTO                                          */}
+          {/* 1. GUARDAR PROYECTO                                                       */}
           {/* ========================================================================= */}
           {activeTab === 'project' && (
             <div className="space-y-4">
@@ -260,11 +270,11 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
               {isExisting ? (
                 <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center justify-between text-xs font-mono">
                   <div className="flex items-center gap-2">
-                    <RefreshCw className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
                     <div>
-                      <span className="text-emerald-300 font-bold block">Proyecto Existente Detectado</span>
+                      <span className="text-emerald-300 font-bold block">Proyecto Detectado</span>
                       <span className="text-[11px] text-slate-400">
-                        Al guardar, se actualizarán los cambios en este mismo proyecto sin consumir slots adicionales.
+                        Al guardar, se conservarán los cambios en este mismo proyecto sin consumir espacios adicionales.
                       </span>
                     </div>
                   </div>
@@ -311,19 +321,23 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
                 </div>
               )}
 
-              {/* Nombre del Proyecto */}
+              {/* Nombre del Proyecto con límite estricto de 25 caracteres */}
               <div className="space-y-2">
                 <label className="text-xs font-mono font-bold text-slate-300 flex items-center justify-between">
                   <span>Nombre del Proyecto</span>
-                  <span className="text-[10px] text-slate-500 font-normal">
-                    Identificador para abrirlo luego
+                  <span className="text-[11px] font-mono text-slate-400">
+                    <span className={projectName.length >= MAX_PROJECT_NAME_LENGTH ? 'text-amber-400 font-bold' : 'text-slate-400'}>
+                      {projectName.length}
+                    </span>
+                    /{MAX_PROJECT_NAME_LENGTH} caracteres
                   </span>
                 </label>
                 <input
                   type="text"
                   value={projectName}
-                  onChange={(e) => setProjectName(e.target.value)}
-                  placeholder="Ej: Lanzamiento SaaS B2B v2"
+                  onChange={(e) => setProjectName(e.target.value.slice(0, MAX_PROJECT_NAME_LENGTH))}
+                  maxLength={MAX_PROJECT_NAME_LENGTH}
+                  placeholder="Ej: Lanzamiento SaaS v2"
                   disabled={isLimitReached}
                   className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm font-sans focus:outline-none focus:border-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   required
@@ -360,7 +374,7 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
                       className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-indigo-600/20 cursor-pointer"
                     >
                       <Save className="w-4 h-4" />
-                      <span>Actualizar Proyecto Existente</span>
+                      <span>Guardar Proyecto</span>
                     </button>
 
                     {savedProjects.length < MAX_SAVED_PROJECTS && (

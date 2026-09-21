@@ -8,7 +8,7 @@ interface FloatingBrandBadgeProps {
 
 export const FloatingBrandBadge: React.FC<FloatingBrandBadgeProps> = ({ onClick }) => {
   return (
-    <div className="absolute bottom-6 right-6 sm:bottom-8 sm:right-8 z-30 select-none">
+    <div className="absolute bottom-6 right-6 sm:bottom-8 sm:right-8 z-30 select-none animate-fade-in pointer-events-auto">
       <button
         type="button"
         onClick={onClick}
