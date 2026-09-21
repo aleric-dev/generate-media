@@ -6,6 +6,14 @@
 
 :root {
   --category-color: #4F46E5;
+  --sidebar-w: 0px;
+}
+
+/* Sonner Toast Centering over Canvas Area */
+[data-sonner-toaster][data-x-position='center'] {
+  left: calc(50vw + (var(--sidebar-w, 0px) / 2)) !important;
+  transform: translateX(-50%) !important;
+  transition: left 300ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 html, body {

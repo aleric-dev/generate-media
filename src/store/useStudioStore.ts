@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { toast as sonnerToast } from 'sonner';
 import { PostState, PostTemplate, BrandProfile } from '../types';
 import { getDefaultBrand } from '../utils/brandStorage';
 
@@ -304,10 +305,15 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
   // Notificaciones Toast
   toast: null,
   showToast: (message, type = 'success') => {
-    const id = Date.now();
-    set({ toast: { id, message, type } });
+    if (type === 'error') {
+      sonnerToast.error(message);
+    } else if (type === 'info') {
+      sonnerToast.info(message);
+    } else {
+      sonnerToast.success(message);
+    }
   },
-  hideToast: () => set({ toast: null }),
+  hideToast: () => sonnerToast.dismiss(),
 
   applyTemplate: (tpl) =>
     set((state) => ({

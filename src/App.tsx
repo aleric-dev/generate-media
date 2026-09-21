@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, useNavigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import { AppRoutes } from './routes';
 import { CreationWizardModal } from './components/CreationWizardModal';
 import { TemplatesModal } from './components/TemplatesModal';
@@ -54,6 +55,24 @@ export const App: React.FC = () => {
       <div className="w-full min-h-screen bg-[#050811] text-slate-100 font-inter">
         <AppRoutes />
         <AppModals />
+        <Toaster
+          theme="dark"
+          position="top-center"
+          richColors
+          closeButton
+          duration={3000}
+          toastOptions={{
+            style: {
+              background: '#0B101B',
+              border: '1px solid rgba(51, 65, 85, 0.7)',
+              color: '#F1F5F9',
+              fontFamily: 'Inter, system-ui, sans-serif',
+              fontSize: '13px',
+              borderRadius: '16px',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8)',
+            },
+          }}
+        />
       </div>
     </BrowserRouter>
   );

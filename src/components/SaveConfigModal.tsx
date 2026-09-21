@@ -23,6 +23,7 @@ import {
 } from '../utils/customPresetsStorage';
 import { saveBrand } from '../utils/brandStorage';
 import { useStudioStore } from '../store/useStudioStore';
+import { Button, Input } from './ui';
 
 interface SaveConfigModalProps {
   isOpen: boolean;
@@ -332,14 +333,13 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
                     /{MAX_PROJECT_NAME_LENGTH} caracteres
                   </span>
                 </label>
-                <input
+                <Input
                   type="text"
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value.slice(0, MAX_PROJECT_NAME_LENGTH))}
                   maxLength={MAX_PROJECT_NAME_LENGTH}
                   placeholder="Ej: Lanzamiento SaaS v2"
                   disabled={isLimitReached}
-                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm font-sans focus:outline-none focus:border-indigo-500 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   required
                 />
               </div>
@@ -368,36 +368,38 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
               <div className="space-y-2 pt-1">
                 {isExisting ? (
                   <>
-                    <button
+                    <Button
                       type="button"
+                      variant="primary"
+                      size="lg"
                       onClick={() => handleSave(false)}
-                      className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-indigo-600/20 cursor-pointer"
+                      className="w-full"
                     >
                       <Save className="w-4 h-4" />
                       <span>Guardar Proyecto</span>
-                    </button>
+                    </Button>
 
                     {savedProjects.length < MAX_SAVED_PROJECTS && (
-                      <button
+                      <Button
                         type="button"
+                        variant="secondary"
+                        size="md"
                         onClick={() => handleSave(true)}
-                        className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 font-mono font-semibold text-xs flex items-center justify-center gap-2 transition cursor-pointer"
+                        className="w-full"
                       >
                         <Copy className="w-3.5 h-3.5" />
                         <span>Guardar como Copia Nueva ({savedProjects.length + 1}/{MAX_SAVED_PROJECTS})</span>
-                      </button>
+                      </Button>
                     )}
                   </>
                 ) : (
-                  <button
+                  <Button
                     type="button"
+                    variant={isLimitReached ? 'secondary' : 'primary'}
+                    size="lg"
                     onClick={() => handleSave(false)}
                     disabled={isLimitReached}
-                    className={`w-full py-3 rounded-xl font-mono font-bold text-xs flex items-center justify-center gap-2 transition shadow-lg ${
-                      isLimitReached
-                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                        : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20 cursor-pointer'
-                    }`}
+                    className="w-full"
                   >
                     <FolderPlus className="w-4 h-4" />
                     <span>
@@ -405,7 +407,7 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
                         ? `Límite de ${MAX_SAVED_PROJECTS} Proyectos Alcanzado`
                         : `Guardar Proyecto (${savedProjects.length}/${MAX_SAVED_PROJECTS})`}
                     </span>
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -426,12 +428,11 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
                   <Building2 className="w-3.5 h-3.5 text-indigo-400" />
                   <span>Nombre de la Empresa o Marca:</span>
                 </label>
-                <input
+                <Input
                   type="text"
                   value={brandName}
                   onChange={(e) => setBrandName(e.target.value)}
                   placeholder="Ej: Aleric Dev"
-                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm font-sans focus:outline-none focus:border-indigo-500 transition"
                   required
                 />
               </div>
@@ -442,12 +443,11 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
                   <Globe className="w-3.5 h-3.5 text-indigo-400" />
                   <span>Sitio Web / Enlace (lo que va en el Footer):</span>
                 </label>
-                <input
+                <Input
                   type="text"
                   value={brandHandle}
                   onChange={(e) => setBrandHandle(e.target.value)}
                   placeholder="Ej: aleric.dev o @alericdev"
-                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm font-sans focus:outline-none focus:border-indigo-500 transition"
                   required
                 />
                 <p className="text-[11px] font-mono text-slate-500">
@@ -478,13 +478,15 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
                 </div>
               </div>
 
-              <button
+              <Button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-indigo-600/20 cursor-pointer"
+                variant="primary"
+                size="lg"
+                className="w-full"
               >
                 <Building2 className="w-4 h-4" />
                 <span>Guardar Perfil de Marca</span>
-              </button>
+              </Button>
             </form>
           )}
 
@@ -496,22 +498,24 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono text-slate-400">Configuración completa del proyecto en JSON:</span>
                 <div className="flex items-center gap-2">
-                  <button
+                  <Button
                     type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={handleCopyJson}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono flex items-center gap-1.5 transition"
                   >
                     {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copied ? '¡Copiado!' : 'Copiar'}</span>
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
+                    variant="primary"
+                    size="sm"
                     onClick={handleDownloadJson}
-                    className="px-2.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-mono flex items-center gap-1.5 transition"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Descargar</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
 

@@ -9,7 +9,7 @@ import { FloatingBrandBadge } from '../components/FloatingBrandBadge';
 import { AboutStudioModal } from '../components/AboutStudioModal';
 import { SaveConfigModal } from '../components/SaveConfigModal';
 import { ExportSuccessModal } from '../components/ExportSuccessModal';
-import { ToastNotification } from '../components/ToastNotification';
+import { Button, Badge } from '../components/ui';
 import { useStudioStore, extractSavableState } from '../store/useStudioStore';
 import { saveOrUpdateProject } from '../utils/customPresetsStorage';
 import { trackImageGeneration } from '../utils/generationTracker';
@@ -54,6 +54,23 @@ export const EditorPage: React.FC = () => {
       setSaveModalOpen(true);
     }
   };
+
+  // Sincronizar ancho del sidebar para centrar el Toast perfectamente sobre el Canvas
+  useEffect(() => {
+    const updateSidebarVar = () => {
+      const isXl = window.innerWidth >= 1280;
+      const width = isSidebarCollapsed ? '68px' : isXl ? '528px' : '488px';
+      document.documentElement.style.setProperty('--sidebar-w', width);
+    };
+
+    updateSidebarVar();
+    window.addEventListener('resize', updateSidebarVar);
+
+    return () => {
+      document.documentElement.style.setProperty('--sidebar-w', '0px');
+      window.removeEventListener('resize', updateSidebarVar);
+    };
+  }, [isSidebarCollapsed]);
 
   const exportModalOpen = useStudioStore((s) => s.exportModalOpen);
   const setExportModalOpen = useStudioStore((s) => s.setExportModalOpen);
@@ -234,43 +251,38 @@ export const EditorPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setSaveModalOpen(true)}
-            className="flex items-center gap-3 py-1.5 px-3.5 bg-slate-900/90 hover:bg-slate-850 border border-slate-800/90 hover:border-indigo-500/40 backdrop-blur-xl rounded-2xl shadow-xl transition group cursor-pointer"
+            className="flex items-center gap-2.5 py-1 px-3 bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800/90 hover:border-indigo-500/40 backdrop-blur-xl rounded-2xl shadow-xl transition-all duration-150 group cursor-pointer"
             title="Haz clic para abrir la configuración del proyecto"
           >
             {/* Nombre libre del Proyecto con icono de carpeta */}
             <div className="flex items-center gap-2">
-              <Folder className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform shrink-0" />
+              <Folder className="w-3.5 h-3.5 text-indigo-400 group-hover:scale-110 transition-transform shrink-0" />
               <span className="text-xs font-mono font-bold text-white whitespace-nowrap">
                 {currentProjectName || 'Proyecto sin guardar'}
               </span>
             </div>
 
-            {/* Tag de Estado Reactivo */}
-            <span
-              className={`text-[10px] font-mono px-2.5 py-0.5 rounded-full font-semibold whitespace-nowrap ${
-                !currentProjectId
-                  ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
-                  : hasUnsavedChanges
-                  ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
-                  : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-              }`}
+            {/* Tag de Estado Reactivo con Badge Atómico */}
+            <Badge
+              variant={!currentProjectId ? 'warning' : hasUnsavedChanges ? 'warning' : 'success'}
             >
               {!currentProjectId ? 'Borrador' : hasUnsavedChanges ? 'Modificado' : 'Guardado'}
-            </span>
+            </Badge>
           </button>
 
           {/* 2. Botón Guardar justo abajo del nombre (solo se muestra si hay cambios pendientes) */}
           {hasUnsavedChanges && (
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={handleQuickSave}
-              className="py-1.5 px-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800/90 hover:border-emerald-500/50 text-slate-200 hover:text-white backdrop-blur-xl shadow-lg flex items-center gap-2 transition-all duration-150 hover:scale-102 active:scale-95 cursor-pointer text-xs font-mono font-semibold group animate-fade-in shrink-0"
+              className="hover:border-emerald-500/50 hover:text-emerald-300 font-mono text-xs gap-2 shadow-lg group"
               title={currentProjectId ? "Guardar cambios pendientes directamente" : "Guardar proyecto con nombre"}
             >
               <Save className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform shrink-0" />
               <span>Guardar</span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-            </button>
+            </Button>
           )}
         </div>
 
@@ -347,9 +359,6 @@ export const EditorPage: React.FC = () => {
           navigate('/inicio');
         }}
       />
-
-      {/* NOTIFICACIÓN TOAST FLOTANTE */}
-      <ToastNotification />
     </div>
   );
 };
