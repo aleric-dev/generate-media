@@ -10,6 +10,8 @@ export interface AspectRatioConfig {
 export type ModuleType = 
   | 'code' 
   | 'kpi' 
+  | 'comparison'
+  | 'notification'
   | 'chart-bars' 
   | 'chart-pie' 
   | 'chart-line' 
@@ -344,8 +346,23 @@ export interface PostTemplate {
   cta?: string;
   handle?: string;
   ctaOrder?: CtaOrder;
-  ctaAlign?: CtaAlign;
   brandIcon?: string;
+  // Module: Comparison & Notification & Extended Sliders
+  comparisonBadgeLeft?: string;
+  comparisonTitleLeft?: string;
+  comparisonPointsLeft?: string[];
+  comparisonBadgeRight?: string;
+  comparisonTitleRight?: string;
+  comparisonPointsRight?: string[];
+  comparisonLayout?: 'split' | 'cards';
+  notificationApp?: string;
+  notificationTitle?: string;
+  notificationMessage?: string;
+  notificationHighlight?: string;
+  notificationTime?: string;
+  notificationIcon?: 'rocket' | 'check' | 'dollar' | 'zap' | 'bell' | 'shield';
+  kpiValueSize?: number;
+  modulePadding?: number;
 }
 
 export interface BrandProfile {
@@ -537,6 +554,27 @@ export interface PostState {
   imageBorderStyle: ImageBorderStyle;
   imageAspectRatio?: 'auto' | '1:1' | '16:9' | '4:5' | '4:3';
   imageFit?: 'cover' | 'contain';
+
+  // Module 10: Comparison (Antes vs Después)
+  comparisonBadgeLeft?: string;
+  comparisonTitleLeft?: string;
+  comparisonPointsLeft?: string[];
+  comparisonBadgeRight?: string;
+  comparisonTitleRight?: string;
+  comparisonPointsRight?: string[];
+  comparisonLayout?: 'split' | 'cards';
+
+  // Module 11: Notification (Alerta de Sistema / Push)
+  notificationApp?: string;
+  notificationTitle?: string;
+  notificationMessage?: string;
+  notificationHighlight?: string;
+  notificationTime?: string;
+  notificationIcon?: 'rocket' | 'check' | 'dollar' | 'zap' | 'bell' | 'shield';
+
+  // Extended Sliders
+  kpiValueSize?: number; // 36 a 76 px
+  modulePadding?: number; // 16 a 64 px
 
   // Footer in Step 1
   cta: string;

@@ -12,7 +12,6 @@ import {
   Instagram,
   CheckCircle2
 } from 'lucide-react';
-import { GithubIcon } from '../GithubIcon';
 import { LINKS } from '../../constants/links';
 
 interface RatioQuickInfo {
@@ -36,7 +35,7 @@ const RATIO_CONFIG: Record<AspectRatioKey, RatioQuickInfo> = {
     name: 'Cuadrado Clásico (Feed)',
     subtitle: 'Cuadrado',
     px: '1080 × 1080 px',
-    desc: '1:1 universal para carruseles paso a paso, infografías y compatibilidad total en todas las redes.',
+    desc: '1:1 universal para infografías, posts de feed y compatibilidad total en todas las redes.',
   },
   '9:16': {
     badge: '9:16',
@@ -133,7 +132,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. QUIÉN LO HIZO: ALERIC DEV, REDES, KO-FI & FEEDBACK (ANTES DE DESCARGAR)*/}
+      {/* 2. QUIÉN LO HIZO: ALERIC DEV, REDES, KO-FI & FEEDBACK                     */}
       {/* ========================================================================= */}
       <div className="p-3.5 bg-slate-900/60 border border-slate-800/90 rounded-2xl space-y-2.5 shadow-sm">
         <div className="flex items-center justify-between">
@@ -239,7 +238,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
           type="button"
           disabled={isExporting}
           onClick={onExport}
-          className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-600 hover:from-indigo-500 text-white font-mono font-bold text-xs tracking-wide shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition transform active:scale-[0.98] disabled:opacity-60 disabled:pointer-events-none"
+          className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-600 hover:from-indigo-500 text-white font-mono font-bold text-xs tracking-wide shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition transform active:scale-[0.98] disabled:opacity-60 disabled:pointer-events-none cursor-pointer"
         >
           {isExporting ? (
             <>

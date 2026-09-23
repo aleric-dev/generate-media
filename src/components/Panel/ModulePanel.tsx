@@ -21,11 +21,30 @@ import {
   Trash2, 
   Box, 
   Info,
-  CheckCircle2
+  CheckCircle2,
+  Split,
+  Bell,
+  Sparkles,
+  Rocket,
+  Zap,
+  DollarSign,
+  Shield
 } from 'lucide-react';
 import { AccordionSection } from './AccordionSection';
 
 const MODULE_DOC_DATA: Record<string, { title: string; badgeText: string; usage: string; tip: string }> = {
+  'comparison': {
+    title: 'Comparativa Antes vs Después',
+    badgeText: '🔥 Alto Engagement Redes',
+    usage: 'Contrasta la fricción anterior (procesos manuales, hojas de cálculo) con la solución actual automatizada en la nube.',
+    tip: 'Define los 3 dolores del pasado y las 3 ventajas competitivas de tu solución.'
+  },
+  'notification': {
+    title: 'Alerta Push / Notificación de Éxito',
+    badgeText: '🚀 Social Proof & Hitos',
+    usage: 'Simula una alerta de sistema o banner móvil con cifras de impacto, nuevos pagos o despliegues exitosos.',
+    tip: 'Utiliza una cifra destacada gigante para detener el scroll de inmediato.'
+  },
   'code': {
     title: 'Ventana de Código IDE',
     badgeText: 'Devs & Tech Posts',
@@ -251,24 +270,91 @@ export const ModulePanel: React.FC<ModulePanelProps> = ({
 
   // Helper común para renderizar el slider de escala interna del módulo
   const renderScaleControl = () => (
-    <div className="pt-2.5 border-t border-slate-800">
-      <div className="flex items-center justify-between mb-1.5">
-        <label className="text-[10px] text-slate-400 font-mono">
-          Escala Interna del Módulo:
-        </label>
-        <span className="text-[10px] text-indigo-400 font-mono font-bold">
-          {state.moduleScale || 100}%
-        </span>
+    <div className="pt-3 border-t border-slate-800 space-y-3">
+      {/* 1. Slider de Escala del Módulo (70% a 160%) */}
+      <div>
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="text-[10px] text-slate-400 font-mono">
+            Escala General del Módulo:
+          </label>
+          <span className="text-[10px] text-indigo-400 font-mono font-bold">
+            {state.moduleScale || 100}%
+          </span>
+        </div>
+        <input
+          type="range"
+          min={70}
+          max={160}
+          step={5}
+          value={state.moduleScale || 100}
+          onChange={(e) => updateState({ moduleScale: Number(e.target.value) })}
+          className="w-full accent-indigo-500 bg-slate-900 h-1.5 rounded-lg cursor-pointer"
+        />
+        <div className="grid grid-cols-4 gap-1 mt-1.5 text-[9px] font-mono">
+          {[
+            { scale: 85, label: '85%', desc: 'Compacto' },
+            { scale: 100, label: '100%', desc: 'Normal' },
+            { scale: 125, label: '125%', desc: 'Grande' },
+            { scale: 150, label: '150%', desc: '🔥 Hero' },
+          ].map((sc) => (
+            <button
+              key={sc.scale}
+              type="button"
+              onClick={() => updateState({ moduleScale: sc.scale })}
+              className={`py-1 px-1 rounded text-center transition ${
+                (state.moduleScale || 100) === sc.scale
+                  ? 'bg-indigo-600 text-white font-bold'
+                  : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              <span>{sc.label}</span>
+              <span className="text-[7px] block opacity-75">{sc.desc}</span>
+            </button>
+          ))}
+        </div>
       </div>
-      <input
-        type="range"
-        min={70}
-        max={130}
-        step={5}
-        value={state.moduleScale || 100}
-        onChange={(e) => updateState({ moduleScale: Number(e.target.value) })}
-        className="w-full accent-indigo-500 bg-slate-900 h-1.5 rounded-lg cursor-pointer"
-      />
+
+      {/* 2. Slider de Tamaño de Letra Interna (13px a 36px) */}
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-[10px] text-slate-400 font-mono">
+            Tamaño de Letra Interna:
+          </label>
+          <span className="text-[10px] text-indigo-400 font-mono font-bold">
+            {state.moduleFontSize || 15} px
+          </span>
+        </div>
+        <input
+          type="range"
+          min={13}
+          max={36}
+          step={1}
+          value={state.moduleFontSize || 15}
+          onChange={(e) => updateState({ moduleFontSize: Number(e.target.value) })}
+          className="w-full accent-indigo-500 bg-slate-900 h-1.5 rounded-lg cursor-pointer"
+        />
+      </div>
+
+      {/* 3. Slider de Espaciado / Padding (16px a 64px) */}
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-[10px] text-slate-400 font-mono">
+            Espaciado / Padding del Contenedor:
+          </label>
+          <span className="text-[10px] text-indigo-400 font-mono font-bold">
+            {state.modulePadding || 36} px
+          </span>
+        </div>
+        <input
+          type="range"
+          min={16}
+          max={64}
+          step={4}
+          value={state.modulePadding || 36}
+          onChange={(e) => updateState({ modulePadding: Number(e.target.value) })}
+          className="w-full accent-indigo-500 bg-slate-900 h-1.5 rounded-lg cursor-pointer"
+        />
+      </div>
     </div>
   );
 
@@ -313,17 +399,19 @@ export const ModulePanel: React.FC<ModulePanelProps> = ({
 
           {state.moduleVisible && (
             <div>
-              <label className="text-[10px] text-slate-400 font-mono block mb-1.5">
-                Selecciona uno de los 9 Módulos Especializados:
+              <label className="text-[10px] text-slate-400 font-mono block mb-1.5 font-bold">
+                Selecciona el Módulo de Impacto para Redes:
               </label>
               <div className="grid grid-cols-3 gap-1.5 text-xs font-mono">
                 {[
+                  { id: 'comparison' as ModuleType, label: 'Antes / Hoy', icon: Split, highlight: true },
+                  { id: 'notification' as ModuleType, label: 'Alerta Push', icon: Bell, highlight: true },
                   { id: 'code' as ModuleType, label: 'Código IDE', icon: Code2 },
                   { id: 'kpi' as ModuleType, label: 'Métricas KPI', icon: TrendingUp },
+                  { id: 'chat' as ModuleType, label: 'WhatsApp', icon: MessageSquare },
                   { id: 'chart-bars' as ModuleType, label: 'Barras', icon: BarChart3 },
                   { id: 'chart-pie' as ModuleType, label: 'Donut Pastel', icon: PieChart },
                   { id: 'chart-line' as ModuleType, label: 'Líneas Área', icon: LineChart },
-                  { id: 'chat' as ModuleType, label: 'WhatsApp', icon: MessageSquare },
                   { id: 'steps' as ModuleType, label: 'Pasos / Fases', icon: ListOrdered },
                   { id: 'quote-cta' as ModuleType, label: 'Cita / Frase', icon: Quote },
                   { id: 'image' as ModuleType, label: 'Mockup Imagen', icon: ImageIcon },
@@ -345,9 +433,11 @@ export const ModulePanel: React.FC<ModulePanelProps> = ({
                           updateState({ activeModule: m.id });
                         }
                       }}
-                      className={`py-2.5 px-1.5 rounded-xl transition flex items-center justify-center gap-1.5 ${
+                      className={`py-2 px-1.5 rounded-xl transition flex items-center justify-center gap-1.5 relative ${
                         isSelected
                           ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400'
+                          : (m as any).highlight
+                          ? 'bg-slate-950 border border-indigo-500/40 text-indigo-300 hover:text-white hover:bg-slate-900'
                           : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900'
                       }`}
                     >
@@ -401,6 +491,325 @@ export const ModulePanel: React.FC<ModulePanelProps> = ({
             </p>
           ) : (
             <div className="p-3.5 bg-slate-950/60 border border-slate-800/80 rounded-xl space-y-3.5">
+
+              {/* 0A. MÓDULO COMPARATIVA ANTES VS DESPUÉS */}
+              {currentModule === 'comparison' && (
+                <div className="space-y-3">
+                  {/* Presets de Contenido Rápido */}
+                  <div className="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono font-bold text-slate-300 flex items-center gap-1.5">
+                        <Sparkles className="w-3 h-3 text-indigo-400" /> Presets de Comparativa 1-Clic:
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1 text-[10px] font-mono">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateState({
+                            comparisonBadgeLeft: 'ANTES',
+                            comparisonTitleLeft: 'Hojas de Cálculo & Excel',
+                            comparisonPointsLeft: [
+                              'Datos duplicados y fórmulas rotas',
+                              'Cero control de accesos por roles',
+                              'Reportes tardíos de 3 a 5 días'
+                            ],
+                            comparisonBadgeRight: 'HOY',
+                            comparisonTitleRight: 'Plataforma Web a Medida',
+                            comparisonPointsRight: [
+                              'Base de datos PostgreSQL en tiempo real',
+                              'Seguridad RBAC y auditoría total',
+                              'Métricas automáticas con 1 clic'
+                            ]
+                          });
+                        }}
+                        className="py-1 px-1.5 rounded bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 text-center"
+                      >
+                        📊 Excel vs Cloud
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateState({
+                            comparisonBadgeLeft: 'MANUAL',
+                            comparisonTitleLeft: 'Operación Manual Lenta',
+                            comparisonPointsLeft: [
+                              '40 horas al mes en copiar y pegar',
+                              'Respuestas tardías a clientes por WhatsApp',
+                              'Pérdida de pedidos en el caos diario'
+                            ],
+                            comparisonBadgeRight: 'AUTOMÁTICO',
+                            comparisonTitleRight: 'Automatización & Web',
+                            comparisonPointsRight: [
+                              'Conexión API inmediata con ERP',
+                              'Bot WhatsApp confirma pedidos al instante',
+                              'Ahorro del 65% de costos operativos'
+                            ]
+                          });
+                        }}
+                        className="py-1 px-1.5 rounded bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 text-center"
+                      >
+                        ⚙️ Manual vs Auto
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateState({
+                            comparisonBadgeLeft: 'MONOLITO',
+                            comparisonTitleLeft: 'Sistemas Antiguos Legacy',
+                            comparisonPointsLeft: [
+                              'Servidores que se caen en fechas pico',
+                              'Altos costos de infraestructura fija',
+                              'Mantenimiento lento y complejo'
+                            ],
+                            comparisonBadgeRight: 'CLOUD NATIVE',
+                            comparisonTitleRight: 'Arquitectura en la Nube',
+                            comparisonPointsRight: [
+                              'Auto-escalado sin caídas ni lentitud',
+                              'Costos optimizados bajo demanda',
+                              'Despliegues continuos en minutos'
+                            ]
+                          });
+                        }}
+                        className="py-1 px-1.5 rounded bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 text-center"
+                      >
+                        ☁️ Legacy vs Cloud
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Lado Antes / Problema */}
+                  <div className="p-3 bg-rose-950/20 border border-rose-900/40 rounded-xl space-y-2">
+                    <span className="text-[10px] font-mono font-bold text-rose-400 block uppercase">
+                      🔴 Lado Izquierdo (Problema / Antes):
+                    </span>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="col-span-1">
+                        <label className="text-[9px] text-slate-400 font-mono">Badge:</label>
+                        <input
+                          type="text"
+                          value={state.comparisonBadgeLeft ?? 'ANTES'}
+                          onChange={(e) => updateState({ comparisonBadgeLeft: e.target.value })}
+                          className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-rose-300 font-mono font-bold"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="text-[9px] text-slate-400 font-mono">Título:</label>
+                        <input
+                          type="text"
+                          value={state.comparisonTitleLeft ?? 'Procesos Manuales & Excel'}
+                          onChange={(e) => updateState({ comparisonTitleLeft: e.target.value })}
+                          className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white font-medium"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[9px] text-slate-400 font-mono">Puntos Clave (1 por línea):</label>
+                      <textarea
+                        rows={3}
+                        value={(state.comparisonPointsLeft || []).join('\n')}
+                        onChange={(e) => updateState({ comparisonPointsLeft: e.target.value.split('\n').filter(Boolean) })}
+                        placeholder="Escribe hasta 3 puntos clave..."
+                        className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-300 font-mono leading-relaxed"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Lado Hoy / Solución */}
+                  <div className="p-3 bg-emerald-950/20 border border-emerald-900/40 rounded-xl space-y-2">
+                    <span className="text-[10px] font-mono font-bold text-emerald-400 block uppercase">
+                      🟢 Lado Derecho (Solución / Hoy):
+                    </span>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="col-span-1">
+                        <label className="text-[9px] text-slate-400 font-mono">Badge:</label>
+                        <input
+                          type="text"
+                          value={state.comparisonBadgeRight ?? 'HOY'}
+                          onChange={(e) => updateState({ comparisonBadgeRight: e.target.value })}
+                          className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-emerald-300 font-mono font-bold"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="text-[9px] text-slate-400 font-mono">Título:</label>
+                        <input
+                          type="text"
+                          value={state.comparisonTitleRight ?? 'Plataforma Web a Medida'}
+                          onChange={(e) => updateState({ comparisonTitleRight: e.target.value })}
+                          className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white font-medium"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[9px] text-slate-400 font-mono">Puntos Clave (1 por línea):</label>
+                      <textarea
+                        rows={3}
+                        value={(state.comparisonPointsRight || []).join('\n')}
+                        onChange={(e) => updateState({ comparisonPointsRight: e.target.value.split('\n').filter(Boolean) })}
+                        placeholder="Escribe hasta 3 puntos clave..."
+                        className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-300 font-mono leading-relaxed"
+                      />
+                    </div>
+                  </div>
+
+                  {renderScaleControl()}
+                </div>
+              )}
+
+              {/* 0B. MÓDULO NOTIFICACIÓN DE SISTEMA (PUSH ALERT) */}
+              {currentModule === 'notification' && (
+                <div className="space-y-3">
+                  {/* Presets de Notificación Rápida */}
+                  <div className="p-2.5 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono font-bold text-slate-300 flex items-center gap-1.5">
+                        <Sparkles className="w-3 h-3 text-indigo-400" /> Presets de Notificación 1-Clic:
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1 text-[10px] font-mono">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateState({
+                            notificationApp: 'Aleric Platform',
+                            notificationTitle: 'Despliegue a Producción',
+                            notificationHighlight: '+1,420 transacciones procesadas',
+                            notificationMessage: 'Pipeline CI/CD completado. Base de datos migrada con 0 downtime.',
+                            notificationTime: 'hace 2 min',
+                            notificationIcon: 'rocket'
+                          });
+                        }}
+                        className="py-1 px-1.5 rounded bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 text-center"
+                      >
+                        🚀 Deploy Exitoso
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateState({
+                            notificationApp: 'Stripe Gateway',
+                            notificationTitle: 'Cobro Recurrente Confirmado',
+                            notificationHighlight: '+$14,500 USD recibidos',
+                            notificationMessage: 'Factura mensual liquidada automáticamente sin intervención manual.',
+                            notificationTime: 'hace 5 min',
+                            notificationIcon: 'dollar'
+                          });
+                        }}
+                        className="py-1 px-1.5 rounded bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 text-center"
+                      >
+                        💰 Venta Recibida
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateState({
+                            notificationApp: 'Cloud Monitoring',
+                            notificationTitle: 'Disponibilidad de Servicio',
+                            notificationHighlight: '99.99% SLA Uptime',
+                            notificationMessage: 'Todos los microservicios operativos con latencia promedio de 42ms.',
+                            notificationTime: 'en tiempo real',
+                            notificationIcon: 'check'
+                          });
+                        }}
+                        className="py-1 px-1.5 rounded bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 text-center"
+                      >
+                        ⚡ Uptime Cloud
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Ícono de Notificación */}
+                  <div>
+                    <label className="text-[10px] text-slate-400 font-mono font-bold block mb-1.5">
+                      Ícono de la Notificación:
+                    </label>
+                    <div className="grid grid-cols-6 gap-1 font-mono text-xs">
+                      {[
+                        { id: 'rocket', label: '🚀', name: 'Cohete' },
+                        { id: 'check', label: '✓', name: 'Check' },
+                        { id: 'dollar', label: '$', name: 'Dólar' },
+                        { id: 'zap', label: '⚡', name: 'Rayo' },
+                        { id: 'bell', label: '🔔', name: 'Campana' },
+                        { id: 'shield', label: '🛡️', name: 'Escudo' },
+                      ].map((ic) => (
+                        <button
+                          key={ic.id}
+                          type="button"
+                          onClick={() => updateState({ notificationIcon: ic.id as any })}
+                          className={`py-1.5 rounded-lg text-center transition ${
+                            (state.notificationIcon || 'rocket') === ic.id
+                              ? 'bg-indigo-600 text-white font-bold ring-1 ring-indigo-400'
+                              : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                          }`}
+                          title={ic.name}
+                        >
+                          {ic.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <label className="text-[10px] text-slate-400 block mb-1 font-mono">Nombre de Aplicación:</label>
+                      <input
+                        type="text"
+                        value={state.notificationApp ?? 'Aleric Platform'}
+                        onChange={(e) => updateState({ notificationApp: e.target.value })}
+                        placeholder="Aleric Platform"
+                        className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-white font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-slate-400 block mb-1 font-mono">Marca de Tiempo:</label>
+                      <input
+                        type="text"
+                        value={state.notificationTime ?? 'hace 2 min'}
+                        onChange={(e) => updateState({ notificationTime: e.target.value })}
+                        placeholder="hace 2 min"
+                        className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-white font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-slate-400 block mb-1 font-mono font-bold">Título del Evento:</label>
+                    <input
+                      type="text"
+                      value={state.notificationTitle ?? 'Despliegue a Producción'}
+                      onChange={(e) => updateState({ notificationTitle: e.target.value })}
+                      placeholder="Despliegue a Producción"
+                      className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-white font-medium"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-indigo-400 block mb-1 font-mono font-bold">
+                      Cifra / Métrica Destacada (Hero):
+                    </label>
+                    <input
+                      type="text"
+                      value={state.notificationHighlight ?? '+1,420 transacciones procesadas'}
+                      onChange={(e) => updateState({ notificationHighlight: e.target.value })}
+                      placeholder="+$14,500 USD / 99.99% Uptime"
+                      className="w-full bg-slate-900 border border-indigo-500/50 rounded-lg p-2 text-white font-mono font-black"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-slate-400 block mb-1 font-mono">Mensaje Descriptivo:</label>
+                    <textarea
+                      rows={2}
+                      value={state.notificationMessage ?? ''}
+                      onChange={(e) => updateState({ notificationMessage: e.target.value })}
+                      placeholder="Mensaje descriptivo del logro..."
+                      className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-300 resize-none leading-relaxed"
+                    />
+                  </div>
+
+                  {renderScaleControl()}
+                </div>
+              )}
 
               {/* 1. MÓDULO DE CÓDIGO IDE */}
               {currentModule === 'code' && (
@@ -619,6 +1028,27 @@ export const ModulePanel: React.FC<ModulePanelProps> = ({
                         );
                       })}
                     </div>
+                  </div>
+
+                  {/* Slider de Tamaño de Cifras KPI (36px a 76px) */}
+                  <div className="p-2.5 bg-slate-900 rounded-xl border border-slate-800 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] text-slate-400 font-mono font-bold">
+                        Tamaño de Cifras KPI (Hero):
+                      </label>
+                      <span className="text-[10px] text-indigo-400 font-mono font-bold">
+                        {state.kpiValueSize || 52} px
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={36}
+                      max={76}
+                      step={2}
+                      value={state.kpiValueSize || 52}
+                      onChange={(e) => updateState({ kpiValueSize: Number(e.target.value) })}
+                      className="w-full accent-indigo-500 bg-slate-950 h-1.5 rounded-lg cursor-pointer"
+                    />
                   </div>
 
                   {/* Lista de Tarjetas KPI */}
@@ -1725,8 +2155,8 @@ export const ModulePanel: React.FC<ModulePanelProps> = ({
 
             <input
               type="range"
-              min={12}
-              max={30}
+              min={13}
+              max={36}
               step={1}
               value={state.moduleFontSize || 15}
               onChange={(e) => updateState({ moduleFontSize: Number(e.target.value) })}
@@ -1737,10 +2167,10 @@ export const ModulePanel: React.FC<ModulePanelProps> = ({
             <div className="grid grid-cols-5 gap-1 pt-1 text-[10px] font-mono">
               {[
                 { size: 13, label: '13px', desc: 'Compacto' },
-                { size: 15, label: '15px', desc: 'Normal' },
-                { size: 18, label: '18px', desc: 'Medio' },
-                { size: 22, label: '22px', desc: 'Grande' },
-                { size: 26, label: '26px', desc: 'Titular' },
+                { size: 16, label: '16px', desc: 'Normal' },
+                { size: 20, label: '20px', desc: 'Medio' },
+                { size: 26, label: '26px', desc: 'Grande' },
+                { size: 32, label: '32px', desc: '🔥 Hero' },
               ].map((p) => {
                 const isSelected = (state.moduleFontSize || 15) === p.size;
                 return (

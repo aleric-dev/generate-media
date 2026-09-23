@@ -9,7 +9,7 @@ import {
   Heart, Flame, Palette, Compass, MessageSquare, Share2,
   Lock, Server, Cloud, DollarSign, ShoppingCart, Percent, Award,
   Globe, Mic, Copy, Check, Shield, CircleDot, Play, ExternalLink,
-  GitBranch
+  GitBranch, Bell
 } from 'lucide-react';
 
 interface CanvasTargetProps {
@@ -259,13 +259,13 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
   const modFontSize = state.moduleFontSize || 15;
   const fontMult = Math.max(0.8, Math.min(2.0, modFontSize / 14));
 
-  let basePadding = 36;
+  let basePadding = state.modulePadding || 36;
   let moduleMinH = isWidescreen ? 'min-h-[220px]' : 'min-h-[280px]';
   if (state.moduleSize === 'compact') {
-    basePadding = 24;
+    basePadding = state.modulePadding || 24;
     moduleMinH = isWidescreen ? 'min-h-[160px]' : 'min-h-[200px]';
   } else if (state.moduleSize === 'spacious') {
-    basePadding = 52;
+    basePadding = state.modulePadding || 52;
     moduleMinH = isWidescreen ? 'min-h-[280px]' : 'min-h-[360px]';
   }
 
@@ -1246,7 +1246,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         <span
                           className="font-mono font-bold"
                           style={{
-                            fontSize: `${Math.round((isHeroBento ? 28 : 24) * modScale * fontMult)}px`,
+                            fontSize: `${Math.round((state.kpiValueSize ? state.kpiValueSize * 0.58 : (isHeroBento ? 28 : 24)) * modScale * fontMult)}px`,
                             color: isLight ? '#64748B' : '#94A3B8'
                           }}
                         >
@@ -1256,7 +1256,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                       <span
                         className="font-mono font-black tracking-tight"
                         style={{
-                          fontSize: `${Math.round((isHeroBento ? 52 : 42) * modScale * fontMult)}px`,
+                          fontSize: `${Math.round((state.kpiValueSize || (isHeroBento ? 52 : 42)) * modScale * fontMult)}px`,
                           color: isLight ? '#0F172A' : '#FFFFFF',
                           textShadow: isLight ? 'none' : `0 0 20px rgba(${rgb}, 0.3)`
                         }}
@@ -1267,7 +1267,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         <span
                           className="font-mono font-bold"
                           style={{
-                            fontSize: `${Math.round((isHeroBento ? 28 : 24) * modScale * fontMult)}px`,
+                            fontSize: `${Math.round((state.kpiValueSize ? state.kpiValueSize * 0.58 : (isHeroBento ? 28 : 24)) * modScale * fontMult)}px`,
                             color: isLight ? '#64748B' : '#94A3B8'
                           }}
                         >
@@ -2397,6 +2397,255 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                   </div>
                 );
               })}
+            </div>
+          );
+        })()}
+
+        {/* ================================================================= */}
+        {/* 10. MÓDULO COMPARATIVA (ANTES VS DESPUÉS / SPLIT CARD)             */}
+        {/* ================================================================= */}
+        {state.activeModule === 'comparison' && (() => {
+          const badgeLeft = state.comparisonBadgeLeft || 'ANTES';
+          const titleLeft = state.comparisonTitleLeft || 'Procesos Manuales & Excel';
+          const pointsLeft = state.comparisonPointsLeft || [
+            'Datos duplicados y fórmulas rotas',
+            'Cero control de accesos por roles',
+            'Reportes tardíos de 3 a 5 días'
+          ];
+
+          const badgeRight = state.comparisonBadgeRight || 'HOY';
+          const titleRight = state.comparisonTitleRight || 'Plataforma Web a Medida';
+          const pointsRight = state.comparisonPointsRight || [
+            'Base de datos PostgreSQL en tiempo real',
+            'Seguridad RBAC y auditoría total',
+            'Métricas automáticas con 1 clic'
+          ];
+
+          return (
+            <div className="grid grid-cols-2 gap-4 w-full h-auto">
+              {/* Columna Izquierda: Problema / Antes */}
+              <div
+                className="p-5 sm:p-6 rounded-2xl border flex flex-col justify-between transition-all shadow-xl relative overflow-hidden backdrop-blur-xl"
+                style={{
+                  backgroundColor: isLight ? 'rgba(254, 242, 242, 0.9)' : 'rgba(25, 15, 20, 0.85)',
+                  borderColor: isLight ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.35)',
+                  borderTopWidth: '4px',
+                  borderTopColor: '#EF4444'
+                }}
+              >
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <span className="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wider uppercase bg-rose-500/15 border border-rose-500/30 text-rose-400">
+                      {badgeLeft}
+                    </span>
+                    <span className="w-6 h-6 rounded-full bg-rose-500/15 text-rose-400 flex items-center justify-center font-bold text-xs">
+                      ✕
+                    </span>
+                  </div>
+
+                  <h3
+                    className={`font-bold tracking-tight text-white ${state.titleFont || 'font-inter'}`}
+                    style={{
+                      fontSize: `${Math.round(modFontSize * 1.35 * fontMult)}px`,
+                      color: isLight ? '#991B1B' : '#FCA5A5'
+                    }}
+                  >
+                    {titleLeft}
+                  </h3>
+
+                  <ul className="space-y-2.5 pt-1">
+                    {pointsLeft.map((pt, pi) => (
+                      <li
+                        key={pi}
+                        className="flex items-start gap-2.5 leading-relaxed font-mono"
+                        style={{
+                          fontSize: `${Math.round(modFontSize * fontMult)}px`,
+                          color: isLight ? '#64748B' : '#CBD5E1'
+                        }}
+                      >
+                        <span className="text-rose-400 shrink-0 mt-0.5 font-bold">•</span>
+                        <span>{pt}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Columna Derecha: Solución / Hoy */}
+              <div
+                className="p-5 sm:p-6 rounded-2xl border flex flex-col justify-between transition-all shadow-xl relative overflow-hidden backdrop-blur-xl"
+                style={{
+                  backgroundColor: isLight ? 'rgba(240, 253, 244, 0.95)' : `rgba(15, 23, 42, 0.85)`,
+                  borderColor: isLight ? 'rgba(16, 185, 129, 0.3)' : `rgba(${rgb}, 0.5)`,
+                  borderTopWidth: '4px',
+                  borderTopColor: state.currentColor,
+                  boxShadow: `0 15px 35px -10px rgba(${rgb}, 0.25)`
+                }}
+              >
+                {/* Halo de resplandor */}
+                <div
+                  className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-25 blur-xl"
+                  style={{ backgroundColor: state.currentColor }}
+                />
+
+                <div className="flex flex-col gap-3 z-10">
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wider uppercase border"
+                      style={{
+                        backgroundColor: `rgba(${rgb}, 0.15)`,
+                        borderColor: `rgba(${rgb}, 0.4)`,
+                        color: state.currentColor
+                      }}
+                    >
+                      {badgeRight}
+                    </span>
+                    <div
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-sm"
+                      style={{ backgroundColor: state.currentColor, color: '#FFFFFF' }}
+                    >
+                      ✓
+                    </div>
+                  </div>
+
+                  <h3
+                    className={`font-bold tracking-tight ${state.titleFont || 'font-inter'}`}
+                    style={{
+                      fontSize: `${Math.round(modFontSize * 1.35 * fontMult)}px`,
+                      color: isLight ? '#0F172A' : '#FFFFFF'
+                    }}
+                  >
+                    {titleRight}
+                  </h3>
+
+                  <ul className="space-y-2.5 pt-1">
+                    {pointsRight.map((pt, pi) => (
+                      <li
+                        key={pi}
+                        className="flex items-start gap-2.5 leading-relaxed font-mono"
+                        style={{
+                          fontSize: `${Math.round(modFontSize * fontMult)}px`,
+                          color: isLight ? '#1E293B' : '#E2E8F0'
+                        }}
+                      >
+                        <CheckCircle2
+                          className="w-4 h-4 shrink-0 mt-0.5"
+                          style={{ color: state.currentColor }}
+                        />
+                        <span className="font-medium">{pt}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* ================================================================= */}
+        {/* 11. MÓDULO NOTIFICACIÓN DE SISTEMA (PUSH ALERT / TOAST)            */}
+        {/* ================================================================= */}
+        {state.activeModule === 'notification' && (() => {
+          const appName = state.notificationApp || 'Aleric Platform';
+          const title = state.notificationTitle || 'Despliegue a Producción';
+          const message = state.notificationMessage || 'Pipeline CI/CD completado. Base de datos migrada con éxito.';
+          const highlight = state.notificationHighlight || '+1,420 transacciones procesadas';
+          const time = state.notificationTime || 'hace 2 min';
+          const iconType = state.notificationIcon || 'rocket';
+
+          const renderNotifIcon = () => {
+            const iconProps = { className: 'w-5 h-5 text-white' };
+            if (iconType === 'check') return <CheckCheck {...iconProps} />;
+            if (iconType === 'dollar') return <DollarSign {...iconProps} />;
+            if (iconType === 'zap') return <Zap {...iconProps} />;
+            if (iconType === 'shield') return <Shield {...iconProps} />;
+            if (iconType === 'bell') return <Bell {...iconProps} />;
+            return <Rocket {...iconProps} />;
+          };
+
+          return (
+            <div
+              className="w-full rounded-2xl p-6 sm:p-7 border flex flex-col gap-4 shadow-2xl relative overflow-hidden backdrop-blur-2xl transition-all"
+              style={{
+                backgroundColor: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(15, 23, 42, 0.9)',
+                borderColor: isLight ? 'rgba(0,0,0,0.1)' : `rgba(${rgb}, 0.4)`,
+                boxShadow: isLight
+                  ? '0 20px 45px -10px rgba(0,0,0,0.12)'
+                  : `0 25px 60px -12px rgba(0,0,0,0.8), 0 0 35px rgba(${rgb}, 0.2)`
+              }}
+            >
+              {/* Halo decorativo de fondo */}
+              <div
+                className="absolute -top-12 -right-12 w-40 h-40 rounded-full pointer-events-none opacity-25 blur-2xl"
+                style={{ backgroundColor: state.currentColor }}
+              />
+
+              {/* Fila Superior: App + Icon + Tiempo */}
+              <div
+                className="flex items-center justify-between w-full z-10 border-b pb-3"
+                style={{ borderColor: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)' }}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center shadow-md ring-2 ring-white/20"
+                    style={{ backgroundColor: state.currentColor }}
+                  >
+                    {renderNotifIcon()}
+                  </div>
+                  <div>
+                    <span
+                      className="font-mono text-xs font-bold uppercase tracking-wider block"
+                      style={{ color: isLight ? '#0F172A' : '#FFFFFF' }}
+                    >
+                      {appName}
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-400">
+                      Notificación de Sistema
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900/60 border border-white/10 text-[10px] font-mono text-slate-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>{time}</span>
+                </div>
+              </div>
+
+              {/* Contenido Central: Título y Métrica Gigante */}
+              <div className="flex flex-col gap-2 z-10 my-1">
+                <span
+                  className="font-bold tracking-tight leading-snug"
+                  style={{
+                    fontSize: `${Math.round(modFontSize * 1.3 * fontMult)}px`,
+                    color: isLight ? '#1E293B' : '#F1F5F9'
+                  }}
+                >
+                  {title}
+                </span>
+
+                {highlight && (
+                  <div
+                    className="font-mono font-black tracking-tight"
+                    style={{
+                      fontSize: `${Math.round(modFontSize * 2.2 * fontMult)}px`,
+                      color: state.currentColor,
+                      textShadow: isLight ? 'none' : `0 0 25px rgba(${rgb}, 0.35)`
+                    }}
+                  >
+                    {highlight}
+                  </div>
+                )}
+
+                <p
+                  className="leading-relaxed"
+                  style={{
+                    fontSize: `${Math.round(modFontSize * fontMult)}px`,
+                    color: isLight ? '#64748B' : '#94A3B8'
+                  }}
+                >
+                  {message}
+                </p>
+              </div>
             </div>
           );
         })()}
