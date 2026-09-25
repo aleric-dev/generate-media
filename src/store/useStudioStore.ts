@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { toast as sonnerToast } from 'sonner';
 import { PostState, PostTemplate, BrandProfile } from '../types';
-import { getDefaultBrand } from '../utils/brandStorage';
+import { getDefaultBrand, setActiveBrandId as persistActiveBrandId } from '../utils/brandStorage';
 
 const getInitialDefaultBrand = (): BrandProfile | null => {
   if (typeof window === 'undefined') return null;
@@ -238,6 +238,10 @@ interface StudioStore {
   recordCurrentSnapshot: () => void;
   updatePostState: (partial: Partial<PostState>) => void;
 
+  // Marca Activa
+  activeBrandId: string | null;
+  setActiveBrandId: (id: string | null) => void;
+
   // Modales
   templatesModalOpen: boolean;
   setTemplatesModalOpen: (open: boolean) => void;
@@ -281,6 +285,12 @@ interface StudioStore {
 
 export const useStudioStore = create<StudioStore>((set, get) => ({
   postState: initialPostState,
+
+  activeBrandId: defaultBrand?.id || null,
+  setActiveBrandId: (id) => {
+    persistActiveBrandId(id);
+    set({ activeBrandId: id });
+  },
 
   currentProjectId: null,
   currentProjectName: null,
@@ -583,7 +593,8 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
       };
     }),
 
-  applyBrandProfile: (brand) =>
+  applyBrandProfile: (brand) => {
+    persistActiveBrandId(brand.id);
     set((state) => {
       const brandUpdates = {
         companyName: brand.companyName,
@@ -610,10 +621,12 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
       }));
 
       return {
+        activeBrandId: brand.id,
         postState: updatedPostState,
         slides: updatedSlides,
       };
-    }),
+    });
+  },
 
   resetToScratch: () =>
     set((state) => ({

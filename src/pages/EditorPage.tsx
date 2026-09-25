@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Folder, Save } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Folder, Save, FolderArchive } from 'lucide-react';
 import { aspectRatios } from '../constants/templates';
 import { ControlPanel } from '../components/Panel/ControlPanel';
 import { CanvasTarget } from '../components/Canvas/CanvasTarget';
@@ -8,22 +8,31 @@ import { FloatingWorkspaceCard, MIN_ZOOM, MAX_ZOOM } from '../components/Floatin
 import { FloatingBrandBadge } from '../components/FloatingBrandBadge';
 import { AboutStudioModal } from '../components/AboutStudioModal';
 import { SaveConfigModal } from '../components/SaveConfigModal';
+import { ProjectsModal } from '../components/ProjectsModal';
 import { ExportSuccessModal } from '../components/ExportSuccessModal';
-import { Button, Badge } from '../components/ui';
+import { Button } from '../components/ui';
 import { useStudioStore, extractSavableState } from '../store/useStudioStore';
-import { saveOrUpdateProject } from '../utils/customPresetsStorage';
+import { 
+  saveOrUpdateProject, 
+  getProjectById, 
+  getSavedProjects, 
+  deleteProject 
+} from '../utils/customPresetsStorage';
+import { getSavedBrands } from '../utils/brandStorage';
 import { trackImageGeneration } from '../utils/generationTracker';
 import * as htmlToImage from 'html-to-image';
 import html2canvas from 'html2canvas';
 
 export const EditorPage: React.FC = () => {
   const navigate = useNavigate();
+  const { projectId } = useParams<{ projectId?: string }>();
   const canvasRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
+  const [projectsModalOpen, setProjectsModalOpen] = useState(false);
 
   const postState = useStudioStore((s) => s.postState);
   const updatePostState = useStudioStore((s) => s.updatePostState);
@@ -32,8 +41,33 @@ export const EditorPage: React.FC = () => {
   const currentProjectName = useStudioStore((s) => s.currentProjectName);
   const lastSavedSnapshot = useStudioStore((s) => s.lastSavedSnapshot);
   const setCurrentProject = useStudioStore((s) => s.setCurrentProject);
+  const activeBrandId = useStudioStore((s) => s.activeBrandId);
   const setWizardModalOpen = useStudioStore((s) => s.setWizardModalOpen);
   const showToast = useStudioStore((s) => s.showToast);
+
+  // Obtener marca activa para mostrar siempre en la barra superior
+  const savedBrands = getSavedBrands();
+  const activeBrand = savedBrands.find((b) => b.id === activeBrandId) ||
+    savedBrands.find((b) => b.name?.toLowerCase() === postState.companyName?.toLowerCase()) ||
+    null;
+
+  // Carga reactiva de proyecto por UUID en URL
+  useEffect(() => {
+    if (projectId) {
+      if (currentProjectId === projectId) return;
+      const proj = getProjectById(projectId);
+      if (proj) {
+        loadProjectState(proj.postState, proj.id, proj.name);
+      } else {
+        showToast('El proyecto solicitado no existe o fue eliminado.', 'error');
+        navigate('/editor', { replace: true });
+      }
+    } else {
+      if (currentProjectId) {
+        setCurrentProject(null, null);
+      }
+    }
+  }, [projectId]);
 
   const hasUnsavedChanges = React.useMemo(() => {
     if (!currentProjectId) return true;
@@ -47,6 +81,9 @@ export const EditorPage: React.FC = () => {
       if (res.success && res.project) {
         setCurrentProject(res.project.id, res.project.name, JSON.stringify(extractSavableState(postState)));
         showToast(`¡Cambios guardados en "${res.project.name}"!`, 'success');
+        if (!projectId || projectId !== res.project.id) {
+          navigate(`/editor/${res.project.id}`, { replace: true });
+        }
       } else {
         showToast(res.error || 'No se pudo guardar el proyecto', 'error');
       }
@@ -245,38 +282,59 @@ export const EditorPage: React.FC = () => {
       {/* 2. COLUMNA DERECHA: ÁREA DE TRABAJO Y PREVISUALIZACIÓN */}
       <main className="flex-1 min-w-0 h-full flex flex-col p-2 sm:p-4 bg-gradient-to-b from-[#070A0F] to-[#020408] overflow-hidden relative">
         
-        {/* ESQUINA SUPERIOR IZQUIERDA: IDENTIDAD DEL PROYECTO Y BOTÓN GUARDAR JUSTO DEBAJO */}
+        {/* ESQUINA SUPERIOR IZQUIERDA: PROYECTO ACTUAL (CON DOT) + PROYECTOS, Y BOTÓN GUARDAR ABAJO */}
         <div className="absolute top-6 left-6 sm:top-8 sm:left-8 z-30 animate-fade-in pointer-events-auto flex flex-col items-start gap-2 select-none">
-          {/* 1. Píldora de Identidad del Proyecto */}
-          <button
-            type="button"
-            onClick={() => setSaveModalOpen(true)}
-            className="flex items-center gap-2.5 py-1 px-3 bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800/90 hover:border-indigo-500/40 backdrop-blur-xl rounded-2xl shadow-xl transition-all duration-150 group cursor-pointer"
-            title="Haz clic para abrir la configuración del proyecto"
-          >
-            {/* Nombre libre del Proyecto con icono de carpeta */}
-            <div className="flex items-center gap-2">
+          {/* Fila 1: Píldora del Proyecto (Nombre + Dot luminoso) + Botón Mis Proyectos */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSaveModalOpen(true)}
+              className="flex items-center gap-2.5 py-1 px-3 bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800/90 hover:border-indigo-500/40 backdrop-blur-xl rounded-2xl shadow-xl transition-all duration-150 group cursor-pointer"
+              title={
+                !currentProjectId
+                  ? 'Borrador sin guardar. Haz clic para configurar'
+                  : hasUnsavedChanges
+                  ? 'Cambios pendientes de guardar. Haz clic para configurar'
+                  : 'Proyecto guardado. Haz clic para configurar'
+              }
+            >
               <Folder className="w-3.5 h-3.5 text-indigo-400 group-hover:scale-110 transition-transform shrink-0" />
               <span className="text-xs font-mono font-bold text-white whitespace-nowrap">
                 {currentProjectName || 'Proyecto sin guardar'}
               </span>
-            </div>
 
-            {/* Tag de Estado Reactivo con Badge Atómico */}
-            <Badge
-              variant={!currentProjectId ? 'warning' : hasUnsavedChanges ? 'warning' : 'success'}
+              {/* Dot de Estado Reactivo (sustituye al tag de texto) */}
+              <span
+                className={`w-2.5 h-2.5 rounded-full shrink-0 transition-all ${
+                  !currentProjectId
+                    ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]'
+                    : hasUnsavedChanges
+                    ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)] animate-pulse'
+                    : 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]'
+                }`}
+                title={!currentProjectId ? 'Borrador sin guardar' : hasUnsavedChanges ? 'Cambios pendientes' : 'Guardado'}
+              />
+            </button>
+
+            {/* Botón Mis Proyectos */}
+            <button
+              type="button"
+              onClick={() => setProjectsModalOpen(true)}
+              className="flex items-center gap-1.5 py-1 px-3 bg-slate-900/90 hover:bg-slate-800/90 text-slate-300 hover:text-white border border-slate-800/90 hover:border-indigo-500/40 backdrop-blur-xl rounded-2xl shadow-md text-xs font-mono transition group cursor-pointer"
+              title="Abrir un proyecto guardado directamente en el editor"
             >
-              {!currentProjectId ? 'Borrador' : hasUnsavedChanges ? 'Modificado' : 'Guardado'}
-            </Badge>
-          </button>
+              <FolderArchive className="w-3.5 h-3.5 text-indigo-400 group-hover:scale-110 transition-transform shrink-0" />
+              <span>Proyectos</span>
+            </button>
+          </div>
 
-          {/* 2. Botón Guardar justo abajo del nombre (solo se muestra si hay cambios pendientes) */}
+          {/* Fila 2: Botón Guardar debajo cuando hay cambios pendientes */}
           {hasUnsavedChanges && (
             <Button
               variant="secondary"
               size="sm"
               onClick={handleQuickSave}
-              className="hover:border-emerald-500/50 hover:text-emerald-300 font-mono text-xs gap-2 shadow-lg group"
+              className="hover:border-emerald-500/50 hover:text-emerald-300 font-mono text-xs gap-2 shadow-lg group py-1 px-3 h-auto rounded-2xl animate-fade-in"
               title={currentProjectId ? "Guardar cambios pendientes directamente" : "Guardar proyecto con nombre"}
             >
               <Save className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform shrink-0" />
@@ -285,6 +343,32 @@ export const EditorPage: React.FC = () => {
             </Button>
           )}
         </div>
+
+        {/* ESQUINA SUPERIOR DERECHA: MARCA ACTIVA (SOLO SI EXISTE MARCA ACTIVA) */}
+        {activeBrand && (
+          <div className="absolute top-6 right-6 sm:top-8 sm:right-8 z-30 animate-fade-in pointer-events-auto select-none">
+            <button
+              type="button"
+              onClick={() => {
+                updatePostState({ activeStep: 1 });
+                if (isSidebarCollapsed) setIsSidebarCollapsed(false);
+              }}
+              className="flex items-center gap-2 py-1 px-3 bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800/90 hover:border-indigo-500/40 backdrop-blur-xl rounded-2xl shadow-xl transition-all duration-150 group cursor-pointer"
+              title="Marca activa actual. Clic para configurar en el Paso 1"
+            >
+              <span
+                className="w-2.5 h-2.5 rounded-full ring-2 ring-white/20 shrink-0 shadow-xs"
+                style={{ backgroundColor: activeBrand.primaryColor }}
+              />
+              <span className="text-xs font-mono font-bold text-slate-200 whitespace-nowrap">
+                {activeBrand.name || activeBrand.companyName}
+              </span>
+              <span className="text-[10px] text-slate-400 font-mono hidden md:inline">
+                @{activeBrand.handle || 'tumarca.dev'}
+              </span>
+            </button>
+          </div>
+        )}
 
         {/* DOCK INFERIOR IZQUIERDO: ZOOM */}
         <FloatingWorkspaceCard
@@ -331,8 +415,31 @@ export const EditorPage: React.FC = () => {
         state={postState}
         currentProjectId={currentProjectId}
         currentProjectName={currentProjectName}
-        onProjectSaved={(id, name) => setCurrentProject(id, name)}
+        onProjectSaved={(id, name) => {
+          setCurrentProject(id, name);
+          navigate(`/editor/${id}`, { replace: true });
+        }}
         onUpdateState={updatePostState}
+      />
+
+      {/* MODAL DE PROYECTOS GUARDADOS (ABRIR DIRECTAMENTE EN EL EDITOR) */}
+      <ProjectsModal
+        isOpen={projectsModalOpen}
+        onClose={() => setProjectsModalOpen(false)}
+        savedProjects={getSavedProjects()}
+        onOpenProject={(proj) => {
+          loadProjectState(proj.postState, proj.id, proj.name);
+          navigate(`/editor/${proj.id}`, { replace: true });
+          setProjectsModalOpen(false);
+          showToast(`¡Proyecto "${proj.name}" abierto!`, 'success');
+        }}
+        onDeleteProject={(id) => {
+          deleteProject(id);
+          if (currentProjectId === id) {
+            setCurrentProject(null, null);
+            navigate('/editor', { replace: true });
+          }
+        }}
       />
 
       {/* MODAL ABOUT US / ACERCA DE MEDIA STUDIO */}

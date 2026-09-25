@@ -50,7 +50,7 @@ export const HomePage: React.FC = () => {
 
   const handleOpenProject = (project: SavedProject) => {
     loadProjectState(project.postState, project.id, project.name);
-    navigate('/editor');
+    navigate(`/editor/${project.id}`);
   };
 
   const handleDeleteProject = (projectId: string) => {

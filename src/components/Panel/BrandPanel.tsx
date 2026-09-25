@@ -5,7 +5,8 @@ import {
   FooterShape, 
   BadgeStyle, 
   HeaderBrandMode, 
-  LogoAspectRatio 
+  LogoAspectRatio,
+  BrandProfile
 } from '../../types';
 import { 
   Palette, 
@@ -21,10 +22,26 @@ import {
   Sparkles, 
   Layers, 
   Sliders, 
-  Check 
+  Check,
+  Building2,
+  Plus,
+  Pencil,
+  Trash2,
+  Globe,
+  AlertCircle,
+  CheckCircle2,
+  RotateCcw
 } from 'lucide-react';
 import { BRAND_ICONS } from '../../constants/brandIcons';
 import { AccordionSection } from './AccordionSection';
+import { 
+  getSavedBrands, 
+  saveBrandWithValidation, 
+  updateBrand,
+  deleteBrand, 
+  findBrandByName 
+} from '../../utils/brandStorage';
+import { useStudioStore } from '../../store/useStudioStore';
 
 interface BrandPanelProps {
   state: PostState;
@@ -57,10 +74,156 @@ export const BrandPanel: React.FC<BrandPanelProps> = ({
   state,
   updateState
 }) => {
-  const [activeSection, setActiveSection] = useState<string | null>('palette');
+  const [activeSection, setActiveSection] = useState<string | null>('brand-profile');
 
   const toggleSection = (key: string) => {
     setActiveSection((prev) => (prev === key ? null : key));
+  };
+
+  const activeBrandId = useStudioStore((s) => s.activeBrandId);
+  const setActiveBrandId = useStudioStore((s) => s.setActiveBrandId);
+  const applyBrandProfile = useStudioStore((s) => s.applyBrandProfile);
+  const showToast = useStudioStore((s) => s.showToast);
+
+  const [savedBrands, setSavedBrands] = useState<BrandProfile[]>(() => getSavedBrands());
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingBrand, setEditingBrand] = useState<BrandProfile | null>(null);
+  const [brandFormName, setBrandFormName] = useState('');
+  const [brandFormHandle, setBrandFormHandle] = useState('');
+  const [brandFormColor, setBrandFormColor] = useState('');
+  const [syncWithEditorStyles, setSyncWithEditorStyles] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+  const refreshBrands = () => {
+    setSavedBrands(getSavedBrands());
+  };
+
+  const duplicateBrand = React.useMemo(() => {
+    if (!brandFormName.trim()) return null;
+    return findBrandByName(brandFormName.trim(), editingBrand ? editingBrand.id : undefined);
+  }, [brandFormName, editingBrand]);
+
+  const activeBrand = savedBrands.find((b) => b.id === activeBrandId) || null;
+
+  const handleSelectBrand = (brand: BrandProfile) => {
+    applyBrandProfile(brand);
+    showToast(`Marca "${brand.name || brand.companyName}" activada`, 'success');
+  };
+
+  const handleOpenCreateForm = () => {
+    setEditingBrand(null);
+    setBrandFormName('');
+    setBrandFormHandle('');
+    setBrandFormColor(state.currentColor);
+    setSyncWithEditorStyles(true);
+    setIsFormOpen(true);
+  };
+
+  const handleOpenEditForm = (brand: BrandProfile, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingBrand(brand);
+    setBrandFormName(brand.name || brand.companyName);
+    setBrandFormHandle(brand.handle || 'tumarca.dev');
+    setBrandFormColor(brand.primaryColor || state.currentColor);
+    setSyncWithEditorStyles(false);
+    setIsFormOpen(true);
+  };
+
+  const handleCancelForm = () => {
+    setIsFormOpen(false);
+    setEditingBrand(null);
+    setBrandFormName('');
+    setBrandFormHandle('');
+    setBrandFormColor('');
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanName = brandFormName.trim();
+    if (!cleanName) {
+      showToast('El nombre de la marca es obligatorio.', 'error');
+      return;
+    }
+
+    if (duplicateBrand) {
+      showToast(`Ya existe otra marca con el nombre "${duplicateBrand.name || duplicateBrand.companyName}".`, 'error');
+      return;
+    }
+
+    if (editingBrand) {
+      // 1. MODO EDICIÓN
+      const updates: Partial<Omit<BrandProfile, 'id' | 'createdAt'>> = {
+        name: cleanName,
+        companyName: cleanName,
+        handle: brandFormHandle.trim() || 'tumarca.dev',
+        primaryColor: brandFormColor || editingBrand.primaryColor,
+      };
+
+      if (syncWithEditorStyles) {
+        updates.primaryColor = state.currentColor;
+        updates.titleFont = state.titleFont;
+        updates.subtitleFont = state.subtitleFont;
+        updates.brandIcon = state.brandIcon;
+        updates.headerBrandMode = state.headerBrandMode;
+        updates.headerShape = state.headerShape;
+        updates.footerShape = state.footerShape;
+        updates.customLogoUrl = state.customLogoUrl;
+        updates.logoType = state.logoType;
+      }
+
+      const res = updateBrand(editingBrand.id, updates);
+      if (!res.success || !res.brand) {
+        showToast(res.error || 'No se pudo actualizar la marca.', 'error');
+        return;
+      }
+
+      // Si la marca modificada es la que está activa actualmente, sincronizar el editor de inmediato
+      if (activeBrand?.id === editingBrand.id) {
+        applyBrandProfile(res.brand);
+      }
+
+      refreshBrands();
+      handleCancelForm();
+      showToast(`¡Marca "${res.brand.name}" actualizada con éxito!`, 'success');
+    } else {
+      // 2. MODO CREACIÓN
+      const res = saveBrandWithValidation({
+        name: cleanName,
+        companyName: cleanName,
+        handle: brandFormHandle.trim() || 'tumarca.dev',
+        logoType: (state.headerBrandMode as any) || 'icon-text',
+        primaryColor: state.currentColor || '#4F46E5',
+        titleFont: state.titleFont,
+        subtitleFont: state.subtitleFont,
+        brandIcon: state.brandIcon,
+        headerBrandMode: state.headerBrandMode,
+        headerShape: state.headerShape,
+        footerShape: state.footerShape,
+        isDefault: true,
+      });
+
+      if (!res.success || !res.brand) {
+        showToast(res.error || 'No se pudo guardar la marca.', 'error');
+        return;
+      }
+
+      applyBrandProfile(res.brand);
+      refreshBrands();
+      handleCancelForm();
+      showToast(`¡Marca "${res.brand.name}" creada y activada con éxito!`, 'success');
+    }
+  };
+
+  const handleDeleteBrand = (id: string, name: string) => {
+    deleteBrand(id);
+    setConfirmDeleteId(null);
+    const updated = getSavedBrands();
+    setSavedBrands(updated);
+    if (activeBrandId === id) {
+      const nextActiveId = updated[0]?.id || null;
+      setActiveBrandId(nextActiveId);
+    }
+    showToast(`Marca "${name}" eliminada.`, 'info');
   };
 
   // 20 Paletas de Color Curadas
@@ -106,11 +269,314 @@ export const BrandPanel: React.FC<BrandPanelProps> = ({
     <div className="space-y-3.5">
 
       {/* ========================================================================= */}
-      {/* 1. COLOR DE MARCA & MODO BASE                                             */}
+      {/* 1. PERFIL DE MARCA CORPORATIVA (SELECCIÓN, EDICIÓN Y CREACIÓN)           */}
+      {/* ========================================================================= */}
+      <AccordionSection
+        id="brand-profile"
+        title="1. Perfil de Marca Corporativa"
+        icon={Building2}
+        badge={activeBrand?.name || state.companyName || 'Sin Marca'}
+        isOpen={activeSection === 'brand-profile'}
+        onToggle={() => toggleSection('brand-profile')}
+      >
+        <div className="space-y-3.5">
+          {/* Tarjeta de Marca Activa Actual */}
+          {activeBrand ? (
+            <div className="p-3 bg-slate-900/80 rounded-2xl border border-slate-800 flex items-center justify-between gap-3 shadow-md">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span
+                  className="w-4 h-4 rounded-full ring-2 ring-white/20 shrink-0 shadow-sm"
+                  style={{ backgroundColor: activeBrand.primaryColor }}
+                />
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-white truncate">
+                      {activeBrand.name}
+                    </span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0">
+                      Activa
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-mono truncate block">
+                    @{activeBrand.handle || 'tumarca.dev'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={(e) => handleOpenEditForm(activeBrand, e)}
+                  title="Editar datos de esta marca"
+                  className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 text-xs font-mono transition flex items-center gap-1"
+                >
+                  <Pencil className="w-3.5 h-3.5 text-indigo-400" />
+                  <span className="text-[10px] hidden sm:inline">Editar</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isFormOpen && !editingBrand) {
+                      handleCancelForm();
+                    } else {
+                      handleOpenCreateForm();
+                    }
+                  }}
+                  className="py-1 px-2.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 hover:text-white border border-indigo-500/40 text-[11px] font-mono font-semibold flex items-center gap-1 transition shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{isFormOpen && !editingBrand ? 'Cerrar' : 'Nueva'}</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="p-3 bg-slate-900/40 rounded-2xl border border-dashed border-slate-800/80 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="w-3.5 h-3.5 rounded-full bg-slate-700 shrink-0" />
+                <div className="min-w-0">
+                  <span className="text-xs font-semibold text-slate-300 block truncate">Sin marca activa</span>
+                  <span className="text-[10px] text-slate-500 font-mono truncate block">0 marcas disponibles</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleOpenCreateForm}
+                className="py-1 px-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-mono font-semibold flex items-center gap-1 transition shrink-0 shadow-sm"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Crear Marca</span>
+              </button>
+            </div>
+          )}
+
+          {/* Formulario de Creación / Edición de Marca */}
+          {isFormOpen && (
+            <form onSubmit={handleFormSubmit} className="p-3 bg-slate-950 rounded-2xl border border-indigo-500/40 space-y-3 shadow-inner">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                  {editingBrand ? (
+                    <>
+                      <Pencil className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Editar Marca: {editingBrand.name}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Crear Perfil de Marca</span>
+                    </>
+                  )}
+                </span>
+                <span className="text-[10px] font-mono text-slate-400">
+                  {editingBrand ? 'Actualizar perfil' : 'Guarda estilo actual'}
+                </span>
+              </div>
+
+              {/* Nombre de la marca */}
+              <div>
+                <label className="text-[10px] text-slate-400 font-mono block mb-1">
+                  Nombre de la Empresa o Marca: <span className="text-rose-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={brandFormName}
+                  onChange={(e) => setBrandFormName(e.target.value)}
+                  placeholder="ej. Aleric Dev"
+                  className={`w-full py-1.5 px-2.5 bg-slate-900 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition ${
+                    duplicateBrand
+                      ? 'border-amber-500/80 focus:border-amber-400 ring-1 ring-amber-500/30'
+                      : 'border-slate-800 focus:border-indigo-500'
+                  }`}
+                />
+
+                {/* ALERTA DE NOMBRE DUPLICADO */}
+                {duplicateBrand && (
+                  <div className="mt-1.5 p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-1.5 text-[11px] text-amber-300 font-mono">
+                    <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                    <span>
+                      Ya existe otra marca registrada con el nombre exacto <strong>"{duplicateBrand.name}"</strong>. Elige un nombre distinto.
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Handle / Web */}
+              <div>
+                <label className="text-[10px] text-slate-400 font-mono block mb-1">
+                  Sitio Web o Handle:
+                </label>
+                <input
+                  type="text"
+                  value={brandFormHandle}
+                  onChange={(e) => setBrandFormHandle(e.target.value)}
+                  placeholder="ej. aleric.dev"
+                  className="w-full py-1.5 px-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
+                />
+              </div>
+
+              {/* Opciones adicionales para Edición */}
+              {editingBrand && (
+                <div className="p-2 bg-slate-900/60 rounded-xl border border-slate-800 space-y-2">
+                  <label className="flex items-center gap-2 cursor-pointer text-[11px] text-slate-300 font-mono">
+                    <input
+                      type="checkbox"
+                      checked={syncWithEditorStyles}
+                      onChange={(e) => setSyncWithEditorStyles(e.target.checked)}
+                      className="rounded border-slate-700 bg-slate-950 text-indigo-500 focus:ring-0"
+                    />
+                    <span>Sincronizar colores, logo y fuentes del lienzo actual</span>
+                  </label>
+                </div>
+              )}
+
+              {/* Resumen y Botón Guardar */}
+              <div className="pt-1 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
+                  <span
+                    className="w-2.5 h-2.5 rounded-full"
+                    style={{ backgroundColor: syncWithEditorStyles ? state.currentColor : (brandFormColor || state.currentColor) }}
+                  />
+                  <span>Color: {syncWithEditorStyles ? state.currentColor : (brandFormColor || state.currentColor)}</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCancelForm}
+                    className="py-1.5 px-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-xs font-mono transition"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!brandFormName.trim() || !!duplicateBrand}
+                    className="py-1.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:pointer-events-none text-white text-xs font-mono font-semibold transition flex items-center gap-1.5 shadow-md shadow-indigo-600/20"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>{editingBrand ? 'Guardar Cambios' : 'Guardar y Activar'}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
+
+          {/* Selector de Marcas Guardadas */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] text-slate-400 font-mono uppercase tracking-wider">
+                Marcas Disponibles ({savedBrands.length}):
+              </label>
+              <span className="text-[10px] text-slate-500 font-mono">1 clic para alternar</span>
+            </div>
+
+            {savedBrands.length === 0 ? (
+              <div className="p-3 bg-slate-950/60 rounded-xl border border-dashed border-slate-800 text-center">
+                <p className="text-xs text-slate-400 font-mono">No hay marcas guardadas.</p>
+                <p className="text-[10px] text-slate-500 mt-1">Crea tu primera marca arriba para alternar con un solo clic.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-1.5 max-h-52 overflow-y-auto pr-1 custom-scrollbar">
+                {savedBrands.map((b) => {
+                  const isSelected = (activeBrand?.id === b.id) || (state.companyName?.toLowerCase() === b.name?.toLowerCase());
+                  const isDeleting = confirmDeleteId === b.id;
+
+                  return (
+                    <div
+                      key={b.id}
+                      onClick={() => !isDeleting && handleSelectBrand(b)}
+                      className={`p-2 rounded-xl border flex items-center justify-between gap-2 transition text-xs ${
+                        isSelected
+                          ? 'bg-slate-900/90 border-indigo-500/80 shadow-md ring-1 ring-indigo-500/30'
+                          : 'bg-slate-950/60 hover:bg-slate-900 border-slate-800/80 hover:border-slate-700 cursor-pointer'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span
+                          className="w-3 h-3 rounded-full shrink-0 shadow-xs"
+                          style={{ backgroundColor: b.primaryColor }}
+                        />
+                        <div className="min-w-0">
+                          <span className={`font-semibold block truncate ${isSelected ? 'text-white' : 'text-slate-300'}`}>
+                            {b.name || b.companyName}
+                          </span>
+                          <span className="text-[10px] text-slate-500 font-mono truncate block">
+                            @{b.handle || 'tumarca.dev'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                        {isDeleting ? (
+                          /* Micro-confirmación de eliminación */
+                          <div className="flex items-center gap-1 bg-rose-950/90 border border-rose-500/50 py-0.5 px-1.5 rounded-lg text-[10px] font-mono text-rose-300 animate-fade-in">
+                            <span>¿Borrar?</span>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteBrand(b.id, b.name || b.companyName)}
+                              className="px-1.5 py-0.5 rounded bg-rose-600 hover:bg-rose-500 text-white font-bold transition"
+                            >
+                              Sí
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setConfirmDeleteId(null)}
+                              className="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                            >
+                              No
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            {isSelected ? (
+                              <span className="py-0.5 px-2 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-mono font-bold flex items-center gap-1">
+                                <CheckCircle2 className="w-3 h-3 text-indigo-400" /> Activa
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleSelectBrand(b)}
+                                className="py-0.5 px-2 rounded-md bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-[10px] font-mono transition"
+                              >
+                                Usar
+                              </button>
+                            )}
+
+                            {/* Botón Editar Marca */}
+                            <button
+                              type="button"
+                              onClick={(e) => handleOpenEditForm(b, e)}
+                              title={`Editar marca "${b.name || b.companyName}"`}
+                              className="p-1 text-slate-500 hover:text-indigo-300 hover:bg-indigo-500/10 rounded-lg transition"
+                            >
+                              <Pencil className="w-3 h-3" />
+                            </button>
+
+                            {/* Botón Eliminar Marca con confirmación */}
+                            <button
+                              type="button"
+                              onClick={() => setConfirmDeleteId(b.id)}
+                              title={`Eliminar marca "${b.name || b.companyName}"`}
+                              className="p-1 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </AccordionSection>
+
+      {/* ========================================================================= */}
+      {/* 2. COLOR DE MARCA & MODO BASE                                             */}
       {/* ========================================================================= */}
       <AccordionSection
         id="palette"
-        title="1. Color de Marca & Modo Base"
+        title="2. Color de Marca & Modo Base"
         icon={Palette}
         badge={state.canvasMode === 'dark' ? `Oscuro • ${state.currentColor}` : `Claro • ${state.currentColor}`}
         isOpen={activeSection === 'palette'}
@@ -202,11 +668,11 @@ export const BrandPanel: React.FC<BrandPanelProps> = ({
       </AccordionSection>
 
       {/* ========================================================================= */}
-      {/* 2. CABECERA DE MARCA (HEADER)                                             */}
+      {/* 3. CABECERA DE MARCA (HEADER)                                             */}
       {/* ========================================================================= */}
       <AccordionSection
         id="header-brand"
-        title="2. Cabecera de Marca (Header)"
+        title="3. Cabecera de Marca (Header)"
         icon={Heading}
         badge={`${state.headerShape || 'line'} • ${state.companyName || 'Marca'}`}
         isOpen={activeSection === 'header-brand'}
@@ -603,11 +1069,11 @@ export const BrandPanel: React.FC<BrandPanelProps> = ({
       </AccordionSection>
 
       {/* ========================================================================= */}
-      {/* 3. PIE DE PÁGINA (FOOTER)                                                 */}
+      {/* 4. PIE DE PÁGINA (FOOTER)                                                 */}
       {/* ========================================================================= */}
       <AccordionSection
         id="footer-brand"
-        title="3. Pie de Página (Footer)"
+        title="4. Pie de Página (Footer)"
         icon={Footprints}
         badge={`${state.footerShape || 'line'} • ${state.handle || 'Footer'}`}
         isOpen={activeSection === 'footer-brand'}

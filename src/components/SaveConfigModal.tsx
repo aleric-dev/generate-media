@@ -21,7 +21,7 @@ import {
   MAX_SAVED_PROJECTS,
   MAX_PROJECT_NAME_LENGTH,
 } from '../utils/customPresetsStorage';
-import { saveBrand } from '../utils/brandStorage';
+import { saveBrandWithValidation } from '../utils/brandStorage';
 import { useStudioStore } from '../store/useStudioStore';
 import { Button, Input } from './ui';
 
@@ -128,7 +128,7 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
     const trimmedName = brandName.trim();
     const trimmedHandle = brandHandle.trim() || 'tumarca.dev';
 
-    saveBrand({
+    const res = saveBrandWithValidation({
       name: trimmedName,
       companyName: trimmedName,
       handle: trimmedHandle,
@@ -142,6 +142,12 @@ export const SaveConfigModal: React.FC<SaveConfigModalProps> = ({
       footerShape: state.footerShape,
       isDefault: true,
     });
+
+    if (!res.success || !res.brand) {
+      showToast(res.error || 'No se pudo guardar la marca.', 'error');
+      setSavedSuccess(`❌ ${res.error}`);
+      return;
+    }
 
     if (onUpdateState) {
       onUpdateState({
