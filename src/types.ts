@@ -357,10 +357,12 @@ export interface PostTemplate {
   comparisonLayout?: 'split' | 'cards';
   notificationApp?: string;
   notificationTitle?: string;
-  notificationMessage?: string;
-  notificationHighlight?: string;
-  notificationTime?: string;
-  notificationIcon?: 'rocket' | 'check' | 'dollar' | 'zap' | 'bell' | 'shield';
+  notificationIcon?: 'rocket' | 'check' | 'dollar' | 'zap' | 'bell' | 'shield' | 'user' | 'star' | 'chart';
+  chartTitle?: string;
+  chartHighlightIndex?: number;
+  chatTheme?: 'dark' | 'light';
+  chatBgColor?: string;
+  stepsVisualVariant?: 'timeline' | 'bento' | 'minimal' | 'badges';
   kpiValueSize?: number;
   modulePadding?: number;
 }
@@ -513,6 +515,8 @@ export interface PostState {
   kpiLayout?: 'grid' | 'bento' | 'stack';
 
   // Module 3 (Chart Bars)
+  chartTitle?: string;
+  chartHighlightIndex?: number;
   chartUnit?: string;
   chartShowRank?: boolean;
   chartCardStyle?: 'glass' | 'minimal' | 'neon';
@@ -530,12 +534,15 @@ export interface PostState {
 
   // Module 6 (Chat)
   chatPlatform?: 'whatsapp' | 'imessage' | 'slack';
+  chatTheme?: 'dark' | 'light';
+  chatBgColor?: string;
   chatShowVoiceNote?: boolean;
   chatVoiceNoteDuration?: string;
   chatReaction?: string;
 
   // Module 7 (Steps)
   stepsLayout?: 'connected-timeline' | 'bento-cards' | 'grid';
+  stepsVisualVariant?: 'timeline' | 'bento' | 'minimal' | 'badges';
 
   // Module 8 (Quote / CTA / Promo)
   quoteAuthorAvatar?: string;
@@ -570,7 +577,7 @@ export interface PostState {
   notificationMessage?: string;
   notificationHighlight?: string;
   notificationTime?: string;
-  notificationIcon?: 'rocket' | 'check' | 'dollar' | 'zap' | 'bell' | 'shield';
+  notificationIcon?: 'rocket' | 'check' | 'dollar' | 'zap' | 'bell' | 'shield' | 'user' | 'star' | 'chart';
 
   // Extended Sliders
   kpiValueSize?: number; // 36 a 76 px

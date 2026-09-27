@@ -48,7 +48,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const steps = [
     { id: 1 as const, label: '1. Marca', icon: Building2, desc: 'Color, Header, Footer y Logo' },
     { id: 2 as const, label: '2. Textos', icon: FileText, desc: 'Titular, Subtítulo, Tags y Jerarquía' },
-    { id: 3 as const, label: '3. Contenido', icon: Layers, desc: 'Módulo Central y Contenedor' },
+    { id: 3 as const, label: '3. Módulo Central', icon: Layers, desc: 'Módulo Central y Contenedor' },
     { id: 4 as const, label: '4. Fondo', icon: Sparkles, desc: 'Tramas en Cards, Luces y Motivos' },
     { id: 5 as const, label: 'Exportar', icon: Download, desc: 'Descarga Ultra HQ' },
   ];

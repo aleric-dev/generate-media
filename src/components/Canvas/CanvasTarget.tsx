@@ -858,37 +858,39 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
     const bgOpacity = (state.moduleBgOpacity ?? 85) / 100;
     const glowIntensity = (state.moduleGlowIntensity ?? 30) / 100;
 
-    if (state.moduleContainerStyle === 'solid') {
+    const containerStyle = state.moduleContainerStyle || 'minimal';
+
+    if (containerStyle === 'solid') {
       moduleContainerClasses += isLight ? ' border shadow-xl' : ' border shadow-2xl';
       moduleContainerStyles.backgroundColor = isLight ? `rgba(255, 255, 255, ${bgOpacity})` : `rgba(15, 23, 42, ${bgOpacity})`;
       moduleContainerStyles.borderColor = isLight ? 'rgba(226, 232, 240, 0.8)' : 'rgba(30, 41, 59, 0.8)';
-    } else if (state.moduleContainerStyle === 'neon') {
+    } else if (containerStyle === 'neon') {
       moduleContainerClasses += isLight ? ' border-2 shadow-2xl' : ' border-2 shadow-2xl';
       moduleContainerStyles.backgroundColor = isLight ? `rgba(255, 255, 255, ${bgOpacity})` : `rgba(10, 15, 29, ${bgOpacity})`;
       moduleContainerStyles.borderColor = moduleAccent;
       if (glowIntensity > 0) {
         moduleContainerStyles.boxShadow = `0 0 ${Math.round(40 * glowIntensity)}px ${moduleAccent}55`;
       }
-    } else if (state.moduleContainerStyle === 'bracket') {
+    } else if (containerStyle === 'bracket') {
       moduleContainerClasses += isLight ? ' border-l-4 border-r-4 shadow-xl' : ' border-l-4 border-r-4 shadow-2xl';
       moduleContainerStyles.backgroundColor = isLight ? `rgba(248, 250, 252, ${bgOpacity})` : `rgba(15, 23, 42, ${bgOpacity})`;
       moduleContainerStyles.borderLeftColor = moduleAccent;
       moduleContainerStyles.borderRightColor = moduleAccent;
-    } else if (state.moduleContainerStyle === 'minimal') {
-      moduleContainerClasses += ' bg-transparent';
-    } else {
-      // 'glass' standard
+    } else if (containerStyle === 'glass') {
       moduleContainerClasses += isLight ? ' glass-card-light' : ' glass-card-clean';
       if (state.moduleBgOpacity !== undefined) {
         moduleContainerStyles.backgroundColor = isLight ? `rgba(255, 255, 255, ${bgOpacity * 0.9})` : `rgba(15, 23, 42, ${bgOpacity * 0.75})`;
       }
+    } else {
+      // 'minimal' standard (default)
+      moduleContainerClasses += ' bg-transparent';
     }
 
-    if (state.moduleBorderWidth !== undefined && state.moduleContainerStyle !== 'minimal') {
+    if (state.moduleBorderWidth !== undefined && containerStyle !== 'minimal') {
       moduleContainerStyles.borderWidth = `${state.moduleBorderWidth}px`;
     }
 
-    if (glowIntensity > 0 && state.moduleContainerStyle !== 'neon' && state.moduleContainerStyle !== 'minimal') {
+    if (glowIntensity > 0 && containerStyle !== 'neon' && containerStyle !== 'minimal') {
       moduleContainerStyles.boxShadow = `0 10px 30px -10px ${moduleAccent}40`;
     }
 
@@ -1174,41 +1176,35 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
         {/* 2. MÓDULO DE KPIS (TARJETAS DE MÉTRICAS ULTRA HQ CON GRADIENTES)  */}
         {/* ================================================================= */}
         {state.activeModule === 'kpi' && (() => {
-          const isBento = state.kpiLayout === 'bento';
+          const colsClass = state.kpis.length === 1
+            ? 'grid-cols-1'
+            : state.kpis.length === 2
+            ? 'grid-cols-2'
+            : state.kpis.length === 3
+            ? 'grid-cols-3'
+            : 'grid-cols-2';
+
           return (
             <div
-              className={`grid ${
-                isBento
-                  ? 'grid-cols-2'
-                  : state.moduleKpiCols === '1'
-                  ? 'grid-cols-1'
-                  : state.moduleKpiCols === '2'
-                  ? 'grid-cols-2'
-                  : state.kpis.length === 3
-                  ? 'grid-cols-3'
-                  : 'grid-cols-2'
-              } h-auto w-full`}
+              className={`grid ${colsClass} h-auto w-full`}
               style={{ gap: `${state.moduleKpiGap ?? 18}px` }}
             >
               {state.kpis.map((kpi, idx) => {
                 const trendText = kpi.trendLabel !== undefined
                   ? kpi.trendLabel
-                  : (kpi.trend === 'up' ? 'Crecimiento' : kpi.trend === 'down' ? 'Reducción' : '');
-                const isHeroBento = isBento && idx === 0 && state.kpis.length >= 3;
+                  : (kpi.trend === 'up' ? 'Subida' : kpi.trend === 'down' ? 'Bajada' : '');
 
                 return (
                   <div
                     key={idx}
-                    className={`p-6 rounded-2xl border flex flex-col justify-between transition-all shadow-xl relative overflow-hidden backdrop-blur-xl ${
-                      isHeroBento ? 'col-span-2' : ''
-                    }`}
+                    className="p-6 rounded-2xl border flex flex-col justify-between transition-all shadow-xl relative overflow-hidden backdrop-blur-xl"
                     style={{
                       background: isLight
-                        ? `linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(${rgb}, ${isHeroBento ? 0.14 : 0.08}) 100%)`
-                        : `linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(${rgb}, ${isHeroBento ? 0.25 : 0.18}) 100%)`,
+                        ? `linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(${rgb}, 0.08) 100%)`
+                        : `linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(${rgb}, 0.18) 100%)`,
                       borderColor: isLight ? 'rgba(0,0,0,0.08)' : `rgba(${rgb}, 0.35)`,
-                      borderTopColor: kpi.borderTop !== false ? state.currentColor : undefined,
-                      borderTopWidth: kpi.borderTop !== false ? '4px' : '1px',
+                      borderTopColor: state.currentColor,
+                      borderTopWidth: '3px',
                       boxShadow: `0 15px 35px -10px rgba(${rgb}, 0.2)`
                     }}
                   >
@@ -1241,81 +1237,31 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                     </div>
 
                     {/* Valor Central & Tendencia */}
-                    <div className="flex items-baseline gap-2 flex-wrap z-10 my-1">
-                      {kpi.prefix && (
-                        <span
-                          className="font-mono font-bold"
-                          style={{
-                            fontSize: `${Math.round((state.kpiValueSize ? state.kpiValueSize * 0.58 : (isHeroBento ? 28 : 24)) * modScale * fontMult)}px`,
-                            color: isLight ? '#64748B' : '#94A3B8'
-                          }}
-                        >
-                          {kpi.prefix}
-                        </span>
-                      )}
+                    <div className="flex items-baseline gap-2 flex-wrap z-10 my-1 justify-between">
                       <span
                         className="font-mono font-black tracking-tight"
                         style={{
-                          fontSize: `${Math.round((state.kpiValueSize || (isHeroBento ? 52 : 42)) * modScale * fontMult)}px`,
+                          fontSize: `${Math.round(44 * modScale * fontMult)}px`,
                           color: isLight ? '#0F172A' : '#FFFFFF',
                           textShadow: isLight ? 'none' : `0 0 20px rgba(${rgb}, 0.3)`
                         }}
                       >
                         {kpi.val}
                       </span>
-                      {kpi.suffix && (
-                        <span
-                          className="font-mono font-bold"
-                          style={{
-                            fontSize: `${Math.round((state.kpiValueSize ? state.kpiValueSize * 0.58 : (isHeroBento ? 28 : 24)) * modScale * fontMult)}px`,
-                            color: isLight ? '#64748B' : '#94A3B8'
-                          }}
-                        >
-                          {kpi.suffix}
-                        </span>
-                      )}
 
                       {kpi.trend === 'up' && (
-                        <span className="ml-auto text-xs font-mono font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
+                        <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
                           <TrendingUp className="w-3.5 h-3.5" />
                           {trendText && <span>{trendText}</span>}
                         </span>
                       )}
                       {kpi.trend === 'down' && (
-                        <span className="ml-auto text-xs font-mono font-bold text-rose-400 bg-rose-500/15 border border-rose-500/30 px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
+                        <span className="text-xs font-mono font-bold text-rose-400 bg-rose-500/15 border border-rose-500/30 px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
                           <TrendingDown className="w-3.5 h-3.5" />
                           {trendText && <span>{trendText}</span>}
                         </span>
                       )}
                     </div>
-
-                    {/* Barra de Progreso Objetivo (Opcional) */}
-                    {(kpi.showProgress || isHeroBento) && (
-                      <div className="w-full mt-3 pt-2 border-t border-white/5 flex flex-col gap-1.5 z-10">
-                        <div className="flex justify-between items-center text-[10px] font-mono text-slate-400">
-                          <span>Objetivo Anual</span>
-                          <span className="font-bold" style={{ color: state.currentColor }}>{kpi.progressValue ?? 88}%</span>
-                        </div>
-                        <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
-                          <div
-                            className="h-full rounded-full transition-all duration-700"
-                            style={{
-                              width: `${Math.min(100, Math.max(0, kpi.progressValue ?? 88))}%`,
-                              backgroundColor: state.currentColor,
-                              boxShadow: `0 0 10px ${state.currentColor}88`
-                            }}
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Texto de Comparativa / Benchmark */}
-                    {kpi.benchmark && (
-                      <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400 mt-2 z-10">
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: state.currentColor }} />
-                        <span>{kpi.benchmark}</span>
-                      </div>
-                    )}
                   </div>
                 );
               })}
@@ -1328,64 +1274,79 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
         {/* ================================================================= */}
         {(state.activeModule === 'chart-bars' || (state.activeModule === 'chart' && (!state.chartType || state.chartType === 'horizontal-bars'))) && (() => {
           const maxVal = Math.max(...state.chartBars.map(b => b.pct), 0);
-          const showRank = state.chartShowRank !== false;
           const unit = state.chartUnit || '%';
+          const highlightIdx = state.chartHighlightIndex ?? 0;
 
           return (
             <div
-              className="w-full rounded-2xl p-5 border flex flex-col gap-4 backdrop-blur-xl shadow-2xl"
+              className="w-full rounded-2xl p-6 border flex flex-col gap-5 backdrop-blur-xl shadow-2xl"
               style={{
                 backgroundColor: isLight ? 'rgba(255, 255, 255, 0.9)' : 'rgba(15, 23, 42, 0.85)',
                 borderColor: isLight ? 'rgba(0,0,0,0.08)' : `rgba(${rgb}, 0.35)`,
                 boxShadow: `0 20px 40px -10px rgba(${rgb}, 0.2)`
               }}
             >
-              {/* Cabecera Analítica */}
-              <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: state.currentColor }} />
+              {/* Cabecera / Título de Gráfico */}
+              {state.chartTitle ? (
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ backgroundColor: state.currentColor }} />
+                    <span className="text-sm font-mono font-bold tracking-wider text-white">
+                      {state.chartTitle}
+                    </span>
+                  </div>
+                  <div className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5">
+                    <span>Pico:</span>
+                    <span className="font-bold px-2 py-0.5 rounded-md text-white bg-slate-900 border border-white/10" style={{ color: state.currentColor }}>
+                      {maxVal}{unit}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between border-b border-white/5 pb-2">
                   <span className="text-xs font-mono font-bold tracking-wider uppercase text-slate-400">
-                    Ranking Comparativo
+                    Comparativa de Barras
                   </span>
+                  <div className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5">
+                    <span>Máx:</span>
+                    <span className="font-bold px-2 py-0.5 rounded-md text-white bg-slate-900 border border-white/10" style={{ color: state.currentColor }}>
+                      {maxVal}{unit}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-[11px] font-mono text-slate-400 flex items-center gap-2">
-                  <span>Pico Máx:</span>
-                  <span className="font-bold px-2 py-0.5 rounded-md text-white bg-slate-900 border border-white/10" style={{ color: state.currentColor }}>
-                    {maxVal}{unit}
-                  </span>
-                </div>
-              </div>
+              )}
 
-              {/* Lista de Barras con Ranking */}
-              <div className="flex flex-col gap-3.5 w-full">
+              {/* Lista de Barras con barra resaltada y neutras */}
+              <div className="flex flex-col gap-4.5 w-full">
                 {state.chartBars.map((bar, idx) => {
-                  const barH = state.chartBarHeight || 18;
-                  const rankColors = [
-                    'text-amber-400 bg-amber-400/15 border-amber-400/30',
-                    'text-slate-300 bg-slate-300/15 border-slate-300/30',
-                    'text-amber-600 bg-amber-600/15 border-amber-600/30'
-                  ];
-                  const rankBadgeClass = rankColors[idx] || 'text-slate-400 bg-slate-800 border-slate-700';
+                  const barH = state.chartBarHeight || 20;
+                  const isHighlighted = idx === highlightIdx;
+                  const activeColor = isHighlighted ? (bar.color || state.currentColor) : (isLight ? '#94A3B8' : '#475569');
+                  const activeGrad = isHighlighted
+                    ? `linear-gradient(90deg, ${bar.color || state.currentColor}88, ${bar.color || state.currentColor})`
+                    : isLight
+                    ? 'linear-gradient(90deg, #94A3B8, #64748B)'
+                    : 'linear-gradient(90deg, #334155, #475569)';
 
                   return (
-                    <div key={idx} className="flex flex-col gap-1.5 w-full">
+                    <div key={idx} className="flex flex-col gap-2 w-full">
                       <div className="flex justify-between items-center text-xs font-mono">
-                        <div className="flex items-center gap-2">
-                          {showRank && (
-                            <span className={`text-[10px] font-black px-1.5 py-0.5 rounded border ${rankBadgeClass}`}>
-                              #{idx + 1}
-                            </span>
-                          )}
-                          <span
-                            className={`font-bold ${isLight ? 'text-slate-800' : 'text-slate-200'}`}
-                            style={{ fontSize: `${modFontSize}px` }}
-                          >
-                            {bar.label}
-                          </span>
-                        </div>
                         <span
-                          className="font-bold text-white px-2.5 py-0.5 rounded-lg shadow-md border border-white/20"
-                          style={{ backgroundColor: bar.color || state.currentColor, fontSize: `${Math.max(11, Math.round(modFontSize * 0.88))}px` }}
+                          className={`font-bold ${isHighlighted ? (isLight ? 'text-slate-900' : 'text-white') : (isLight ? 'text-slate-600' : 'text-slate-400')}`}
+                          style={{ fontSize: `${Math.max(14, Math.round(modFontSize * 1.05))}px` }}
+                        >
+                          {bar.label}
+                        </span>
+                        <span
+                          className={`font-bold px-2.5 py-0.5 rounded-lg shadow-sm border ${
+                            isHighlighted
+                              ? 'text-white border-white/20'
+                              : 'text-slate-300 border-white/10 bg-slate-800/80'
+                          }`}
+                          style={{
+                            backgroundColor: isHighlighted ? activeColor : undefined,
+                            fontSize: `${Math.max(12, Math.round(modFontSize * 0.92))}px`
+                          }}
                         >
                           {bar.pct}{unit}
                         </span>
@@ -1395,15 +1356,15 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         style={{
                           height: `${barH}px`,
                           backgroundColor: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(15, 23, 42, 0.8)',
-                          borderColor: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.12)'
+                          borderColor: isHighlighted ? `rgba(${rgb}, 0.3)` : (isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)')
                         }}
                       >
                         <div
                           className="h-full rounded-full transition-all duration-700 shadow-sm relative"
                           style={{
                             width: `${Math.min(100, Math.max(0, bar.pct))}%`,
-                            background: `linear-gradient(90deg, ${bar.color || state.currentColor}88, ${bar.color || state.currentColor})`,
-                            boxShadow: `0 0 12px ${bar.color || state.currentColor}80`
+                            background: activeGrad,
+                            boxShadow: isHighlighted ? `0 0 14px ${activeColor}90` : 'none'
                           }}
                         />
                       </div>
@@ -1428,13 +1389,22 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
 
           return (
             <div
-              className="flex items-center justify-around gap-6 w-full p-5 rounded-2xl border backdrop-blur-xl shadow-2xl"
+              className="flex flex-col gap-4 w-full p-5 rounded-2xl border backdrop-blur-xl shadow-2xl"
               style={{
                 backgroundColor: isLight ? 'rgba(255, 255, 255, 0.9)' : 'rgba(15, 23, 42, 0.85)',
                 borderColor: isLight ? 'rgba(0,0,0,0.08)' : `rgba(${rgb}, 0.35)`,
                 boxShadow: `0 20px 40px -10px rgba(${rgb}, 0.2)`
               }}
             >
+              {state.chartTitle && (
+                <div className="flex items-center gap-2 border-b border-white/10 pb-2.5">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: state.currentColor }} />
+                  <span className="text-sm font-mono font-bold tracking-wider text-white">
+                    {state.chartTitle}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center justify-around gap-6 w-full">
               {/* Contenedor Gráfico Circular o Gauge */}
               <div className="relative w-52 h-52 shrink-0 flex items-center justify-center">
                 {isGauge ? (
@@ -1565,29 +1535,24 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                 })}
               </div>
             </div>
-          );
-        })()}
+          </div>
+        );
+      })()}
 
         {/* ================================================================= */}
-        {/* 5. GRÁFICOS: LÍNEAS / TENDENCIA CURVADA SPLINE CON PICO ATH       */}
+        {/* 5. GRÁFICOS: LÍNEAS / TENDENCIA CURVADA SPLINE                    */}
         {/* ================================================================= */}
         {(state.activeModule === 'chart-line' || (state.activeModule === 'chart' && state.chartType === 'line')) && (() => {
           const bars1 = state.chartBars.length > 0 ? state.chartBars : [{ label: 'Q1', pct: 40 }, { label: 'Q2', pct: 85 }];
-          const isDualSeries = state.chartLineSeries === 2;
-          const bars2 = state.chartLineSeries2 && state.chartLineSeries2.length > 0
-            ? state.chartLineSeries2
-            : bars1.map((b) => ({ ...b, pct: Math.max(10, Math.round(b.pct * 0.7)) }));
-          const color2 = state.chartLineColor2 || '#06B6D4';
           const strokeW = state.chartLineStroke || 4;
           const isCurved = state.chartLineCurved !== false;
           const showGrid = state.chartLineShowGrid !== false;
-          const showAth = state.chartLineShowAth !== false;
 
           const svgW = 460;
           const svgH = 175;
           const padX = 45;
           const padY = 32;
-          const maxPct = Math.max(100, ...bars1.map((b) => b.pct), ...(isDualSeries ? bars2.map((b) => b.pct) : []));
+          const maxPct = Math.max(100, ...bars1.map((b) => b.pct));
 
           const points1 = bars1.map((b, idx) => {
             const x = padX + (idx / Math.max(1, bars1.length - 1)) * (svgW - 2 * padX);
@@ -1617,22 +1582,6 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
 
           const areaD1 = `${pathD1} L ${points1[points1.length - 1].x.toFixed(1)} ${(svgH - padY).toFixed(1)} L ${points1[0].x.toFixed(1)} ${(svgH - padY).toFixed(1)} Z`;
 
-          let pathD2 = '';
-          let points2: typeof points1 = [];
-          if (isDualSeries) {
-            points2 = bars2.map((b, idx) => {
-              const x = padX + (idx / Math.max(1, bars2.length - 1)) * (svgW - 2 * padX);
-              const y = svgH - padY - (b.pct / maxPct) * (svgH - 2 * padY);
-              return { x, y, ...b };
-            });
-            pathD2 = isCurved
-              ? getCurvedPath(points2)
-              : points2.reduce((acc, pt, i) => `${acc} ${i === 0 ? 'M' : 'L'} ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`, '');
-          }
-
-          // Punto pico ATH
-          const athPoint = points1.reduce((prev, curr) => (curr.pct > prev.pct ? curr : prev), points1[0]);
-
           return (
             <div
               className="w-full rounded-2xl p-5 border flex flex-col items-center backdrop-blur-xl shadow-2xl"
@@ -1642,6 +1591,14 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                 boxShadow: `0 20px 40px -10px rgba(${rgb}, 0.2)`
               }}
             >
+              {state.chartTitle && (
+                <div className="flex items-center gap-2 border-b border-white/10 pb-2.5 mb-3 w-full">
+                  <span className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ backgroundColor: state.currentColor }} />
+                  <span className="text-sm font-mono font-bold tracking-wider text-white">
+                    {state.chartTitle}
+                  </span>
+                </div>
+              )}
               <svg className="w-full h-44 overflow-visible" viewBox={`0 0 ${svgW} ${svgH}`}>
                 <defs>
                   <linearGradient id="chartLineGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -1664,23 +1621,10 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                   </>
                 )}
 
-                {/* Área con Relleno Degradado de Serie 1 */}
+                {/* Área con Relleno Degradado */}
                 <path d={areaD1} fill="url(#chartLineGrad1)" />
 
-                {/* Serie 2 (Si está activa) */}
-                {isDualSeries && (
-                  <path
-                    d={pathD2}
-                    fill="none"
-                    stroke={color2}
-                    strokeWidth={Math.max(2, strokeW - 1)}
-                    strokeDasharray="5 5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                )}
-
-                {/* Línea Principal de Serie 1 */}
+                {/* Línea Principal de Serie */}
                 <path
                   d={pathD1}
                   fill="none"
@@ -1691,33 +1635,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                   style={{ filter: `drop-shadow(0 0 6px ${state.currentColor}80)` }}
                 />
 
-                {/* Tooltip ATH (Pico Histórico) */}
-                {showAth && athPoint && (
-                  <g transform={`translate(${athPoint.x}, ${athPoint.y - 36})`}>
-                    <rect
-                      x="-38"
-                      y="-12"
-                      width="76"
-                      height="22"
-                      rx="11"
-                      fill={state.currentColor}
-                      className="filter drop-shadow-lg"
-                    />
-                    <text
-                      x="0"
-                      y="3"
-                      textAnchor="middle"
-                      fill="#FFFFFF"
-                      fontSize="9"
-                      fontFamily="monospace"
-                      fontWeight="bold"
-                    >
-                      {state.chartLineAthLabel || '★ ATH MÁX'}
-                    </text>
-                  </g>
-                )}
-
-                {/* Puntos y Etiquetas de Serie 1 */}
+                {/* Puntos y Etiquetas */}
                 {points1.map((pt, idx) => (
                   <g key={idx}>
                     <circle
@@ -1742,29 +1660,16 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                     </text>
                   </g>
                 ))}
-
-                {/* Puntos de Serie 2 */}
-                {isDualSeries && points2.map((pt, idx) => (
-                  <circle
-                    key={`p2-${idx}`}
-                    cx={pt.x}
-                    cy={pt.y}
-                    r="4.5"
-                    fill={color2}
-                    stroke="#FFFFFF"
-                    strokeWidth="2"
-                  />
-                ))}
               </svg>
             </div>
           );
         })()}
 
         {/* ================================================================= */}
-        {/* 6. MÓDULO DE CHAT MULTIPLATAFORMA (WHATSAPP, IMESSAGE, SLACK)     */}
+        {/* 6. MÓDULO DE CHAT WHATSAPP ULTRA REALISTA                        */}
         {/* ================================================================= */}
         {state.activeModule === 'chat' && (() => {
-          const platform = state.chatPlatform || 'whatsapp';
+          const chatIsLight = state.chatTheme ? state.chatTheme === 'light' : isLight;
 
           const renderFormattedText = (raw: string) => {
             const tokens = raw.split(/(\*\*.*?\*\*|\*[^*]+\*|__.*?__|_.*?_)/g);
@@ -1783,67 +1688,43 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
 
           return (
             <div className="flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-white/10 w-full h-auto backdrop-blur-xl">
-              {/* Cabecera según Plataforma */}
-              {platform === 'whatsapp' && (
-                <div
-                  className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.08]"
-                  style={{ backgroundColor: isLight ? '#F0F2F5' : '#1F2C34' }}
-                >
-                  <div className="flex items-center gap-3">
+              {/* Cabecera WhatsApp */}
+              <div
+                className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.08]"
+                style={{ backgroundColor: chatIsLight ? '#F0F2F5' : '#1F2C34' }}
+              >
+                <div className="flex items-center gap-3">
+                  {state.customLogoUrl ? (
+                    <img
+                      src={state.customLogoUrl}
+                      alt="Avatar"
+                      className="w-10 h-10 rounded-full object-cover shadow-md shrink-0 ring-2 ring-white/20"
+                    />
+                  ) : (
                     <div
                       className="w-10 h-10 rounded-full flex items-center justify-center text-white font-mono font-bold shadow-md shrink-0 ring-2 ring-white/20"
                       style={{ backgroundColor: state.currentColor }}
                     >
                       {(state.chatContactName ? state.chatContactName.charAt(0).toUpperCase() : 'A')}
                     </div>
-                    <div className="flex flex-col">
-                      <span className={`font-mono font-bold text-sm tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                        {state.chatContactName || 'Aleric Partner'}
-                      </span>
-                      <div className="flex items-center gap-1.5 text-xs font-mono">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                        <span className="text-emerald-400 font-semibold">{state.chatOnlineStatus ?? 'en línea'}</span>
-                      </div>
+                  )}
+                  <div className="flex flex-col">
+                    <span className={`font-mono font-bold text-sm tracking-tight ${chatIsLight ? 'text-slate-900' : 'text-white'}`}>
+                      {state.chatContactName || 'Aleric Partner'}
+                    </span>
+                    <div className="flex items-center gap-1.5 text-xs font-mono">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="text-emerald-400 font-semibold">{state.chatOnlineStatus || 'en línea'}</span>
                     </div>
                   </div>
                 </div>
-              )}
-
-              {platform === 'imessage' && (
-                <div className="flex flex-col items-center px-4 py-3 bg-slate-900/90 border-b border-white/10">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-slate-700 to-slate-500 flex items-center justify-center text-white font-bold text-sm shadow-md ring-1 ring-white/20">
-                    {(state.chatContactName ? state.chatContactName.charAt(0).toUpperCase() : 'i')}
-                  </div>
-                  <span className="text-xs font-bold text-white mt-1">
-                    {state.chatContactName || 'Cliente VIP'}
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-mono">iMessage</span>
-                </div>
-              )}
-
-              {platform === 'slack' && (
-                <div className="flex items-center justify-between px-4 py-2.5 bg-[#1A1D21] border-b border-white/10">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-black text-slate-400 text-sm">#</span>
-                    <span className="font-bold text-xs text-white">
-                      {state.chatContactName ? state.chatContactName.toLowerCase().replace(/\s+/g, '-') : 'general'}
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
-                    Slack Active
-                  </span>
-                </div>
-              )}
+              </div>
 
               {/* Mensajes del Chat */}
               <div
                 className="p-5 space-y-3.5"
                 style={{
-                  backgroundColor: platform === 'whatsapp'
-                    ? (isLight ? '#EFEAE2' : '#0B141A')
-                    : platform === 'imessage'
-                    ? '#05070A'
-                    : '#1A1D21'
+                  backgroundColor: state.chatBgColor || (chatIsLight ? '#EFEAE2' : '#0B141A')
                 }}
               >
                 {state.chatMessages.map((msg, idx) => {
@@ -1855,19 +1736,11 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                     >
                       <div
                         className={`relative max-w-[85%] px-4 py-3 rounded-2xl shadow-md transition-all ${
-                          platform === 'imessage'
-                            ? isBot
-                              ? 'bg-blue-600 text-white rounded-br-xs'
-                              : 'bg-slate-800 text-slate-100 rounded-bl-xs'
-                            : platform === 'slack'
-                            ? isBot
-                              ? 'bg-indigo-950/80 border border-indigo-500/30 text-indigo-100'
-                              : 'bg-slate-900 border border-white/10 text-slate-200'
-                            : isBot
-                            ? isLight
+                          isBot
+                            ? chatIsLight
                               ? 'bg-[#D9FDD3] text-[#111B21] rounded-tr-xs'
                               : 'bg-[#005C4B] text-[#E9EDEF] rounded-tr-xs'
-                            : isLight
+                            : chatIsLight
                             ? 'bg-[#FFFFFF] text-[#111B21] rounded-tl-xs'
                             : 'bg-[#202C33] text-[#E9EDEF] rounded-tl-xs'
                         }`}
@@ -1878,14 +1751,11 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         </p>
 
                         <div className="flex items-center justify-end gap-1.5 mt-1.5 select-none">
-                          <span className={`text-[10px] font-mono ${isLight && platform === 'whatsapp' ? 'text-slate-500' : 'text-slate-400'}`}>
+                          <span className={`text-[10px] font-mono ${chatIsLight ? 'text-slate-500' : 'text-slate-400'}`}>
                             {msg.time}
                           </span>
-                          {isBot && platform === 'whatsapp' && (
+                          {isBot && (
                             <CheckCheck className="w-4 h-4 text-[#53BDEB]" />
-                          )}
-                          {isBot && platform === 'imessage' && (
-                            <span className="text-[9px] text-blue-200 font-mono">Entregado</span>
                           )}
                         </div>
 
@@ -1930,24 +1800,11 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
         {/* 7. MÓDULO DE PASOS / FASES CON TIMELINE CONECTADA                 */}
         {/* ================================================================= */}
         {state.activeModule === 'steps' && (() => {
-          const isTimeline = state.stepsLayout === 'connected-timeline';
-          const formatLabel = (num: number, fmt?: string) => {
-            const pad = num < 10 ? `0${num}` : `${num}`;
-            switch (fmt) {
-              case 'number': return `#${pad}`;
-              case 'paso': return `PASO ${pad}`;
-              case 'sprint': return `SPRINT ${pad}`;
-              case 'hito': return `HITO ${String.fromCharCode(64 + num)}`;
-              case 'minimal': return `${num}`;
-              case 'fase':
-              default:
-                return `FASE ${pad}`;
-            }
-          };
-
+          const variant = state.stepsVisualVariant || (state.stepsLayout === 'connected-timeline' ? 'timeline' : 'bento');
           const stepsList = state.steps || state.stepsData || [];
 
-          if (isTimeline) {
+          // 1. TIMELINE VERTICAL CONECTADA
+          if (variant === 'timeline') {
             return (
               <div className="w-full flex flex-col gap-3 py-2">
                 {stepsList.map((st, idx) => {
@@ -1955,7 +1812,6 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                   const isLast = idx === stepsList.length - 1;
                   return (
                     <div key={idx} className="flex items-start gap-4 relative">
-                      {/* Línea conectora entre nodos */}
                       {!isLast && (
                         <div
                           className="absolute left-4 top-8 bottom-0 w-0.5"
@@ -1964,7 +1820,6 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                           }}
                         />
                       )}
-                      {/* Nodo numérico con brillo */}
                       <div
                         className="w-8 h-8 rounded-full flex items-center justify-center font-mono font-black text-xs text-white shrink-0 shadow-lg z-10 ring-4 ring-slate-900"
                         style={{ backgroundColor: state.currentColor }}
@@ -1972,7 +1827,6 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         {stepNum}
                       </div>
 
-                      {/* Tarjeta del Paso */}
                       <div
                         className="flex-1 p-4 rounded-xl border backdrop-blur-xl transition-all shadow-md"
                         style={{
@@ -1980,17 +1834,6 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                           borderColor: isLight ? 'rgba(0,0,0,0.08)' : `rgba(${rgb}, 0.35)`
                         }}
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <span
-                            className="text-[10px] font-mono px-2 py-0.5 rounded font-bold uppercase"
-                            style={{ backgroundColor: `rgba(${rgb}, 0.15)`, color: state.currentColor }}
-                          >
-                            {formatLabel(stepNum, state.stepsFormat)}
-                          </span>
-                          <span className="text-[10px] font-mono text-slate-400">
-                            {idx === 0 ? '✓ Completado' : idx === 1 ? '● En Proceso' : '○ Planificado'}
-                          </span>
-                        </div>
                         <h4
                           className={`font-bold text-white ${state.titleFont || 'font-inter'}`}
                           style={{ fontSize: `${Math.round(modFontSize * 1.15)}px` }}
@@ -2011,7 +1854,87 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
             );
           }
 
-          // Layout estándar Grid 2x2
+          // 2. MINIMAL: LISTADO LIMPIO CON ACENTO LATERAL
+          if (variant === 'minimal') {
+            return (
+              <div className="w-full flex flex-col gap-3.5 py-1">
+                {stepsList.map((st, idx) => {
+                  const stepNum = st.stepNumber || (idx + 1);
+                  return (
+                    <div
+                      key={idx}
+                      className="flex items-start gap-3.5 pl-3 border-l-3 transition-all"
+                      style={{ borderLeftColor: state.currentColor }}
+                    >
+                      <span
+                        className="font-mono font-black text-xs px-2 py-0.5 rounded text-white shrink-0"
+                        style={{ backgroundColor: `rgba(${rgb}, 0.25)`, color: state.currentColor }}
+                      >
+                        0{stepNum}
+                      </span>
+                      <div className="flex flex-col">
+                        <h4
+                          className={`font-bold text-white ${state.titleFont || 'font-inter'}`}
+                          style={{ fontSize: `${Math.round(modFontSize * 1.1)}px` }}
+                        >
+                          {st.title}
+                        </h4>
+                        <p
+                          className="text-slate-400 leading-relaxed text-xs mt-0.5"
+                          style={{ fontSize: `${Math.round(modFontSize * 0.95)}px` }}
+                        >
+                          {st.desc || st.description}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          }
+
+          // 3. BADGES / CHIPS: FILA DE PÍLDORAS RESUMEN
+          if (variant === 'badges') {
+            return (
+              <div className="flex flex-col gap-2.5 w-full">
+                {stepsList.map((st, idx) => {
+                  const stepNum = st.stepNumber || (idx + 1);
+                  return (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between p-3.5 rounded-xl border backdrop-blur-md"
+                      style={{
+                        backgroundColor: isLight ? 'rgba(255,255,255,0.85)' : 'rgba(15, 23, 42, 0.7)',
+                        borderColor: isLight ? 'rgba(0,0,0,0.06)' : `rgba(${rgb}, 0.25)`
+                      }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span
+                          className="w-6 h-6 rounded-lg flex items-center justify-center font-mono font-bold text-xs text-white"
+                          style={{ backgroundColor: state.currentColor }}
+                        >
+                          {stepNum}
+                        </span>
+                        <span
+                          className="font-bold text-white"
+                          style={{ fontSize: `${Math.round(modFontSize * 1.05)}px` }}
+                        >
+                          {st.title}
+                        </span>
+                      </div>
+                      <span
+                        className="text-xs text-slate-400 font-mono truncate max-w-[200px]"
+                      >
+                        {st.desc || st.description}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          }
+
+          // 4. BENTO (DEFAULT): GRID DE TARJETAS 2x2
           return (
             <div
               className="grid grid-cols-2 w-full"
@@ -2036,15 +1959,6 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         style={{ backgroundColor: state.currentColor }}
                       >
                         {stepNum}
-                      </span>
-                      <span
-                        className="text-xs font-mono px-2.5 py-0.5 rounded-md font-bold uppercase tracking-wider"
-                        style={{
-                          backgroundColor: `rgba(${rgb}, 0.12)`,
-                          color: state.currentColor
-                        }}
-                      >
-                        {formatLabel(stepNum, state.stepsFormat)}
                       </span>
                     </div>
                     <h4
@@ -2560,6 +2474,9 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
             if (iconType === 'zap') return <Zap {...iconProps} />;
             if (iconType === 'shield') return <Shield {...iconProps} />;
             if (iconType === 'bell') return <Bell {...iconProps} />;
+            if (iconType === 'user') return <User {...iconProps} />;
+            if (iconType === 'star') return <Star {...iconProps} />;
+            if (iconType === 'chart') return <TrendingUp {...iconProps} />;
             return <Rocket {...iconProps} />;
           };
 
