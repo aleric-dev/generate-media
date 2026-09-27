@@ -43,6 +43,7 @@ export const EditorPage: React.FC = () => {
   const setCurrentProject = useStudioStore((s) => s.setCurrentProject);
   const activeBrandId = useStudioStore((s) => s.activeBrandId);
   const setWizardModalOpen = useStudioStore((s) => s.setWizardModalOpen);
+  const resetToScratch = useStudioStore((s) => s.resetToScratch);
   const showToast = useStudioStore((s) => s.showToast);
 
   // Obtener marca activa para mostrar siempre en la barra superior
@@ -64,7 +65,7 @@ export const EditorPage: React.FC = () => {
       }
     } else {
       if (currentProjectId) {
-        setCurrentProject(null, null);
+        resetToScratch();
       }
     }
   }, [projectId]);

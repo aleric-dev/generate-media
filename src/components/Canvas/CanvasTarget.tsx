@@ -257,15 +257,15 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
   const rawScale = state.moduleScale ?? 100;
   const modScale = rawScale <= 2.5 ? (rawScale === 0 ? 1 : rawScale) : rawScale / 100;
   const modFontSize = state.moduleFontSize || 15;
-  const fontMult = Math.max(0.8, Math.min(2.0, modFontSize / 14));
+  const baseTextSize = Math.round(modFontSize * modScale);
+  const fontMult = modScale;
+  const chartFont = state.subtitleFont || state.titleFont || 'font-inter';
 
-  let basePadding = state.modulePadding || 36;
+  let basePadding = state.modulePadding ?? 0;
   let moduleMinH = isWidescreen ? 'min-h-[220px]' : 'min-h-[280px]';
   if (state.moduleSize === 'compact') {
-    basePadding = state.modulePadding || 24;
     moduleMinH = isWidescreen ? 'min-h-[160px]' : 'min-h-[200px]';
   } else if (state.moduleSize === 'spacious') {
-    basePadding = state.modulePadding || 52;
     moduleMinH = isWidescreen ? 'min-h-[280px]' : 'min-h-[360px]';
   }
 
@@ -764,19 +764,22 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
   };
 
   // Elementos Modulares Desacoplados para Ordenamiento Libre
-  const renderTitleElement = () => (
-    <div key="block-title" className={titleAlignClass}>
-      <h2
-        className={`font-extrabold leading-[1.22] tracking-tight drop-shadow-lg transition-all ${state.titleFont || 'font-inter'}`}
-        style={{
-          fontSize: `${state.titleSize}px`,
-          color: titleColor
-        }}
-      >
-        {state.title ?? ''}
-      </h2>
-    </div>
-  );
+  const renderTitleElement = () => {
+    if (!state.title) return null;
+    return (
+      <div key="block-title" className={titleAlignClass}>
+        <h2
+          className={`font-extrabold leading-[1.22] tracking-tight drop-shadow-lg transition-all ${state.titleFont || 'font-inter'}`}
+          style={{
+            fontSize: `${state.titleSize}px`,
+            color: titleColor
+          }}
+        >
+          {state.title}
+        </h2>
+      </div>
+    );
+  };
 
   const renderSubtitleElement = () => {
     if (!state.subtitle) return null;
@@ -947,10 +950,11 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                       {state.codeFilename || 'pipeline.ts'}
                     </span>
                     <span
-                      className="ml-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+                      className="ml-2 px-2 py-0.5 rounded font-bold uppercase tracking-wider"
                       style={{
                         backgroundColor: `rgba(${rgb}, 0.15)`,
-                        color: state.currentColor
+                        color: state.currentColor,
+                        fontSize: `${Math.max(10, Math.round(10 * modScale))}px`
                       }}
                     >
                       {state.codeLanguage || 'TypeScript'}
@@ -980,10 +984,11 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                   </div>
                   <div className="flex items-center gap-2">
                     <span
-                      className="px-2 py-0.5 rounded text-[10px] font-bold uppercase"
+                      className="px-2 py-0.5 rounded font-bold uppercase"
                       style={{
                         backgroundColor: `rgba(${rgb}, 0.15)`,
-                        color: state.currentColor
+                        color: state.currentColor,
+                        fontSize: `${Math.max(10, Math.round(10 * modScale))}px`
                       }}
                     >
                       {state.codeLanguage || 'Python'}
@@ -1052,7 +1057,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                       <div className="flex items-center ml-4 gap-1.5">
                         {/* Pestaña Principal Activa */}
                         <div
-                          className="px-3.5 py-1 rounded-t-lg border-t border-x flex items-center gap-2 text-xs font-mono font-medium shadow-xs"
+                          className="px-4 py-1.5 rounded-t-lg border-t border-x flex items-center gap-2 text-xs font-mono font-medium shadow-xs"
                           style={{
                             backgroundColor: themeBg,
                             borderColor: isLight ? '#CBD5E1' : `rgba(${rgb}, 0.4)`,
@@ -1060,20 +1065,12 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                           }}
                         >
                           <FileCode className="w-3.5 h-3.5" style={{ color: state.currentColor }} />
-                          <span>{state.codeFilename || 'pipeline.ts'}</span>
-                          <span className="text-[10px] text-slate-500 hover:text-white cursor-default">✕</span>
-                        </div>
-                        {/* Pestaña Secundaria Inactiva */}
-                        <div
-                          className="px-3 py-1 rounded-t-lg opacity-60 flex items-center gap-1.5 text-xs font-mono"
-                          style={{ color: isLight ? '#64748B' : '#94A3B8' }}
-                        >
-                          <span>types.d.ts</span>
+                          <span className="font-semibold">{state.codeFilename || 'pipeline.ts'}</span>
                         </div>
                       </div>
                     ) : (
                       <div
-                        className="ml-4 px-3 py-1 rounded-lg border flex items-center gap-2 text-xs font-mono font-medium shadow-inner"
+                        className="ml-4 px-3.5 py-1 rounded-lg border flex items-center gap-2 text-xs font-mono font-medium shadow-inner"
                         style={{
                           backgroundColor: isLight ? '#FFFFFF' : '#0B101B',
                           borderColor: isLight ? '#CBD5E1' : `rgba(${rgb}, 0.4)`,
@@ -1081,18 +1078,19 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         }}
                       >
                         <FileCode className="w-3.5 h-3.5" style={{ color: state.currentColor }} />
-                        <span>{state.codeFilename || 'server/pipeline.ts'}</span>
+                        <span className="font-semibold">{state.codeFilename || 'server/pipeline.ts'}</span>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 font-mono text-[11px]">
+                  <div className="flex items-center gap-2 font-mono">
                     <span
                       className="px-2.5 py-0.5 rounded-md font-bold uppercase tracking-wider"
                       style={{
                         backgroundColor: `rgba(${rgb}, 0.15)`,
                         color: state.currentColor,
-                        border: `1px solid rgba(${rgb}, 0.3)`
+                        border: `1px solid rgba(${rgb}, 0.3)`,
+                        fontSize: `${Math.max(10, Math.round(11 * modScale))}px`
                       }}
                     >
                       {state.codeLanguage || 'TypeScript'}
@@ -1136,7 +1134,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                           color: isHighlighted
                             ? (isLight ? '#0F172A' : '#FFFFFF')
                             : (isLight ? '#1E293B' : '#E2E8F0'),
-                          fontSize: `${state.codeFontSize ? state.codeFontSize : modFontSize}px`
+                          fontSize: `${Math.round((state.codeFontSize || modFontSize) * modScale)}px`
                         }}
                       >
                         {lineText || ' '}
@@ -1146,25 +1144,24 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                 })}
               </div>
 
-              {/* Barra de Estado Inferior IDE */}
+              {/* Barra de Estado Inferior IDE Minimalista y Legible */}
               {showStatusBar && (
                 <div
-                  className="flex items-center justify-between px-4 py-1.5 border-t text-[10px] font-mono select-none"
+                  className="flex items-center justify-between px-4 py-2 border-t select-none"
                   style={{
                     backgroundColor: isLight ? '#F1F5F9' : 'rgba(0,0,0,0.3)',
                     borderColor: isLight ? '#E2E8F0' : 'rgba(255,255,255,0.06)',
-                    color: isLight ? '#64748B' : '#94A3B8'
+                    color: isLight ? '#64748B' : '#94A3B8',
+                    fontSize: `${Math.round(12 * modScale)}px`
                   }}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1 font-semibold" style={{ color: state.currentColor }}>
-                      <GitBranch className="w-3 h-3" /> main*
-                    </span>
-                    <span>UTF-8</span>
-                    <span>{state.codeLanguage || 'TypeScript'}</span>
+                  <div className="flex items-center gap-2 font-mono font-semibold" style={{ color: state.currentColor }}>
+                    <GitBranch className="w-3.5 h-3.5" />
+                    <span>main*</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
-                    <CheckCircle2 className="w-3 h-3" /> Ready
+                  <div className="flex items-center gap-1.5 text-emerald-400 font-mono font-semibold">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Ready</span>
                   </div>
                 </div>
               )}
@@ -1176,12 +1173,9 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
         {/* 2. MÓDULO DE KPIS (TARJETAS DE MÉTRICAS ULTRA HQ CON GRADIENTES)  */}
         {/* ================================================================= */}
         {state.activeModule === 'kpi' && (() => {
+          const isThree = state.kpis.length === 3;
           const colsClass = state.kpis.length === 1
             ? 'grid-cols-1'
-            : state.kpis.length === 2
-            ? 'grid-cols-2'
-            : state.kpis.length === 3
-            ? 'grid-cols-3'
             : 'grid-cols-2';
 
           return (
@@ -1190,14 +1184,15 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
               style={{ gap: `${state.moduleKpiGap ?? 18}px` }}
             >
               {state.kpis.map((kpi, idx) => {
-                const trendText = kpi.trendLabel !== undefined
+                const trendText = (kpi.trendLabel && kpi.trendLabel.trim() !== '')
                   ? kpi.trendLabel
                   : (kpi.trend === 'up' ? 'Subida' : kpi.trend === 'down' ? 'Bajada' : '');
+                const spanClass = isThree && idx === 0 ? 'col-span-2' : 'col-span-1';
 
                 return (
                   <div
                     key={idx}
-                    className="p-6 rounded-2xl border flex flex-col justify-between transition-all shadow-xl relative overflow-hidden backdrop-blur-xl"
+                    className={`p-6 rounded-2xl border flex flex-col justify-between transition-all shadow-xl relative overflow-hidden backdrop-blur-xl ${spanClass}`}
                     style={{
                       background: isLight
                         ? `linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(${rgb}, 0.08) 100%)`
@@ -1214,26 +1209,17 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                       style={{ backgroundColor: state.currentColor }}
                     />
 
-                    {/* Cabecera de la Tarjeta KPI con Etiqueta e Ícono */}
+                    {/* Cabecera de la Tarjeta KPI con Etiqueta */}
                     <div className="flex items-center justify-between gap-2 z-10 mb-2">
                       <span
                         className="font-mono font-bold uppercase tracking-wider truncate"
                         style={{
-                          fontSize: `${Math.max(12, Math.round(modFontSize * 0.95))}px`,
+                          fontSize: `${Math.max(13, Math.round(baseTextSize * 1.05))}px`,
                           color: isLight ? '#475569' : '#CBD5E1'
                         }}
                       >
                         {kpi.label}
                       </span>
-                      <div
-                        className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 shadow-sm"
-                        style={{
-                          backgroundColor: `rgba(${rgb}, 0.15)`,
-                          color: state.currentColor
-                        }}
-                      >
-                        {idx === 0 ? <Award className="w-3.5 h-3.5" /> : idx === 1 ? <TrendingUp className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
-                      </div>
                     </div>
 
                     {/* Valor Central & Tendencia */}
@@ -1241,7 +1227,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                       <span
                         className="font-mono font-black tracking-tight"
                         style={{
-                          fontSize: `${Math.round(44 * modScale * fontMult)}px`,
+                          fontSize: `${Math.round(44 * fontMult)}px`,
                           color: isLight ? '#0F172A' : '#FFFFFF',
                           textShadow: isLight ? 'none' : `0 0 20px rgba(${rgb}, 0.3)`
                         }}
@@ -1250,14 +1236,24 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                       </span>
 
                       {kpi.trend === 'up' && (
-                        <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
-                          <TrendingUp className="w-3.5 h-3.5" />
+                        <span
+                          className="font-mono font-black text-emerald-400 bg-emerald-500/20 border border-emerald-500/40 rounded-xl flex items-center justify-center shadow-md shrink-0"
+                          style={{
+                            fontSize: `${Math.round(15 * modScale)}px`,
+                            padding: `${Math.round(6 * modScale)}px ${Math.round(14 * modScale)}px`
+                          }}
+                        >
                           {trendText && <span>{trendText}</span>}
                         </span>
                       )}
                       {kpi.trend === 'down' && (
-                        <span className="text-xs font-mono font-bold text-rose-400 bg-rose-500/15 border border-rose-500/30 px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
-                          <TrendingDown className="w-3.5 h-3.5" />
+                        <span
+                          className="font-mono font-black text-rose-400 bg-rose-500/20 border border-rose-500/40 rounded-xl flex items-center justify-center shadow-md shrink-0"
+                          style={{
+                            fontSize: `${Math.round(15 * modScale)}px`,
+                            padding: `${Math.round(6 * modScale)}px ${Math.round(14 * modScale)}px`
+                          }}
+                        >
                           {trendText && <span>{trendText}</span>}
                         </span>
                       )}
@@ -1273,9 +1269,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
         {/* 3. GRÁFICOS: BARRAS HORIZONTALES CON RANKING Y CONTENEDOR ANALYTIC*/}
         {/* ================================================================= */}
         {(state.activeModule === 'chart-bars' || (state.activeModule === 'chart' && (!state.chartType || state.chartType === 'horizontal-bars'))) && (() => {
-          const maxVal = Math.max(...state.chartBars.map(b => b.pct), 0);
-          const unit = state.chartUnit || '%';
-          const highlightIdx = state.chartHighlightIndex ?? 0;
+          const FIXED_CHART_COLORS = ['#6366F1', '#06B6D4', '#10B981', '#F59E0B', '#EC4899'];
 
           return (
             <div
@@ -1287,68 +1281,63 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
               }}
             >
               {/* Cabecera / Título de Gráfico */}
-              {state.chartTitle ? (
-                <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ backgroundColor: state.currentColor }} />
-                    <span className="text-sm font-mono font-bold tracking-wider text-white">
-                      {state.chartTitle}
-                    </span>
-                  </div>
-                  <div className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5">
-                    <span>Pico:</span>
-                    <span className="font-bold px-2 py-0.5 rounded-md text-white bg-slate-900 border border-white/10" style={{ color: state.currentColor }}>
-                      {maxVal}{unit}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                  <span className="text-xs font-mono font-bold tracking-wider uppercase text-slate-400">
-                    Comparativa de Barras
+              {state.chartTitle && (
+                <div className="flex items-center gap-2.5 border-b border-white/10 pb-3">
+                  <span
+                    className="rounded-full animate-pulse"
+                    style={{
+                      backgroundColor: state.currentColor,
+                      width: `${Math.round(12 * modScale)}px`,
+                      height: `${Math.round(12 * modScale)}px`
+                    }}
+                  />
+                  <span
+                    className={`font-bold tracking-wider text-white ${chartFont}`}
+                    style={{ fontSize: `${Math.round(18 * modScale)}px` }}
+                  >
+                    {state.chartTitle}
                   </span>
-                  <div className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5">
-                    <span>Máx:</span>
-                    <span className="font-bold px-2 py-0.5 rounded-md text-white bg-slate-900 border border-white/10" style={{ color: state.currentColor }}>
-                      {maxVal}{unit}
-                    </span>
-                  </div>
                 </div>
               )}
 
               {/* Lista de Barras con barra resaltada y neutras */}
-              <div className="flex flex-col gap-4.5 w-full">
-                {state.chartBars.map((bar, idx) => {
+              <div
+                className="flex flex-col w-full"
+                style={{ gap: `${state.chartBarsGap ?? 20}px` }}
+              >
+                {state.chartBars.slice(0, 5).map((bar, idx) => {
                   const barH = state.chartBarHeight || 20;
-                  const isHighlighted = idx === highlightIdx;
-                  const activeColor = isHighlighted ? (bar.color || state.currentColor) : (isLight ? '#94A3B8' : '#475569');
-                  const activeGrad = isHighlighted
-                    ? `linear-gradient(90deg, ${bar.color || state.currentColor}88, ${bar.color || state.currentColor})`
+                  const isHighlighted = state.chartBarHighlightMode === 'normal' ? true : idx === 0;
+                  const defaultColor = FIXED_CHART_COLORS[idx % FIXED_CHART_COLORS.length];
+                  const activeColor = state.chartBarHighlightMode === 'normal'
+                    ? (bar.color || defaultColor)
+                    : (isHighlighted ? (bar.color || state.currentColor) : (isLight ? '#94A3B8' : '#475569'));
+                  const activeGrad = state.chartBarHighlightMode === 'normal'
+                    ? `linear-gradient(90deg, ${activeColor}88, ${activeColor})`
+                    : isHighlighted
+                    ? `linear-gradient(90deg, ${activeColor}88, ${activeColor})`
                     : isLight
                     ? 'linear-gradient(90deg, #94A3B8, #64748B)'
                     : 'linear-gradient(90deg, #334155, #475569)';
 
                   return (
                     <div key={idx} className="flex flex-col gap-2 w-full">
-                      <div className="flex justify-between items-center text-xs font-mono">
+                      <div className="flex justify-between items-center text-xs">
                         <span
-                          className={`font-bold ${isHighlighted ? (isLight ? 'text-slate-900' : 'text-white') : (isLight ? 'text-slate-600' : 'text-slate-400')}`}
-                          style={{ fontSize: `${Math.max(14, Math.round(modFontSize * 1.05))}px` }}
+                          className={`font-bold ${chartFont} ${isHighlighted ? (isLight ? 'text-slate-900' : 'text-white') : (isLight ? 'text-slate-600' : 'text-slate-400')}`}
+                          style={{ fontSize: `${Math.max(14, Math.round(baseTextSize * 1.05))}px` }}
                         >
                           {bar.label}
                         </span>
                         <span
-                          className={`font-bold px-2.5 py-0.5 rounded-lg shadow-sm border ${
-                            isHighlighted
-                              ? 'text-white border-white/20'
-                              : 'text-slate-300 border-white/10 bg-slate-800/80'
+                          className={`font-bold font-mono ${
+                            isHighlighted ? (isLight ? 'text-slate-900' : 'text-white') : (isLight ? 'text-slate-500' : 'text-slate-400')
                           }`}
                           style={{
-                            backgroundColor: isHighlighted ? activeColor : undefined,
-                            fontSize: `${Math.max(12, Math.round(modFontSize * 0.92))}px`
+                            fontSize: `${Math.max(14, Math.round(baseTextSize * 1.05))}px`
                           }}
                         >
-                          {bar.pct}{unit}
+                          {bar.pct}%
                         </span>
                       </div>
                       <div
@@ -1380,12 +1369,23 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
         {/* 4. GRÁFICOS: PASTEL / DONUT CIRCULAR O SPEEDOMETER GAUGE 180°     */}
         {/* ================================================================= */}
         {(state.activeModule === 'chart-pie' || (state.activeModule === 'chart' && state.chartType === 'pie')) && (() => {
-          const totalPct = state.chartBars.reduce((acc, b) => acc + (b.pct || 0), 0) || 100;
-          const defaultPalette = [state.currentColor, '#06B6D4', '#10B981', '#F59E0B', '#EC4899', '#8B5CF6'];
-          const isGauge = state.chartPieMode === 'gauge';
-          const donutStroke = state.chartDonutThickness === 'thin' ? '10' : state.chartDonutThickness === 'full' ? '28' : '16';
-          const heroMetric = state.chartDonutHeroText || `${state.chartBars[0]?.pct || 100}%`;
-          const heroSub = state.chartDonutHeroSub || state.chartDonutText || 'Total';
+          const slices = (state.chartPieSlices && state.chartPieSlices.length > 0)
+            ? state.chartPieSlices
+            : (state.chartBars && state.chartBars.length > 0 ? state.chartBars : [
+                { label: 'Cloud / AWS', pct: 45, color: '#6366F1' },
+                { label: 'Frontends', pct: 30, color: '#06B6D4' },
+                { label: 'APIs & Micro', pct: 25, color: '#10B981' }
+              ]);
+          const totalPct = slices.reduce((acc, b) => acc + (b.pct || 0), 0) || 100;
+          const FIXED_CHART_COLORS = ['#6366F1', '#06B6D4', '#10B981', '#F59E0B', '#EC4899'];
+          const pieStyle = state.chartPieStyle || (state.chartPieMode === 'gauge' ? 'gauge' : 'donut');
+          const isGauge = pieStyle === 'gauge';
+          const isPie = pieStyle === 'pie';
+          const donutStroke = isPie ? '50' : '18';
+          const circleRadius = isPie ? 25 : 40;
+          const heroMetric = state.chartDonutHeroText || '';
+          const heroSub = state.chartDonutHeroSub || '';
+          const hasHeroText = Boolean(heroMetric || heroSub);
 
           return (
             <div
@@ -1397,92 +1397,120 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
               }}
             >
               {state.chartTitle && (
-                <div className="flex items-center gap-2 border-b border-white/10 pb-2.5">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: state.currentColor }} />
-                  <span className="text-sm font-mono font-bold tracking-wider text-white">
+                <div className="flex items-center gap-2.5 border-b border-white/10 pb-3">
+                  <span
+                    className="rounded-full"
+                    style={{
+                      backgroundColor: state.currentColor,
+                      width: `${Math.round(12 * modScale)}px`,
+                      height: `${Math.round(12 * modScale)}px`
+                    }}
+                  />
+                  <span
+                    className={`font-bold tracking-wider text-white ${chartFont}`}
+                    style={{ fontSize: `${Math.round(18 * modScale)}px` }}
+                  >
                     {state.chartTitle}
                   </span>
                 </div>
               )}
               <div className="flex items-center justify-around gap-6 w-full">
-              {/* Contenedor Gráfico Circular o Gauge */}
-              <div className="relative w-52 h-52 shrink-0 flex items-center justify-center">
+              {/* Contenedor Gráfico Circular, Donut o Gauge */}
+              <div className="relative w-56 h-56 shrink-0 flex items-center justify-center">
                 {isGauge ? (
-                  // Velocímetro / Gauge 180°
-                  <div className="relative w-48 h-36 flex items-end justify-center">
-                    <svg className="w-full h-full overflow-visible" viewBox="0 0 160 95">
-                      {/* Arco base */}
+                  // Velocímetro / Gauge 180° Ampliado
+                  <div className="relative w-64 h-44 flex items-end justify-center">
+                    <svg className="w-full h-full overflow-visible" viewBox="0 0 180 105">
+                      {/* Arco base con corte lineal */}
                       <path
-                        d="M 20 85 A 60 60 0 0 1 140 85"
+                        d="M 15 95 A 75 75 0 0 1 165 95"
                         fill="none"
                         stroke={isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}
-                        strokeWidth={donutStroke}
-                        strokeLinecap="round"
+                        strokeWidth="18"
+                        strokeLinecap="butt"
                       />
-                      {/* Arco activo principal */}
+                      {/* Segmentos activos por categoría con sus respectivos colores */}
                       {(() => {
-                        const topPct = (state.chartBars[0]?.pct || 80) / 100;
-                        const arcLength = 188.5; // pi * 60
-                        const dashArray = `${topPct * arcLength} ${arcLength}`;
-                        return (
-                          <path
-                            d="M 20 85 A 60 60 0 0 1 140 85"
-                            fill="none"
-                            stroke={state.currentColor}
-                            strokeWidth={donutStroke}
-                            strokeDasharray={dashArray}
-                            strokeLinecap="round"
-                            className="transition-all duration-700"
-                            style={{ filter: `drop-shadow(0 0 8px ${state.currentColor}66)` }}
-                          />
-                        );
+                        const arcLength = 235.62; // pi * 75
+                        let accumulated = 0;
+                        return slices.slice(0, 5).map((slice, idx) => {
+                          const sliceFraction = (slice.pct || 0) / totalPct;
+                          const sliceLength = sliceFraction * arcLength;
+                          const dashArray = `${sliceLength.toFixed(2)} ${arcLength.toFixed(2)}`;
+                          const dashOffset = (-accumulated).toFixed(2);
+                          accumulated += sliceLength;
+                          const sliceColor = slice.color || FIXED_CHART_COLORS[idx % FIXED_CHART_COLORS.length];
+
+                          return (
+                            <path
+                              key={idx}
+                              d="M 15 95 A 75 75 0 0 1 165 95"
+                              fill="none"
+                              stroke={sliceColor}
+                              strokeWidth="18"
+                              strokeDasharray={dashArray}
+                              strokeDashoffset={dashOffset}
+                              strokeLinecap="butt"
+                              className="transition-all duration-700"
+                              style={{ filter: `drop-shadow(0 0 6px ${sliceColor}66)` }}
+                            />
+                          );
+                        });
                       })()}
                     </svg>
-                    <div className="absolute bottom-2 flex flex-col items-center text-center">
-                      <span
-                        className="font-mono font-black text-3xl tracking-tight"
-                        style={{ color: isLight ? '#0F172A' : '#FFFFFF' }}
-                      >
-                        {heroMetric}
-                      </span>
-                      <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest font-bold">
-                        {heroSub}
-                      </span>
-                    </div>
+                    {hasHeroText && (
+                      <div className="absolute bottom-2 flex flex-col items-center text-center">
+                        {heroMetric && (
+                          <span
+                            className={`font-black text-3xl tracking-tight ${chartFont}`}
+                            style={{ color: isLight ? '#0F172A' : '#FFFFFF' }}
+                          >
+                            {heroMetric}
+                          </span>
+                        )}
+                        {heroSub && (
+                          <span className={`text-[10px] text-slate-400 uppercase tracking-widest font-bold ${chartFont}`}>
+                            {heroSub}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ) : (
-                  // Donut 360° Circular
+                  // Donut 360° o Pie Completo
                   <>
                     <svg className="w-full h-full -rotate-90 transform filter drop-shadow-lg" viewBox="0 0 110 110">
-                      <circle
-                        cx="55"
-                        cy="55"
-                        r="40"
-                        stroke={isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}
-                        strokeWidth={donutStroke}
-                        fill="transparent"
-                      />
+                      {!isPie && (
+                        <circle
+                          cx="55"
+                          cy="55"
+                          r="40"
+                          stroke={isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}
+                          strokeWidth={donutStroke}
+                          fill="transparent"
+                        />
+                      )}
                       {(() => {
-                        const circumference = 251.32;
+                        const circumference = isPie ? 157.08 : 251.32;
                         let accumulatedPct = 0;
-                        return state.chartBars.map((bar, idx) => {
+                        return slices.slice(0, 5).map((bar, idx) => {
                           const slicePct = bar.pct / totalPct;
                           const strokeDasharray = `${(slicePct * circumference).toFixed(2)} ${circumference.toFixed(2)}`;
                           const strokeDashoffset = `${(-(accumulatedPct / totalPct) * circumference).toFixed(2)}`;
                           accumulatedPct += bar.pct;
-                          const sliceColor = bar.color || defaultPalette[idx % defaultPalette.length];
+                          const sliceColor = bar.color || FIXED_CHART_COLORS[idx % FIXED_CHART_COLORS.length];
 
                           return (
                             <circle
                               key={idx}
                               cx="55"
                               cy="55"
-                              r="40"
+                              r={circleRadius}
                               stroke={sliceColor}
                               strokeWidth={donutStroke}
                               strokeDasharray={strokeDasharray}
                               strokeDashoffset={strokeDashoffset}
-                              strokeLinecap="round"
+                              strokeLinecap="butt"
                               fill="transparent"
                               className="transition-all duration-700"
                             />
@@ -1490,44 +1518,56 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         });
                       })()}
                     </svg>
-                    <div className="absolute flex flex-col items-center justify-center text-center">
-                      <span
-                        className="font-mono font-black text-2xl"
-                        style={{ color: isLight ? '#0F172A' : '#FFFFFF' }}
-                      >
-                        {heroMetric}
-                      </span>
-                      <span className="text-xs font-mono text-slate-400 uppercase tracking-widest font-bold pt-0.5">
-                        {heroSub}
-                      </span>
-                    </div>
+                    {!isPie && hasHeroText && (
+                      <div className="absolute flex flex-col items-center justify-center text-center">
+                        {heroMetric && (
+                          <span
+                            className={`font-black text-3xl ${chartFont}`}
+                            style={{ color: isLight ? '#0F172A' : '#FFFFFF' }}
+                          >
+                            {heroMetric}
+                          </span>
+                        )}
+                        {heroSub && (
+                          <span className={`text-xs text-slate-400 uppercase tracking-widest font-bold pt-0.5 ${chartFont}`}>
+                            {heroSub}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </>
                 )}
               </div>
 
               {/* Leyenda Bento de Chips */}
-              <div className="flex flex-col gap-2.5 flex-1 max-w-[55%]">
-                {state.chartBars.map((bar, idx) => {
-                  const sliceColor = bar.color || defaultPalette[idx % defaultPalette.length];
+              <div className="flex flex-col gap-2.5 flex-1 max-w-[58%]">
+                {slices.slice(0, 5).map((bar, idx) => {
+                  const sliceColor = bar.color || FIXED_CHART_COLORS[idx % FIXED_CHART_COLORS.length];
                   return (
                     <div
                       key={idx}
-                      className="flex items-center justify-between gap-2 text-xs font-mono p-2.5 rounded-xl border"
+                      className="flex items-center justify-between gap-3 text-xs p-3 rounded-xl border"
                       style={{
                         backgroundColor: isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.04)',
                         borderColor: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'
                       }}
                     >
-                      <div className="flex items-center gap-2.5 truncate">
+                      <div className="flex items-center gap-3 truncate">
                         <span
-                          className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
+                          className="w-4 h-4 rounded-full shrink-0 shadow-sm ring-1 ring-white/10"
                           style={{ backgroundColor: sliceColor }}
                         />
-                        <span className={`truncate text-xs font-semibold ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                        <span
+                          className={`truncate font-bold ${chartFont} ${isLight ? 'text-slate-800' : 'text-slate-100'}`}
+                          style={{ fontSize: `${Math.max(14, Math.round(baseTextSize * 0.95))}px` }}
+                        >
                           {bar.label}
                         </span>
                       </div>
-                      <span className="font-bold text-white shrink-0 text-xs px-2.5 py-0.5 rounded-lg bg-slate-900/90 border border-white/10">
+                      <span
+                        className="font-mono font-black text-white shrink-0 px-3 py-1 rounded-xl bg-slate-900 border border-white/20 shadow-xs"
+                        style={{ fontSize: `${Math.max(13, Math.round(baseTextSize * 0.92))}px` }}
+                      >
                         {bar.pct}%
                       </span>
                     </div>
@@ -1543,13 +1583,22 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
         {/* 5. GRÁFICOS: LÍNEAS / TENDENCIA CURVADA SPLINE                    */}
         {/* ================================================================= */}
         {(state.activeModule === 'chart-line' || (state.activeModule === 'chart' && state.chartType === 'line')) && (() => {
-          const bars1 = state.chartBars.length > 0 ? state.chartBars : [{ label: 'Q1', pct: 40 }, { label: 'Q2', pct: 85 }];
+          const rawPoints = (state.chartLinePoints && state.chartLinePoints.length > 0)
+            ? state.chartLinePoints
+            : (state.chartBars && state.chartBars.length > 0 ? state.chartBars : [
+                { label: 'Ene', pct: 25 },
+                { label: 'Feb', pct: 45 },
+                { label: 'Mar', pct: 60 },
+                { label: 'Abr', pct: 80 },
+                { label: 'May', pct: 95 }
+              ]);
+          const bars1 = rawPoints.slice(0, 6);
           const strokeW = state.chartLineStroke || 4;
           const isCurved = state.chartLineCurved !== false;
           const showGrid = state.chartLineShowGrid !== false;
 
           const svgW = 460;
-          const svgH = 175;
+          const svgH = state.chartLineHeight || 175;
           const padX = 45;
           const padY = 32;
           const maxPct = Math.max(100, ...bars1.map((b) => b.pct));
@@ -1592,14 +1641,28 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
               }}
             >
               {state.chartTitle && (
-                <div className="flex items-center gap-2 border-b border-white/10 pb-2.5 mb-3 w-full">
-                  <span className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ backgroundColor: state.currentColor }} />
-                  <span className="text-sm font-mono font-bold tracking-wider text-white">
+                <div className="flex items-center gap-2.5 border-b border-white/10 pb-3 mb-3 w-full">
+                  <span
+                    className="rounded-full animate-pulse"
+                    style={{
+                      backgroundColor: state.currentColor,
+                      width: `${Math.round(12 * modScale)}px`,
+                      height: `${Math.round(12 * modScale)}px`
+                    }}
+                  />
+                  <span
+                    className={`font-bold tracking-wider text-white ${chartFont}`}
+                    style={{ fontSize: `${Math.round(18 * modScale)}px` }}
+                  >
                     {state.chartTitle}
                   </span>
                 </div>
               )}
-              <svg className="w-full h-44 overflow-visible" viewBox={`0 0 ${svgW} ${svgH}`}>
+              <svg
+                className="w-full overflow-visible"
+                style={{ height: `${svgH}px` }}
+                viewBox={`0 0 ${svgW} ${svgH}`}
+              >
                 <defs>
                   <linearGradient id="chartLineGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
                     <stop offset="0%" stopColor={state.currentColor} stopOpacity="0.45" />
@@ -1611,13 +1674,13 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                 {showGrid && (
                   <>
                     <line x1={padX} y1={padY} x2={svgW - padX} y2={padY} stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />
-                    <text x={padX - 8} y={padY + 4} textAnchor="end" fill="#64748B" fontSize="9" fontFamily="monospace">100%</text>
+                    <text x={padX - 8} y={padY + 4} textAnchor="end" fill="#94A3B8" fontSize="12" className={chartFont}>100%</text>
 
                     <line x1={padX} y1={(padY + svgH - padY) / 2} x2={svgW - padX} y2={(padY + svgH - padY) / 2} stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />
-                    <text x={padX - 8} y={(padY + svgH - padY) / 2 + 4} textAnchor="end" fill="#64748B" fontSize="9" fontFamily="monospace">50%</text>
+                    <text x={padX - 8} y={(padY + svgH - padY) / 2 + 4} textAnchor="end" fill="#94A3B8" fontSize="12" className={chartFont}>50%</text>
 
                     <line x1={padX} y1={svgH - padY} x2={svgW - padX} y2={svgH - padY} stroke="rgba(255,255,255,0.15)" />
-                    <text x={padX - 8} y={svgH - padY + 4} textAnchor="end" fill="#64748B" fontSize="9" fontFamily="monospace">0%</text>
+                    <text x={padX - 8} y={svgH - padY + 4} textAnchor="end" fill="#94A3B8" fontSize="12" className={chartFont}>0%</text>
                   </>
                 )}
 
@@ -1649,12 +1712,12 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                     />
                     <text
                       x={pt.x}
-                      y={svgH - padY + 18}
+                      y={svgH - padY + 22}
                       textAnchor="middle"
-                      fill={isLight ? '#475569' : '#CBD5E1'}
-                      fontSize="12"
-                      fontFamily="monospace"
+                      fill={isLight ? '#334155' : '#E2E8F0'}
+                      fontSize="15"
                       fontWeight="bold"
+                      className={chartFont}
                     >
                       {pt.label}
                     </text>
@@ -1664,6 +1727,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
             </div>
           );
         })()}
+
 
         {/* ================================================================= */}
         {/* 6. MÓDULO DE CHAT WHATSAPP ULTRA REALISTA                        */}
@@ -1688,35 +1752,34 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
 
           return (
             <div className="flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-white/10 w-full h-auto backdrop-blur-xl">
-              {/* Cabecera WhatsApp */}
+              {/* Cabecera WhatsApp Optimizada */}
               <div
                 className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.08]"
                 style={{ backgroundColor: chatIsLight ? '#F0F2F5' : '#1F2C34' }}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3.5 min-w-0">
                   {state.customLogoUrl ? (
                     <img
                       src={state.customLogoUrl}
                       alt="Avatar"
-                      className="w-10 h-10 rounded-full object-cover shadow-md shrink-0 ring-2 ring-white/20"
+                      className="w-11 h-11 rounded-full object-cover shadow-md shrink-0 ring-2 ring-white/20"
                     />
                   ) : (
                     <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-mono font-bold shadow-md shrink-0 ring-2 ring-white/20"
+                      className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-base shadow-md shrink-0 ring-2 ring-white/20"
                       style={{ backgroundColor: state.currentColor }}
                     >
                       {(state.chatContactName ? state.chatContactName.charAt(0).toUpperCase() : 'A')}
                     </div>
                   )}
-                  <div className="flex flex-col">
-                    <span className={`font-mono font-bold text-sm tracking-tight ${chatIsLight ? 'text-slate-900' : 'text-white'}`}>
-                      {state.chatContactName || 'Aleric Partner'}
-                    </span>
-                    <div className="flex items-center gap-1.5 text-xs font-mono">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                      <span className="text-emerald-400 font-semibold">{state.chatOnlineStatus || 'en línea'}</span>
-                    </div>
-                  </div>
+                  <span className={`font-bold text-base sm:text-lg tracking-tight truncate ${chatIsLight ? 'text-slate-900' : 'text-white'}`}>
+                    {state.chatContactName || 'Aleric Partner'}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono shrink-0">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-emerald-400 font-semibold">{state.chatOnlineStatus || 'en línea'}</span>
                 </div>
               </div>
 
@@ -1744,20 +1807,11 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                             ? 'bg-[#FFFFFF] text-[#111B21] rounded-tl-xs'
                             : 'bg-[#202C33] text-[#E9EDEF] rounded-tl-xs'
                         }`}
-                        style={{ fontSize: `${Math.round(modFontSize * 1.05)}px` }}
+                        style={{ fontSize: `${Math.max(14, Math.round(baseTextSize * 1.02))}px` }}
                       >
                         <p className="leading-relaxed whitespace-pre-wrap font-sans">
                           {renderFormattedText(msg.text)}
                         </p>
-
-                        <div className="flex items-center justify-end gap-1.5 mt-1.5 select-none">
-                          <span className={`text-[10px] font-mono ${chatIsLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                            {msg.time}
-                          </span>
-                          {isBot && (
-                            <CheckCheck className="w-4 h-4 text-[#53BDEB]" />
-                          )}
-                        </div>
 
                         {/* Reacción Emoji Flotante (en el último mensaje) */}
                         {state.chatReaction && idx === state.chatMessages.length - 1 && (
@@ -1842,7 +1896,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         </h4>
                         <p
                           className="text-slate-400 leading-relaxed mt-1"
-                          style={{ fontSize: `${modFontSize}px` }}
+                          style={{ fontSize: `${baseTextSize}px` }}
                         >
                           {st.desc || st.description}
                         </p>
@@ -1875,13 +1929,13 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                       <div className="flex flex-col">
                         <h4
                           className={`font-bold text-white ${state.titleFont || 'font-inter'}`}
-                          style={{ fontSize: `${Math.round(modFontSize * 1.1)}px` }}
+                          style={{ fontSize: `${Math.round(baseTextSize * 1.1)}px` }}
                         >
                           {st.title}
                         </h4>
                         <p
                           className="text-slate-400 leading-relaxed text-xs mt-0.5"
-                          style={{ fontSize: `${Math.round(modFontSize * 0.95)}px` }}
+                          style={{ fontSize: `${Math.round(baseTextSize * 0.95)}px` }}
                         >
                           {st.desc || st.description}
                         </p>
@@ -1917,7 +1971,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         </span>
                         <span
                           className="font-bold text-white"
-                          style={{ fontSize: `${Math.round(modFontSize * 1.05)}px` }}
+                          style={{ fontSize: `${Math.round(baseTextSize * 1.05)}px` }}
                         >
                           {st.title}
                         </span>
@@ -1963,13 +2017,13 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                     </div>
                     <h4
                       className={`font-bold text-white ${state.titleFont || 'font-inter'}`}
-                      style={{ fontSize: `${Math.round(modFontSize * 1.15)}px` }}
+                      style={{ fontSize: `${Math.round(baseTextSize * 1.15)}px` }}
                     >
                       {st.title}
                     </h4>
                     <p
                       className="text-slate-400 leading-relaxed line-clamp-3"
-                      style={{ fontSize: `${modFontSize}px` }}
+                      style={{ fontSize: `${baseTextSize}px` }}
                     >
                       {stepDesc}
                     </p>
@@ -2040,7 +2094,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                   {state.ctaActionBenefit && (
                     <span
                       className="text-xs font-mono text-slate-400 text-center pt-0.5"
-                      style={{ fontSize: `${Math.max(11, Math.round(modFontSize * 0.88))}px` }}
+                      style={{ fontSize: `${Math.max(11, Math.round(baseTextSize * 0.88))}px` }}
                     >
                       {state.ctaActionBenefit}
                     </span>
@@ -2132,7 +2186,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
               <blockquote
                 className={`italic font-medium leading-relaxed z-10 px-4 max-w-[95%] ${state.subtitleFont || state.titleFont || 'font-inter'}`}
                 style={{
-                  fontSize: `${Math.round((state.moduleFontSize || 16) * 1.35)}px`,
+                  fontSize: `${Math.round(baseTextSize * 1.35)}px`,
                   color: isLight ? '#0F172A' : '#F8FAFC'
                 }}
               >
@@ -2336,10 +2390,10 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
           ];
 
           return (
-            <div className="grid grid-cols-2 gap-4 w-full h-auto">
+            <div className="grid grid-cols-2 gap-8 w-full h-auto">
               {/* Columna Izquierda: Problema / Antes */}
               <div
-                className="p-5 sm:p-6 rounded-2xl border flex flex-col justify-between transition-all shadow-xl relative overflow-hidden backdrop-blur-xl"
+                className="p-6 sm:p-7 rounded-2xl border flex flex-col justify-between transition-all shadow-xl relative overflow-hidden backdrop-blur-xl"
                 style={{
                   backgroundColor: isLight ? 'rgba(254, 242, 242, 0.9)' : 'rgba(25, 15, 20, 0.85)',
                   borderColor: isLight ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.35)',
@@ -2347,12 +2401,12 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                   borderTopColor: '#EF4444'
                 }}
               >
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3.5">
                   <div className="flex items-center justify-between">
-                    <span className="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wider uppercase bg-rose-500/15 border border-rose-500/30 text-rose-400">
+                    <span className="px-4 py-1.5 rounded-full text-sm font-mono font-bold tracking-wider uppercase bg-rose-500/20 border border-rose-500/40 text-rose-400">
                       {badgeLeft}
                     </span>
-                    <span className="w-6 h-6 rounded-full bg-rose-500/15 text-rose-400 flex items-center justify-center font-bold text-xs">
+                    <span className="w-7 h-7 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-sm shadow-sm">
                       ✕
                     </span>
                   </div>
@@ -2360,20 +2414,20 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                   <h3
                     className={`font-bold tracking-tight text-white ${state.titleFont || 'font-inter'}`}
                     style={{
-                      fontSize: `${Math.round(modFontSize * 1.35 * fontMult)}px`,
+                      fontSize: `${Math.round(baseTextSize * 1.35)}px`,
                       color: isLight ? '#991B1B' : '#FCA5A5'
                     }}
                   >
                     {titleLeft}
                   </h3>
 
-                  <ul className="space-y-2.5 pt-1">
+                  <ul className="space-y-3 pt-1">
                     {pointsLeft.map((pt, pi) => (
                       <li
                         key={pi}
                         className="flex items-start gap-2.5 leading-relaxed font-mono"
                         style={{
-                          fontSize: `${Math.round(modFontSize * fontMult)}px`,
+                          fontSize: `${baseTextSize}px`,
                           color: isLight ? '#64748B' : '#CBD5E1'
                         }}
                       >
@@ -2387,36 +2441,29 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
 
               {/* Columna Derecha: Solución / Hoy */}
               <div
-                className="p-5 sm:p-6 rounded-2xl border flex flex-col justify-between transition-all shadow-xl relative overflow-hidden backdrop-blur-xl"
+                className="p-6 sm:p-7 rounded-2xl border flex flex-col justify-between transition-all shadow-xl relative overflow-hidden backdrop-blur-xl"
                 style={{
                   backgroundColor: isLight ? 'rgba(240, 253, 244, 0.95)' : `rgba(15, 23, 42, 0.85)`,
-                  borderColor: isLight ? 'rgba(16, 185, 129, 0.3)' : `rgba(${rgb}, 0.5)`,
+                  borderColor: isLight ? 'rgba(16, 185, 129, 0.3)' : `rgba(16, 185, 129, 0.45)`,
                   borderTopWidth: '4px',
-                  borderTopColor: state.currentColor,
-                  boxShadow: `0 15px 35px -10px rgba(${rgb}, 0.25)`
+                  borderTopColor: '#10B981',
+                  boxShadow: `0 15px 35px -10px rgba(16, 185, 129, 0.25)`
                 }}
               >
-                {/* Halo de resplandor */}
+                {/* Halo de resplandor esmeralda */}
                 <div
-                  className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-25 blur-xl"
-                  style={{ backgroundColor: state.currentColor }}
+                  className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-25 blur-xl bg-emerald-500"
                 />
 
-                <div className="flex flex-col gap-3 z-10">
+                <div className="flex flex-col gap-3.5 z-10">
                   <div className="flex items-center justify-between">
                     <span
-                      className="px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wider uppercase border"
-                      style={{
-                        backgroundColor: `rgba(${rgb}, 0.15)`,
-                        borderColor: `rgba(${rgb}, 0.4)`,
-                        color: state.currentColor
-                      }}
+                      className="px-4 py-1.5 rounded-full text-sm font-mono font-bold tracking-wider uppercase bg-emerald-500/20 border border-emerald-500/40 text-emerald-400"
                     >
                       {badgeRight}
                     </span>
                     <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-sm"
-                      style={{ backgroundColor: state.currentColor, color: '#FFFFFF' }}
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-sm shadow-sm bg-emerald-500 text-white font-bold"
                     >
                       ✓
                     </div>
@@ -2425,26 +2472,25 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                   <h3
                     className={`font-bold tracking-tight ${state.titleFont || 'font-inter'}`}
                     style={{
-                      fontSize: `${Math.round(modFontSize * 1.35 * fontMult)}px`,
-                      color: isLight ? '#0F172A' : '#FFFFFF'
+                      fontSize: `${Math.round(baseTextSize * 1.35)}px`,
+                      color: isLight ? '#065F46' : '#FFFFFF'
                     }}
                   >
                     {titleRight}
                   </h3>
 
-                  <ul className="space-y-2.5 pt-1">
+                  <ul className="space-y-3 pt-1">
                     {pointsRight.map((pt, pi) => (
                       <li
                         key={pi}
                         className="flex items-start gap-2.5 leading-relaxed font-mono"
                         style={{
-                          fontSize: `${Math.round(modFontSize * fontMult)}px`,
+                          fontSize: `${baseTextSize}px`,
                           color: isLight ? '#1E293B' : '#E2E8F0'
                         }}
                       >
                         <CheckCircle2
-                          className="w-4 h-4 shrink-0 mt-0.5"
-                          style={{ color: state.currentColor }}
+                          className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400"
                         />
                         <span className="font-medium">{pt}</span>
                       </li>
@@ -2499,31 +2545,45 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
 
               {/* Fila Superior: App + Icon + Tiempo */}
               <div
-                className="flex items-center justify-between w-full z-10 border-b pb-3"
+                className="flex items-center justify-between w-full z-10 border-b pb-3.5"
                 style={{ borderColor: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)' }}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3.5">
                   <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center shadow-md ring-2 ring-white/20"
-                    style={{ backgroundColor: state.currentColor }}
+                    className="rounded-xl flex items-center justify-center shadow-md ring-2 ring-white/20 shrink-0"
+                    style={{
+                      width: `${Math.round(40 * modScale)}px`,
+                      height: `${Math.round(40 * modScale)}px`,
+                      backgroundColor: state.currentColor
+                    }}
                   >
                     {renderNotifIcon()}
                   </div>
-                  <div>
-                    <span
-                      className="font-mono text-xs font-bold uppercase tracking-wider block"
-                      style={{ color: isLight ? '#0F172A' : '#FFFFFF' }}
-                    >
-                      {appName}
-                    </span>
-                    <span className="text-[10px] font-mono text-slate-400">
-                      Notificación de Sistema
-                    </span>
-                  </div>
+                  <span
+                    className="font-bold tracking-tight uppercase"
+                    style={{
+                      fontSize: `${Math.round(17 * modScale)}px`,
+                      color: isLight ? '#0F172A' : '#FFFFFF'
+                    }}
+                  >
+                    {appName}
+                  </span>
                 </div>
 
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900/60 border border-white/10 text-[10px] font-mono text-slate-400">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <div
+                  className="flex items-center gap-2 rounded-full bg-slate-900/60 border border-white/10 font-mono text-slate-300"
+                  style={{
+                    fontSize: `${Math.round(13 * modScale)}px`,
+                    padding: `${Math.round(4 * modScale)}px ${Math.round(11 * modScale)}px`
+                  }}
+                >
+                  <span
+                    className="rounded-full bg-emerald-400 animate-pulse"
+                    style={{
+                      width: `${Math.round(7 * modScale)}px`,
+                      height: `${Math.round(7 * modScale)}px`
+                    }}
+                  />
                   <span>{time}</span>
                 </div>
               </div>
@@ -2533,7 +2593,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                 <span
                   className="font-bold tracking-tight leading-snug"
                   style={{
-                    fontSize: `${Math.round(modFontSize * 1.3 * fontMult)}px`,
+                    fontSize: `${Math.round(baseTextSize * 1.3)}px`,
                     color: isLight ? '#1E293B' : '#F1F5F9'
                   }}
                 >
@@ -2544,7 +2604,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                   <div
                     className="font-mono font-black tracking-tight"
                     style={{
-                      fontSize: `${Math.round(modFontSize * 2.2 * fontMult)}px`,
+                      fontSize: `${Math.round(baseTextSize * 2.2)}px`,
                       color: state.currentColor,
                       textShadow: isLight ? 'none' : `0 0 25px rgba(${rgb}, 0.35)`
                     }}
@@ -2556,7 +2616,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                 <p
                   className="leading-relaxed"
                   style={{
-                    fontSize: `${Math.round(modFontSize * fontMult)}px`,
+                    fontSize: `${baseTextSize}px`,
                     color: isLight ? '#64748B' : '#94A3B8'
                   }}
                 >
@@ -3028,43 +3088,54 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
           ? (state.handleCustomColor || state.currentColor) 
           : state.currentColor;
 
+        const hasCta = Boolean(state.cta && state.cta.trim());
+        const hasHandle = Boolean(state.handle && state.handle.trim());
+
         return (
           <footer className={footerClass} style={footerInlineStyle}>
             {(state.ctaOrder || 'cta-first') === 'cta-first' ? (
               <>
-                <div className="flex items-center gap-2.5 shrink min-w-0">
-                  <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: state.currentColor }} />
-                  <p
-                    className="font-medium truncate pr-4 transition-all"
-                    style={{ fontSize: `${footerSize * 1.3}px`, color: ctaColor }}
+                {hasCta && (
+                  <div className="flex items-center gap-2.5 shrink min-w-0">
+                    <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: state.currentColor }} />
+                    <p
+                      className="font-medium truncate pr-4 transition-all"
+                      style={{ fontSize: `${footerSize * 1.3}px`, color: ctaColor }}
+                    >
+                      {state.cta}
+                    </p>
+                  </div>
+                )}
+                {hasHandle && (
+                  <div
+                    className="font-mono font-bold tracking-wide shrink-0 transition-all ml-auto"
+                    style={{ fontSize: `${footerSize * 1.55}px`, color: handleColor }}
                   >
-                    {state.cta || 'Escríbenos y migramos tu operación a la nube.'}
-                  </p>
-                </div>
-                <div
-                  className="font-mono font-bold tracking-wide shrink-0 transition-all"
-                  style={{ fontSize: `${footerSize * 1.55}px`, color: handleColor }}
-                >
-                  {state.handle || 'tumarca.dev'}
-                </div>
+                    {state.handle}
+                  </div>
+                )}
               </>
             ) : (
               <>
-                <div
-                  className="font-mono font-bold tracking-wide shrink-0 transition-all"
-                  style={{ fontSize: `${footerSize * 1.55}px`, color: handleColor }}
-                >
-                  {state.handle || 'tumarca.dev'}
-                </div>
-                <div className="flex items-center gap-2.5 shrink min-w-0">
-                  <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: state.currentColor }} />
-                  <p
-                    className="font-medium truncate pr-4 transition-all"
-                    style={{ fontSize: `${footerSize * 1.3}px`, color: ctaColor }}
+                {hasHandle && (
+                  <div
+                    className="font-mono font-bold tracking-wide shrink-0 transition-all"
+                    style={{ fontSize: `${footerSize * 1.55}px`, color: handleColor }}
                   >
-                    {state.cta || 'Escríbenos y migramos tu operación a la nube.'}
-                  </p>
-                </div>
+                    {state.handle}
+                  </div>
+                )}
+                {hasCta && (
+                  <div className="flex items-center gap-2.5 shrink min-w-0 ml-auto">
+                    <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: state.currentColor }} />
+                    <p
+                      className="font-medium truncate pr-4 transition-all"
+                      style={{ fontSize: `${footerSize * 1.3}px`, color: ctaColor }}
+                    >
+                      {state.cta}
+                    </p>
+                  </div>
+                )}
               </>
             )}
           </footer>

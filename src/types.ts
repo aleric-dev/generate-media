@@ -360,6 +360,11 @@ export interface PostTemplate {
   notificationIcon?: 'rocket' | 'check' | 'dollar' | 'zap' | 'bell' | 'shield' | 'user' | 'star' | 'chart';
   chartTitle?: string;
   chartHighlightIndex?: number;
+  chartBarsGap?: number;
+  chartBarHighlightMode?: 'first' | 'normal';
+  chartLineLabels?: string;
+  chartLineValues?: string;
+  chartPieStyle?: 'donut' | 'pie' | 'gauge';
   chatTheme?: 'dark' | 'light';
   chatBgColor?: string;
   stepsVisualVariant?: 'timeline' | 'bento' | 'minimal' | 'badges';
@@ -517,16 +522,24 @@ export interface PostState {
   // Module 3 (Chart Bars)
   chartTitle?: string;
   chartHighlightIndex?: number;
+  chartBarsGap?: number;
+  chartBarHighlightMode?: 'first' | 'normal';
   chartUnit?: string;
   chartShowRank?: boolean;
   chartCardStyle?: 'glass' | 'minimal' | 'neon';
 
   // Module 4 (Chart Pie / Donut)
   chartPieMode?: 'donut' | 'gauge';
+  chartPieStyle?: 'donut' | 'pie' | 'gauge';
+  chartPieSlices?: ChartBar[];
   chartDonutHeroText?: string;
   chartDonutHeroSub?: string;
 
   // Module 5 (Chart Line)
+  chartLinePoints?: ChartBar[];
+  chartLineHeight?: number;
+  chartLineLabels?: string;
+  chartLineValues?: string;
   chartLineCurved?: boolean;
   chartLineShowAth?: boolean;
   chartLineAthLabel?: string;
