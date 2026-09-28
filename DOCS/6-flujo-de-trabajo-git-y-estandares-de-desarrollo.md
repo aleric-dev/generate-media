@@ -282,11 +282,12 @@ Al ejecutar `npm run release`:
 3. Extrae los commits `feat` y `fix` y actualiza `CHANGELOG.md`.
 4. Crea el commit de release y genera el tag anotado en un solo paso.
 
-### 9.2. Opción 2: Automatización en CI/CD con GitHub Actions (`release-please`)
-Podemos configurar un workflow de GitHub que cree un Pull Request automático de Release cada vez que ingresen commits a `main`. Cuando el equipo aprueba y fusiona ese PR, la acción:
-* Genera el tag en Git.
-* Actualiza `CHANGELOG.md` y `package.json`.
-* Publica el GitHub Release con sus activos compilados.
+### 9.2. Opción 2: Automatización Directa en CI/CD con GitHub Actions (`Auto Tag & Release`)
+Mediante `.github/workflows/tag-release.yml`, cada vez que se mezcla un PR en `main`:
+1. La acción analiza los Conventional Commits (`feat` ➔ Minor, `fix` ➔ Patch, `BREAKING CHANGE` ➔ Major).
+2. Genera y sube el tag anotado en Git directamente utilizando permisos de escritura nativos (`contents: write`).
+3. Publica automáticamente la Release oficial en GitHub con el resumen de cambios acumulados.
+4. No requiere permisos complejos de creación de Pull Requests ni tokens personales, garantizando 100% de fiabilidad en el CI/CD.
 
 ---
 
