@@ -2,6 +2,8 @@ import React, { forwardRef, useMemo, useState } from 'react';
 import { PostState, ShapePlacement, ShapeStyleVariant, ShapeGeometry, ShapeProximity, BackgroundLayerOrder, PatternVignette } from '../../types';
 import { aspectRatios } from '../../constants/templates';
 import { getBrandIconComponent } from '../../constants/brandIcons';
+import { FIXED_CHART_COLORS, getChartColors } from '../../constants/chartColors';
+import { formatTitleText } from '../../utils/textFormatter';
 import { 
   Star, CheckCircle2, Radio, User, Sparkles, Tag, ArrowRight, 
   FileCode, Terminal, TrendingUp, TrendingDown, CheckCheck, Minus, 
@@ -9,8 +11,27 @@ import {
   Heart, Flame, Palette, Compass, MessageSquare, Share2,
   Lock, Server, Cloud, DollarSign, ShoppingCart, Percent, Award,
   Globe, Mic, Copy, Check, Shield, CircleDot, Play, ExternalLink,
-  GitBranch
+  GitBranch, Bell, PieChart, Activity, Target, BarChart3
 } from 'lucide-react';
+
+const getDonutCenterIcon = (iconId?: string) => {
+  switch (iconId) {
+    case 'pie-chart': return PieChart;
+    case 'activity': return Activity;
+    case 'zap': return Zap;
+    case 'target': return Target;
+    case 'shield': return Shield;
+    case 'award': return Award;
+    case 'sparkles': return Sparkles;
+    case 'bar-chart': return BarChart3;
+    case 'percent': return Percent;
+    case 'dollar': return DollarSign;
+    case 'none': return null;
+    case 'trending-up':
+    default:
+      return TrendingUp;
+  }
+};
 
 interface CanvasTargetProps {
   state: PostState;
@@ -19,7 +40,7 @@ interface CanvasTargetProps {
 export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ state }, ref) => {
   const r = aspectRatios[state.aspectRatio] || aspectRatios['4:5'];
   const isLight = state.canvasMode === 'light';
-  const isWidescreen = state.aspectRatio === '16:9';
+  const isWidescreen = false;
 
   // Cálculo de color RGB para iluminaciones y formas
   const cleanColor = (state.currentColor || '#4F46E5').replace('#', '');
@@ -38,6 +59,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
   const duoRgb = `${dRed}, ${dGreen}, ${dBlue}`;
 
   // Factores de iluminación
+  const dynamicChartColors = useMemo(() => getChartColors(state.currentColor), [state.currentColor]);
   const lightFactor = (state.lightIntensity ?? 40) / 100;
   const lightA1 = (lightFactor * (isLight ? 0.35 : 0.65)).toFixed(3);
   const lightA2 = (lightFactor * (isLight ? 0.18 : 0.35)).toFixed(3);
@@ -257,15 +279,15 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
   const rawScale = state.moduleScale ?? 100;
   const modScale = rawScale <= 2.5 ? (rawScale === 0 ? 1 : rawScale) : rawScale / 100;
   const modFontSize = state.moduleFontSize || 15;
-  const fontMult = Math.max(0.8, Math.min(2.0, modFontSize / 14));
+  const baseTextSize = Math.round(modFontSize * modScale);
+  const fontMult = modScale;
+  const chartFont = state.subtitleFont || state.titleFont || 'font-inter';
 
-  let basePadding = 36;
+  let basePadding = state.modulePadding ?? 0;
   let moduleMinH = isWidescreen ? 'min-h-[220px]' : 'min-h-[280px]';
   if (state.moduleSize === 'compact') {
-    basePadding = 24;
     moduleMinH = isWidescreen ? 'min-h-[160px]' : 'min-h-[200px]';
   } else if (state.moduleSize === 'spacious') {
-    basePadding = 52;
     moduleMinH = isWidescreen ? 'min-h-[280px]' : 'min-h-[360px]';
   }
 
@@ -396,14 +418,14 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
     );
   };
 
-  // Badge Superior Estilos
-  const badgeStyle = state.headerBadgeStyle || state.badgeStyle || 'pill';
-  const badgeColorMode = state.headerBadgeColorMode || state.badgeColorMode || 'inherit';
+  // Badge Superior Estilos (Exclusivo de Cabecera)
+  const badgeStyle = state.headerBadgeStyle || 'pill';
+  const badgeColorMode = state.headerBadgeColorMode || 'inherit';
   let badgeColor = state.currentColor;
   if (badgeColorMode === 'contrast') {
     badgeColor = isLight ? '#0F172A' : '#FFFFFF';
-  } else if (badgeColorMode === 'custom' && (state.headerBadgeCustomColor || state.badgeCustomColor)) {
-    badgeColor = state.headerBadgeCustomColor || state.badgeCustomColor;
+  } else if (badgeColorMode === 'custom' && state.headerBadgeCustomColor) {
+    badgeColor = state.headerBadgeCustomColor;
   }
 
   const renderHeaderBadge = () => {
@@ -696,7 +718,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
               color: tagTextColor
             }}
           >
-            <span className="rounded-full animate-pulse" style={{ width: `${Math.round(tagPx * 0.55)}px`, height: `${Math.round(tagPx * 0.55)}px`, backgroundColor: tagTextColor }} />
+            <span className="rounded-full shrink-0" style={{ width: `${Math.round(tagPx * 0.55)}px`, height: `${Math.round(tagPx * 0.55)}px`, backgroundColor: tagTextColor }} />
             <span>{state.statusPillText}</span>
           </div>
         </div>
@@ -740,43 +762,163 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
       );
     }
 
-    // Default 'badges'
+    // Default 'badges' con 6 estilos visuales dedicados
     if (tagsList.length === 0) return null;
+    const tagStyle = state.tagsBadgeStyle || 'pill';
+
     return (
       <div id="view-tags-container" className={`flex flex-wrap gap-2.5 pt-1 ${tagsJustifyClass}`}>
-        {tagsList.map((tag, idx) => (
-          <span
-            key={idx}
-            className="rounded-lg font-mono font-medium tracking-wide shadow-xs transition-all"
-            style={{
-              fontSize: `${tagPx}px`,
-              color: tagTextColor,
-              backgroundColor: tagBgColor,
-              border: `1px solid ${tagBorderColor}`,
-              padding: `${Math.round(tagPx * 0.3)}px ${Math.round(tagPx * 0.85)}px`
-            }}
-          >
-            {tag}
-          </span>
-        ))}
+        {tagsList.map((tag, idx) => {
+          if (tagStyle === 'bracket') {
+            return (
+              <span
+                key={idx}
+                className="font-mono font-medium tracking-wide flex items-center transition-all"
+                style={{
+                  fontSize: `${tagPx}px`,
+                  color: tagTextColor,
+                  padding: `${Math.round(tagPx * 0.25)}px ${Math.round(tagPx * 0.5)}px`
+                }}
+              >
+                <span className="opacity-40 mr-1 font-mono">[</span>
+                <span>{tag}</span>
+                <span className="opacity-40 ml-1 font-mono">]</span>
+              </span>
+            );
+          }
+
+          if (tagStyle === 'minimal-dot') {
+            return (
+              <span
+                key={idx}
+                className="rounded-md font-mono font-medium tracking-wide flex items-center gap-1.5 shadow-xs transition-all"
+                style={{
+                  fontSize: `${tagPx}px`,
+                  color: tagTextColor,
+                  backgroundColor: isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}`,
+                  padding: `${Math.round(tagPx * 0.3)}px ${Math.round(tagPx * 0.85)}px`
+                }}
+              >
+                <span
+                  className="rounded-full shrink-0"
+                  style={{
+                    width: `${Math.max(5, Math.round(tagPx * 0.42))}px`,
+                    height: `${Math.max(5, Math.round(tagPx * 0.42))}px`,
+                    backgroundColor: tagTextColor
+                  }}
+                />
+                <span>{tag}</span>
+              </span>
+            );
+          }
+
+          if (tagStyle === 'outline') {
+            return (
+              <span
+                key={idx}
+                className="rounded-lg font-mono font-medium tracking-wide shadow-xs transition-all"
+                style={{
+                  fontSize: `${tagPx}px`,
+                  color: tagTextColor,
+                  backgroundColor: 'transparent',
+                  border: `1.5px solid ${tagTextColor}`,
+                  padding: `${Math.round(tagPx * 0.3)}px ${Math.round(tagPx * 0.85)}px`
+                }}
+              >
+                {tag}
+              </span>
+            );
+          }
+
+          if (tagStyle === 'neon') {
+            return (
+              <span
+                key={idx}
+                className="rounded-lg font-mono font-bold tracking-wide shadow-md transition-all"
+                style={{
+                  fontSize: `${tagPx}px`,
+                  color: tagTextColor,
+                  backgroundColor: `${tagTextColor}18`,
+                  border: `1.5px solid ${tagTextColor}`,
+                  boxShadow: `0 0 12px ${tagTextColor}50, inset 0 0 6px ${tagTextColor}20`,
+                  padding: `${Math.round(tagPx * 0.3)}px ${Math.round(tagPx * 0.9)}px`
+                }}
+              >
+                {tag}
+              </span>
+            );
+          }
+
+          if (tagStyle === 'glass') {
+            return (
+              <span
+                key={idx}
+                className="rounded-xl font-mono font-medium tracking-wide shadow-md backdrop-blur-md transition-all"
+                style={{
+                  fontSize: `${tagPx}px`,
+                  color: tagTextColor,
+                  backgroundColor: isLight ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.07)',
+                  border: `1px solid ${isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.16)'}`,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+                  padding: `${Math.round(tagPx * 0.35)}px ${Math.round(tagPx * 0.95)}px`
+                }}
+              >
+                {tag}
+              </span>
+            );
+          }
+
+          // Default 'pill'
+          return (
+            <span
+              key={idx}
+              className="rounded-full font-mono font-medium tracking-wide shadow-xs transition-all"
+              style={{
+                fontSize: `${tagPx}px`,
+                color: tagTextColor,
+                backgroundColor: tagBgColor,
+                border: `1px solid ${tagBorderColor}`,
+                padding: `${Math.round(tagPx * 0.35)}px ${Math.round(tagPx * 1.1)}px`
+              }}
+            >
+              {tag}
+            </span>
+          );
+        })}
       </div>
     );
   };
 
   // Elementos Modulares Desacoplados para Ordenamiento Libre
-  const renderTitleElement = () => (
-    <div key="block-title" className={titleAlignClass}>
-      <h2
-        className={`font-extrabold leading-[1.22] tracking-tight drop-shadow-lg transition-all ${state.titleFont || 'font-inter'}`}
-        style={{
-          fontSize: `${state.titleSize}px`,
-          color: titleColor
-        }}
-      >
-        {state.title ?? ''}
-      </h2>
-    </div>
-  );
+  const renderTitleElement = () => {
+    if (!state.title) return null;
+    const hasExplicitBold = state.title.includes('*');
+    return (
+      <div key="block-title" className={titleAlignClass}>
+        <h2
+          className={`${hasExplicitBold ? 'font-medium' : 'font-extrabold'} leading-[1.22] tracking-tight drop-shadow-lg transition-all ${state.titleFont || 'font-inter'}`}
+          style={{
+            fontSize: `${state.titleSize}px`,
+            color: titleColor
+          }}
+        >
+          {formatTitleText(state.title, {
+            accentColor: state.titleHighlightColor || state.currentColor || '#FF5722',
+            titleColor,
+            isDark: !isLight,
+            highlightStyle: state.titleHighlightStyle || 'marker-strip',
+            hasExplicitBold,
+            highlightFont: state.titleHighlightFont || 'inherit',
+            highlightWeight: state.titleHighlightWeight || 'bold',
+            highlightColorMode: state.titleHighlightColorMode || 'contrast',
+            highlightTextColor: state.titleHighlightTextColor || '#FFFFFF',
+            canvasBgColor: isLight ? '#FFFFFF' : '#0B0F19',
+          })}
+        </h2>
+      </div>
+    );
+  };
 
   const renderSubtitleElement = () => {
     if (!state.subtitle) return null;
@@ -852,43 +994,46 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
 
     let moduleContainerClasses = `${roundedClass} ${moduleMinH} transition-all w-full flex flex-col justify-center h-auto`;
     let moduleContainerStyles: React.CSSProperties = {
-      padding: `${Math.round(basePadding * modScale)}px`
+      padding: `${Math.round(basePadding * modScale)}px`,
+      marginTop: state.moduleMarginTop ? `${state.moduleMarginTop}px` : undefined
     };
 
     const bgOpacity = (state.moduleBgOpacity ?? 85) / 100;
     const glowIntensity = (state.moduleGlowIntensity ?? 30) / 100;
 
-    if (state.moduleContainerStyle === 'solid') {
+    const containerStyle = state.moduleContainerStyle || 'minimal';
+
+    if (containerStyle === 'solid') {
       moduleContainerClasses += isLight ? ' border shadow-xl' : ' border shadow-2xl';
       moduleContainerStyles.backgroundColor = isLight ? `rgba(255, 255, 255, ${bgOpacity})` : `rgba(15, 23, 42, ${bgOpacity})`;
       moduleContainerStyles.borderColor = isLight ? 'rgba(226, 232, 240, 0.8)' : 'rgba(30, 41, 59, 0.8)';
-    } else if (state.moduleContainerStyle === 'neon') {
+    } else if (containerStyle === 'neon') {
       moduleContainerClasses += isLight ? ' border-2 shadow-2xl' : ' border-2 shadow-2xl';
       moduleContainerStyles.backgroundColor = isLight ? `rgba(255, 255, 255, ${bgOpacity})` : `rgba(10, 15, 29, ${bgOpacity})`;
       moduleContainerStyles.borderColor = moduleAccent;
       if (glowIntensity > 0) {
         moduleContainerStyles.boxShadow = `0 0 ${Math.round(40 * glowIntensity)}px ${moduleAccent}55`;
       }
-    } else if (state.moduleContainerStyle === 'bracket') {
+    } else if (containerStyle === 'bracket') {
       moduleContainerClasses += isLight ? ' border-l-4 border-r-4 shadow-xl' : ' border-l-4 border-r-4 shadow-2xl';
       moduleContainerStyles.backgroundColor = isLight ? `rgba(248, 250, 252, ${bgOpacity})` : `rgba(15, 23, 42, ${bgOpacity})`;
       moduleContainerStyles.borderLeftColor = moduleAccent;
       moduleContainerStyles.borderRightColor = moduleAccent;
-    } else if (state.moduleContainerStyle === 'minimal') {
-      moduleContainerClasses += ' bg-transparent';
-    } else {
-      // 'glass' standard
+    } else if (containerStyle === 'glass') {
       moduleContainerClasses += isLight ? ' glass-card-light' : ' glass-card-clean';
       if (state.moduleBgOpacity !== undefined) {
         moduleContainerStyles.backgroundColor = isLight ? `rgba(255, 255, 255, ${bgOpacity * 0.9})` : `rgba(15, 23, 42, ${bgOpacity * 0.75})`;
       }
+    } else {
+      // 'minimal' standard (default)
+      moduleContainerClasses += ' bg-transparent';
     }
 
-    if (state.moduleBorderWidth !== undefined && state.moduleContainerStyle !== 'minimal') {
+    if (state.moduleBorderWidth !== undefined && containerStyle !== 'minimal') {
       moduleContainerStyles.borderWidth = `${state.moduleBorderWidth}px`;
     }
 
-    if (glowIntensity > 0 && state.moduleContainerStyle !== 'neon' && state.moduleContainerStyle !== 'minimal') {
+    if (glowIntensity > 0 && containerStyle !== 'neon' && containerStyle !== 'minimal') {
       moduleContainerStyles.boxShadow = `0 10px 30px -10px ${moduleAccent}40`;
     }
 
@@ -945,10 +1090,11 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                       {state.codeFilename || 'pipeline.ts'}
                     </span>
                     <span
-                      className="ml-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+                      className="ml-2 px-2 py-0.5 rounded font-bold uppercase tracking-wider"
                       style={{
                         backgroundColor: `rgba(${rgb}, 0.15)`,
-                        color: state.currentColor
+                        color: state.currentColor,
+                        fontSize: `${Math.max(10, Math.round(10 * modScale))}px`
                       }}
                     >
                       {state.codeLanguage || 'TypeScript'}
@@ -978,10 +1124,11 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                   </div>
                   <div className="flex items-center gap-2">
                     <span
-                      className="px-2 py-0.5 rounded text-[10px] font-bold uppercase"
+                      className="px-2 py-0.5 rounded font-bold uppercase"
                       style={{
                         backgroundColor: `rgba(${rgb}, 0.15)`,
-                        color: state.currentColor
+                        color: state.currentColor,
+                        fontSize: `${Math.max(10, Math.round(10 * modScale))}px`
                       }}
                     >
                       {state.codeLanguage || 'Python'}
@@ -1050,7 +1197,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                       <div className="flex items-center ml-4 gap-1.5">
                         {/* Pestaña Principal Activa */}
                         <div
-                          className="px-3.5 py-1 rounded-t-lg border-t border-x flex items-center gap-2 text-xs font-mono font-medium shadow-xs"
+                          className="px-4 py-1.5 rounded-t-lg border-t border-x flex items-center gap-2 text-xs font-mono font-medium shadow-xs"
                           style={{
                             backgroundColor: themeBg,
                             borderColor: isLight ? '#CBD5E1' : `rgba(${rgb}, 0.4)`,
@@ -1058,20 +1205,12 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                           }}
                         >
                           <FileCode className="w-3.5 h-3.5" style={{ color: state.currentColor }} />
-                          <span>{state.codeFilename || 'pipeline.ts'}</span>
-                          <span className="text-[10px] text-slate-500 hover:text-white cursor-default">✕</span>
-                        </div>
-                        {/* Pestaña Secundaria Inactiva */}
-                        <div
-                          className="px-3 py-1 rounded-t-lg opacity-60 flex items-center gap-1.5 text-xs font-mono"
-                          style={{ color: isLight ? '#64748B' : '#94A3B8' }}
-                        >
-                          <span>types.d.ts</span>
+                          <span className="font-semibold">{state.codeFilename || 'pipeline.ts'}</span>
                         </div>
                       </div>
                     ) : (
                       <div
-                        className="ml-4 px-3 py-1 rounded-lg border flex items-center gap-2 text-xs font-mono font-medium shadow-inner"
+                        className="ml-4 px-3.5 py-1 rounded-lg border flex items-center gap-2 text-xs font-mono font-medium shadow-inner"
                         style={{
                           backgroundColor: isLight ? '#FFFFFF' : '#0B101B',
                           borderColor: isLight ? '#CBD5E1' : `rgba(${rgb}, 0.4)`,
@@ -1079,18 +1218,19 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         }}
                       >
                         <FileCode className="w-3.5 h-3.5" style={{ color: state.currentColor }} />
-                        <span>{state.codeFilename || 'server/pipeline.ts'}</span>
+                        <span className="font-semibold">{state.codeFilename || 'server/pipeline.ts'}</span>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 font-mono text-[11px]">
+                  <div className="flex items-center gap-2 font-mono">
                     <span
                       className="px-2.5 py-0.5 rounded-md font-bold uppercase tracking-wider"
                       style={{
                         backgroundColor: `rgba(${rgb}, 0.15)`,
                         color: state.currentColor,
-                        border: `1px solid rgba(${rgb}, 0.3)`
+                        border: `1px solid rgba(${rgb}, 0.3)`,
+                        fontSize: `${Math.max(10, Math.round(11 * modScale))}px`
                       }}
                     >
                       {state.codeLanguage || 'TypeScript'}
@@ -1134,7 +1274,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                           color: isHighlighted
                             ? (isLight ? '#0F172A' : '#FFFFFF')
                             : (isLight ? '#1E293B' : '#E2E8F0'),
-                          fontSize: `${state.codeFontSize ? state.codeFontSize : modFontSize}px`
+                          fontSize: `${Math.round((state.codeFontSize || modFontSize) * modScale)}px`
                         }}
                       >
                         {lineText || ' '}
@@ -1144,25 +1284,24 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                 })}
               </div>
 
-              {/* Barra de Estado Inferior IDE */}
+              {/* Barra de Estado Inferior IDE Minimalista y Legible */}
               {showStatusBar && (
                 <div
-                  className="flex items-center justify-between px-4 py-1.5 border-t text-[10px] font-mono select-none"
+                  className="flex items-center justify-between px-4 py-2 border-t select-none"
                   style={{
                     backgroundColor: isLight ? '#F1F5F9' : 'rgba(0,0,0,0.3)',
                     borderColor: isLight ? '#E2E8F0' : 'rgba(255,255,255,0.06)',
-                    color: isLight ? '#64748B' : '#94A3B8'
+                    color: isLight ? '#64748B' : '#94A3B8',
+                    fontSize: `${Math.round(12 * modScale)}px`
                   }}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1 font-semibold" style={{ color: state.currentColor }}>
-                      <GitBranch className="w-3 h-3" /> main*
-                    </span>
-                    <span>UTF-8</span>
-                    <span>{state.codeLanguage || 'TypeScript'}</span>
+                  <div className="flex items-center gap-2 font-mono font-semibold" style={{ color: state.currentColor }}>
+                    <GitBranch className="w-3.5 h-3.5" />
+                    <span>main*</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
-                    <CheckCircle2 className="w-3 h-3" /> Ready
+                  <div className="flex items-center gap-1.5 text-emerald-400 font-mono font-semibold">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Ready</span>
                   </div>
                 </div>
               )}
@@ -1174,41 +1313,33 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
         {/* 2. MÓDULO DE KPIS (TARJETAS DE MÉTRICAS ULTRA HQ CON GRADIENTES)  */}
         {/* ================================================================= */}
         {state.activeModule === 'kpi' && (() => {
-          const isBento = state.kpiLayout === 'bento';
+          const isThree = state.kpis.length === 3;
+          const colsClass = state.kpis.length === 1
+            ? 'grid-cols-1'
+            : 'grid-cols-2';
+
           return (
             <div
-              className={`grid ${
-                isBento
-                  ? 'grid-cols-2'
-                  : state.moduleKpiCols === '1'
-                  ? 'grid-cols-1'
-                  : state.moduleKpiCols === '2'
-                  ? 'grid-cols-2'
-                  : state.kpis.length === 3
-                  ? 'grid-cols-3'
-                  : 'grid-cols-2'
-              } h-auto w-full`}
+              className={`grid ${colsClass} h-auto w-full`}
               style={{ gap: `${state.moduleKpiGap ?? 18}px` }}
             >
               {state.kpis.map((kpi, idx) => {
-                const trendText = kpi.trendLabel !== undefined
+                const trendText = (kpi.trendLabel && kpi.trendLabel.trim() !== '')
                   ? kpi.trendLabel
-                  : (kpi.trend === 'up' ? 'Crecimiento' : kpi.trend === 'down' ? 'Reducción' : '');
-                const isHeroBento = isBento && idx === 0 && state.kpis.length >= 3;
+                  : (kpi.trend === 'up' ? 'Subida' : kpi.trend === 'down' ? 'Bajada' : '');
+                const spanClass = isThree && idx === 0 ? 'col-span-2' : 'col-span-1';
 
                 return (
                   <div
                     key={idx}
-                    className={`p-6 rounded-2xl border flex flex-col justify-between transition-all shadow-xl relative overflow-hidden backdrop-blur-xl ${
-                      isHeroBento ? 'col-span-2' : ''
-                    }`}
+                    className={`p-6 rounded-2xl border flex flex-col justify-between transition-all shadow-xl relative overflow-hidden backdrop-blur-xl ${spanClass}`}
                     style={{
                       background: isLight
-                        ? `linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(${rgb}, ${isHeroBento ? 0.14 : 0.08}) 100%)`
-                        : `linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(${rgb}, ${isHeroBento ? 0.25 : 0.18}) 100%)`,
+                        ? `linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(${rgb}, 0.08) 100%)`
+                        : `linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(${rgb}, 0.18) 100%)`,
                       borderColor: isLight ? 'rgba(0,0,0,0.08)' : `rgba(${rgb}, 0.35)`,
-                      borderTopColor: kpi.borderTop !== false ? state.currentColor : undefined,
-                      borderTopWidth: kpi.borderTop !== false ? '4px' : '1px',
+                      borderTopColor: state.currentColor,
+                      borderTopWidth: '3px',
                       boxShadow: `0 15px 35px -10px rgba(${rgb}, 0.2)`
                     }}
                   >
@@ -1218,104 +1349,55 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                       style={{ backgroundColor: state.currentColor }}
                     />
 
-                    {/* Cabecera de la Tarjeta KPI con Etiqueta e Ícono */}
+                    {/* Cabecera de la Tarjeta KPI con Etiqueta */}
                     <div className="flex items-center justify-between gap-2 z-10 mb-2">
                       <span
-                        className="font-mono font-bold uppercase tracking-wider truncate"
+                        className={`font-normal uppercase tracking-wider truncate ${state.subtitleFont || state.titleFont || 'font-inter'}`}
                         style={{
-                          fontSize: `${Math.max(12, Math.round(modFontSize * 0.95))}px`,
-                          color: isLight ? '#475569' : '#CBD5E1'
+                          fontSize: `${Math.max(13, Math.round(baseTextSize * 1.05))}px`,
+                          color: isLight ? '#0F172A' : '#FFFFFF'
                         }}
                       >
                         {kpi.label}
                       </span>
-                      <div
-                        className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 shadow-sm"
-                        style={{
-                          backgroundColor: `rgba(${rgb}, 0.15)`,
-                          color: state.currentColor
-                        }}
-                      >
-                        {idx === 0 ? <Award className="w-3.5 h-3.5" /> : idx === 1 ? <TrendingUp className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
-                      </div>
                     </div>
 
                     {/* Valor Central & Tendencia */}
-                    <div className="flex items-baseline gap-2 flex-wrap z-10 my-1">
-                      {kpi.prefix && (
-                        <span
-                          className="font-mono font-bold"
-                          style={{
-                            fontSize: `${Math.round((isHeroBento ? 28 : 24) * modScale * fontMult)}px`,
-                            color: isLight ? '#64748B' : '#94A3B8'
-                          }}
-                        >
-                          {kpi.prefix}
-                        </span>
-                      )}
+                    <div className="flex items-baseline gap-2 flex-wrap z-10 my-1 justify-between">
                       <span
-                        className="font-mono font-black tracking-tight"
+                        className={`font-normal tracking-tight ${state.subtitleFont || state.titleFont || 'font-inter'}`}
                         style={{
-                          fontSize: `${Math.round((isHeroBento ? 52 : 42) * modScale * fontMult)}px`,
+                          fontSize: `${Math.round(44 * fontMult)}px`,
                           color: isLight ? '#0F172A' : '#FFFFFF',
                           textShadow: isLight ? 'none' : `0 0 20px rgba(${rgb}, 0.3)`
                         }}
                       >
                         {kpi.val}
                       </span>
-                      {kpi.suffix && (
-                        <span
-                          className="font-mono font-bold"
-                          style={{
-                            fontSize: `${Math.round((isHeroBento ? 28 : 24) * modScale * fontMult)}px`,
-                            color: isLight ? '#64748B' : '#94A3B8'
-                          }}
-                        >
-                          {kpi.suffix}
-                        </span>
-                      )}
 
                       {kpi.trend === 'up' && (
-                        <span className="ml-auto text-xs font-mono font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
-                          <TrendingUp className="w-3.5 h-3.5" />
+                        <span
+                          className={`font-normal text-emerald-400 bg-emerald-500/20 border border-emerald-500/40 rounded-xl flex items-center justify-center shadow-md shrink-0 ${state.subtitleFont || state.titleFont || 'font-inter'}`}
+                          style={{
+                            fontSize: `${Math.round(15 * modScale)}px`,
+                            padding: `${Math.round(6 * modScale)}px ${Math.round(14 * modScale)}px`
+                          }}
+                        >
                           {trendText && <span>{trendText}</span>}
                         </span>
                       )}
                       {kpi.trend === 'down' && (
-                        <span className="ml-auto text-xs font-mono font-bold text-rose-400 bg-rose-500/15 border border-rose-500/30 px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
-                          <TrendingDown className="w-3.5 h-3.5" />
+                        <span
+                          className={`font-normal text-rose-400 bg-rose-500/20 border border-rose-500/40 rounded-xl flex items-center justify-center shadow-md shrink-0 ${state.subtitleFont || state.titleFont || 'font-inter'}`}
+                          style={{
+                            fontSize: `${Math.round(15 * modScale)}px`,
+                            padding: `${Math.round(6 * modScale)}px ${Math.round(14 * modScale)}px`
+                          }}
+                        >
                           {trendText && <span>{trendText}</span>}
                         </span>
                       )}
                     </div>
-
-                    {/* Barra de Progreso Objetivo (Opcional) */}
-                    {(kpi.showProgress || isHeroBento) && (
-                      <div className="w-full mt-3 pt-2 border-t border-white/5 flex flex-col gap-1.5 z-10">
-                        <div className="flex justify-between items-center text-[10px] font-mono text-slate-400">
-                          <span>Objetivo Anual</span>
-                          <span className="font-bold" style={{ color: state.currentColor }}>{kpi.progressValue ?? 88}%</span>
-                        </div>
-                        <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
-                          <div
-                            className="h-full rounded-full transition-all duration-700"
-                            style={{
-                              width: `${Math.min(100, Math.max(0, kpi.progressValue ?? 88))}%`,
-                              backgroundColor: state.currentColor,
-                              boxShadow: `0 0 10px ${state.currentColor}88`
-                            }}
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Texto de Comparativa / Benchmark */}
-                    {kpi.benchmark && (
-                      <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400 mt-2 z-10">
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: state.currentColor }} />
-                        <span>{kpi.benchmark}</span>
-                      </div>
-                    )}
                   </div>
                 );
               })}
@@ -1327,67 +1409,64 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
         {/* 3. GRÁFICOS: BARRAS HORIZONTALES CON RANKING Y CONTENEDOR ANALYTIC*/}
         {/* ================================================================= */}
         {(state.activeModule === 'chart-bars' || (state.activeModule === 'chart' && (!state.chartType || state.chartType === 'horizontal-bars'))) && (() => {
-          const maxVal = Math.max(...state.chartBars.map(b => b.pct), 0);
-          const showRank = state.chartShowRank !== false;
-          const unit = state.chartUnit || '%';
-
           return (
             <div
-              className="w-full rounded-2xl p-5 border flex flex-col gap-4 backdrop-blur-xl shadow-2xl"
+              className="w-full flex flex-col gap-5"
               style={{
-                backgroundColor: isLight ? 'rgba(255, 255, 255, 0.9)' : 'rgba(15, 23, 42, 0.85)',
-                borderColor: isLight ? 'rgba(0,0,0,0.08)' : `rgba(${rgb}, 0.35)`,
-                boxShadow: `0 20px 40px -10px rgba(${rgb}, 0.2)`
+                backgroundColor: 'transparent',
+                border: 'none',
+                boxShadow: 'none',
+                padding: 0
               }}
             >
-              {/* Cabecera Analítica */}
-              <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: state.currentColor }} />
-                  <span className="text-xs font-mono font-bold tracking-wider uppercase text-slate-400">
-                    Ranking Comparativo
+              {/* Cabecera / Título de Gráfico (Integrado, en Mayúsculas, sin punto ni línea inferior) */}
+              {state.chartTitle && (
+                <div className={`flex items-center w-full mb-3 ${
+                  state.chartTitleAlign === 'center' ? 'justify-center text-center' :
+                  state.chartTitleAlign === 'right' ? 'justify-end text-right' :
+                  'justify-start text-left'
+                }`}>
+                  <span
+                    className={`font-bold uppercase tracking-wider text-white ${chartFont}`}
+                    style={{ fontSize: `${Math.round(18 * modScale)}px` }}
+                  >
+                    {state.chartTitle.toUpperCase()}
                   </span>
                 </div>
-                <div className="text-[11px] font-mono text-slate-400 flex items-center gap-2">
-                  <span>Pico Máx:</span>
-                  <span className="font-bold px-2 py-0.5 rounded-md text-white bg-slate-900 border border-white/10" style={{ color: state.currentColor }}>
-                    {maxVal}{unit}
-                  </span>
-                </div>
-              </div>
+              )}
 
-              {/* Lista de Barras con Ranking */}
-              <div className="flex flex-col gap-3.5 w-full">
-                {state.chartBars.map((bar, idx) => {
-                  const barH = state.chartBarHeight || 18;
-                  const rankColors = [
-                    'text-amber-400 bg-amber-400/15 border-amber-400/30',
-                    'text-slate-300 bg-slate-300/15 border-slate-300/30',
-                    'text-amber-600 bg-amber-600/15 border-amber-600/30'
-                  ];
-                  const rankBadgeClass = rankColors[idx] || 'text-slate-400 bg-slate-800 border-slate-700';
+              {/* Lista de Barras con colores planos sólidos de alto contraste */}
+              <div
+                className="flex flex-col w-full"
+                style={{ gap: `${state.chartBarsGap ?? 22}px` }}
+              >
+                {state.chartBars.slice(0, 5).map((bar, idx) => {
+                  const barH = state.chartBarHeight || 20;
+                  const isHighlightFirst = state.chartBarHighlightMode === 'first';
+                  const isHighlighted = isHighlightFirst ? idx === 0 : true;
+                  const barColor = dynamicChartColors[idx % dynamicChartColors.length];
+                  const activeColor = isHighlightFirst
+                    ? (idx === 0 ? (state.currentColor || barColor) : (isLight ? '#94A3B8' : '#475569'))
+                    : barColor;
 
                   return (
-                    <div key={idx} className="flex flex-col gap-1.5 w-full">
-                      <div className="flex justify-between items-center text-xs font-mono">
-                        <div className="flex items-center gap-2">
-                          {showRank && (
-                            <span className={`text-[10px] font-black px-1.5 py-0.5 rounded border ${rankBadgeClass}`}>
-                              #{idx + 1}
-                            </span>
-                          )}
-                          <span
-                            className={`font-bold ${isLight ? 'text-slate-800' : 'text-slate-200'}`}
-                            style={{ fontSize: `${modFontSize}px` }}
-                          >
-                            {bar.label}
-                          </span>
-                        </div>
+                    <div key={idx} className="flex flex-col gap-3.5 w-full">
+                      <div className="flex justify-between items-center text-xs">
                         <span
-                          className="font-bold text-white px-2.5 py-0.5 rounded-lg shadow-md border border-white/20"
-                          style={{ backgroundColor: bar.color || state.currentColor, fontSize: `${Math.max(11, Math.round(modFontSize * 0.88))}px` }}
+                          className={`font-normal ${chartFont} ${isHighlighted ? (isLight ? 'text-slate-900' : 'text-white') : (isLight ? 'text-slate-700' : 'text-slate-200')}`}
+                          style={{ fontSize: `${Math.max(14, Math.round(baseTextSize * 1.05))}px` }}
                         >
-                          {bar.pct}{unit}
+                          {bar.label}
+                        </span>
+                        <span
+                          className={`font-normal ${chartFont} ${
+                            isHighlighted ? (isLight ? 'text-slate-900' : 'text-white') : (isLight ? 'text-slate-700' : 'text-slate-300')
+                          }`}
+                          style={{
+                            fontSize: `${Math.max(14, Math.round(baseTextSize * 1.05))}px`
+                          }}
+                        >
+                          {bar.pct}%
                         </span>
                       </div>
                       <div
@@ -1395,15 +1474,15 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         style={{
                           height: `${barH}px`,
                           backgroundColor: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(15, 23, 42, 0.8)',
-                          borderColor: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.12)'
+                          borderColor: isHighlighted ? `${activeColor}50` : (isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)')
                         }}
                       >
                         <div
                           className="h-full rounded-full transition-all duration-700 shadow-sm relative"
                           style={{
                             width: `${Math.min(100, Math.max(0, bar.pct))}%`,
-                            background: `linear-gradient(90deg, ${bar.color || state.currentColor}88, ${bar.color || state.currentColor})`,
-                            boxShadow: `0 0 12px ${bar.color || state.currentColor}80`
+                            backgroundColor: activeColor,
+                            boxShadow: isHighlighted ? `0 0 14px ${activeColor}80` : 'none'
                           }}
                         />
                       </div>
@@ -1419,100 +1498,162 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
         {/* 4. GRÁFICOS: PASTEL / DONUT CIRCULAR O SPEEDOMETER GAUGE 180°     */}
         {/* ================================================================= */}
         {(state.activeModule === 'chart-pie' || (state.activeModule === 'chart' && state.chartType === 'pie')) && (() => {
-          const totalPct = state.chartBars.reduce((acc, b) => acc + (b.pct || 0), 0) || 100;
-          const defaultPalette = [state.currentColor, '#06B6D4', '#10B981', '#F59E0B', '#EC4899', '#8B5CF6'];
-          const isGauge = state.chartPieMode === 'gauge';
-          const donutStroke = state.chartDonutThickness === 'thin' ? '10' : state.chartDonutThickness === 'full' ? '28' : '16';
-          const heroMetric = state.chartDonutHeroText || `${state.chartBars[0]?.pct || 100}%`;
-          const heroSub = state.chartDonutHeroSub || state.chartDonutText || 'Total';
+          const slices = (state.chartPieSlices && state.chartPieSlices.length > 0)
+            ? state.chartPieSlices
+            : (state.chartBars && state.chartBars.length > 0 ? state.chartBars : [
+                { label: 'Cloud / AWS', pct: 45, color: '#6366F1' },
+                { label: 'Frontends', pct: 30, color: '#06B6D4' },
+                { label: 'APIs & Micro', pct: 25, color: '#10B981' }
+              ]);
+          const totalPct = slices.reduce((acc, b) => acc + (b.pct || 0), 0) || 100;
+          const pieStyle = state.chartPieStyle || (state.chartPieMode === 'gauge' ? 'gauge' : 'donut');
+          const isGauge = pieStyle === 'gauge';
+          const isPie = pieStyle === 'pie';
+          const donutStroke = isPie ? '50' : '18';
+          const circleRadius = isPie ? 25 : 40;
+          const heroMetric = state.chartDonutHeroText || '';
+          const heroSub = state.chartDonutHeroSub || '';
+          const hasHeroText = Boolean(heroMetric || heroSub);
+
+          const CenterIcon = getDonutCenterIcon(state.chartDonutIcon);
 
           return (
-            <div
-              className="flex items-center justify-around gap-6 w-full p-5 rounded-2xl border backdrop-blur-xl shadow-2xl"
-              style={{
-                backgroundColor: isLight ? 'rgba(255, 255, 255, 0.9)' : 'rgba(15, 23, 42, 0.85)',
-                borderColor: isLight ? 'rgba(0,0,0,0.08)' : `rgba(${rgb}, 0.35)`,
-                boxShadow: `0 20px 40px -10px rgba(${rgb}, 0.2)`
-              }}
-            >
-              {/* Contenedor Gráfico Circular o Gauge */}
-              <div className="relative w-52 h-52 shrink-0 flex items-center justify-center">
+            <div className="flex flex-col gap-4 w-full">
+              {/* Cabecera / Título de Gráfico (Integrado, en Mayúsculas, sin punto ni línea inferior) */}
+              {state.chartTitle && (
+                <div className={`flex items-center w-full mb-3 ${
+                  state.chartTitleAlign === 'center' ? 'justify-center text-center' :
+                  state.chartTitleAlign === 'right' ? 'justify-end text-right' :
+                  'justify-start text-left'
+                }`}>
+                  <span
+                    className={`font-bold uppercase tracking-wider text-white ${chartFont}`}
+                    style={{ fontSize: `${Math.round(18 * modScale)}px` }}
+                  >
+                    {state.chartTitle.toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center justify-around gap-6 w-full">
+              {/* Contenedor Gráfico Circular, Donut o Gauge */}
+              <div className="relative w-64 h-64 shrink-0 flex items-center justify-center">
                 {isGauge ? (
-                  // Velocímetro / Gauge 180°
-                  <div className="relative w-48 h-36 flex items-end justify-center">
-                    <svg className="w-full h-full overflow-visible" viewBox="0 0 160 95">
-                      {/* Arco base */}
+                  // Velocímetro / Gauge 180° Ampliado
+                  <div className="relative w-72 h-48 flex items-end justify-center">
+                    <svg className="w-full h-full overflow-visible" viewBox="0 0 180 105">
+                      {/* Arco base con corte lineal */}
                       <path
-                        d="M 20 85 A 60 60 0 0 1 140 85"
+                        d="M 15 95 A 75 75 0 0 1 165 95"
                         fill="none"
                         stroke={isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}
-                        strokeWidth={donutStroke}
-                        strokeLinecap="round"
+                        strokeWidth="18"
+                        strokeLinecap="butt"
                       />
-                      {/* Arco activo principal */}
+                      {/* Segmentos activos por categoría con sus respectivos colores */}
                       {(() => {
-                        const topPct = (state.chartBars[0]?.pct || 80) / 100;
-                        const arcLength = 188.5; // pi * 60
-                        const dashArray = `${topPct * arcLength} ${arcLength}`;
-                        return (
-                          <path
-                            d="M 20 85 A 60 60 0 0 1 140 85"
-                            fill="none"
-                            stroke={state.currentColor}
-                            strokeWidth={donutStroke}
-                            strokeDasharray={dashArray}
-                            strokeLinecap="round"
-                            className="transition-all duration-700"
-                            style={{ filter: `drop-shadow(0 0 8px ${state.currentColor}66)` }}
-                          />
-                        );
+                        const arcLength = 235.62; // pi * 75
+                        let accumulated = 0;
+                        return slices.slice(0, 5).map((slice, idx) => {
+                          const sliceFraction = (slice.pct || 0) / totalPct;
+                          const sliceLength = sliceFraction * arcLength;
+                          const dashArray = `${sliceLength.toFixed(2)} ${arcLength.toFixed(2)}`;
+                          const dashOffset = (-accumulated).toFixed(2);
+                          accumulated += sliceLength;
+                          const sliceColor = dynamicChartColors[idx % dynamicChartColors.length];
+
+                          return (
+                            <path
+                              key={idx}
+                              d="M 15 95 A 75 75 0 0 1 165 95"
+                              fill="none"
+                              stroke={sliceColor}
+                              strokeWidth="18"
+                              strokeDasharray={dashArray}
+                              strokeDashoffset={dashOffset}
+                              strokeLinecap="butt"
+                              className="transition-all duration-700"
+                              style={{ filter: `drop-shadow(0 0 6px ${sliceColor}66)` }}
+                            />
+                          );
+                        });
                       })()}
                     </svg>
-                    <div className="absolute bottom-2 flex flex-col items-center text-center">
-                      <span
-                        className="font-mono font-black text-3xl tracking-tight"
-                        style={{ color: isLight ? '#0F172A' : '#FFFFFF' }}
-                      >
-                        {heroMetric}
-                      </span>
-                      <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest font-bold">
-                        {heroSub}
-                      </span>
-                    </div>
+                    {(() => {
+                      if (state.chartDonutIcon === 'none') return null;
+                      if (CenterIcon) {
+                        return (
+                          <div className="absolute bottom-8 flex items-center justify-center pointer-events-none">
+                            <CenterIcon
+                              className="transition-transform"
+                              style={{
+                                width: `${Math.round(40 * modScale)}px`,
+                                height: `${Math.round(40 * modScale)}px`,
+                                color: isLight ? '#0F172A' : '#FFFFFF',
+                                filter: isLight
+                                  ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+                                  : 'drop-shadow(0 0 12px rgba(255,255,255,0.4))'
+                              }}
+                            />
+                          </div>
+                        );
+                      }
+                      if (hasHeroText) {
+                        return (
+                          <div className="absolute bottom-2 flex flex-col items-center text-center">
+                            {heroMetric && (
+                              <span
+                                className={`font-normal text-3xl tracking-tight ${chartFont}`}
+                                style={{ color: isLight ? '#0F172A' : '#FFFFFF' }}
+                              >
+                                {heroMetric}
+                              </span>
+                            )}
+                            {heroSub && (
+                              <span className={`text-[10px] text-slate-400 uppercase tracking-widest font-normal ${chartFont}`}>
+                                {heroSub}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
                   </div>
                 ) : (
-                  // Donut 360° Circular
+                  // Donut 360° o Pie Completo
                   <>
                     <svg className="w-full h-full -rotate-90 transform filter drop-shadow-lg" viewBox="0 0 110 110">
-                      <circle
-                        cx="55"
-                        cy="55"
-                        r="40"
-                        stroke={isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}
-                        strokeWidth={donutStroke}
-                        fill="transparent"
-                      />
+                      {!isPie && (
+                        <circle
+                          cx="55"
+                          cy="55"
+                          r="40"
+                          stroke={isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}
+                          strokeWidth={donutStroke}
+                          fill="transparent"
+                        />
+                      )}
                       {(() => {
-                        const circumference = 251.32;
+                        const circumference = isPie ? 157.08 : 251.32;
                         let accumulatedPct = 0;
-                        return state.chartBars.map((bar, idx) => {
+                        return slices.slice(0, 5).map((bar, idx) => {
                           const slicePct = bar.pct / totalPct;
                           const strokeDasharray = `${(slicePct * circumference).toFixed(2)} ${circumference.toFixed(2)}`;
                           const strokeDashoffset = `${(-(accumulatedPct / totalPct) * circumference).toFixed(2)}`;
                           accumulatedPct += bar.pct;
-                          const sliceColor = bar.color || defaultPalette[idx % defaultPalette.length];
+                          const sliceColor = dynamicChartColors[idx % dynamicChartColors.length];
 
                           return (
                             <circle
                               key={idx}
                               cx="55"
                               cy="55"
-                              r="40"
+                              r={circleRadius}
                               stroke={sliceColor}
                               strokeWidth={donutStroke}
                               strokeDasharray={strokeDasharray}
                               strokeDashoffset={strokeDashoffset}
-                              strokeLinecap="round"
+                              strokeLinecap="butt"
                               fill="transparent"
                               className="transition-all duration-700"
                             />
@@ -1520,44 +1661,70 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         });
                       })()}
                     </svg>
-                    <div className="absolute flex flex-col items-center justify-center text-center">
-                      <span
-                        className="font-mono font-black text-2xl"
-                        style={{ color: isLight ? '#0F172A' : '#FFFFFF' }}
-                      >
-                        {heroMetric}
-                      </span>
-                      <span className="text-xs font-mono text-slate-400 uppercase tracking-widest font-bold pt-0.5">
-                        {heroSub}
-                      </span>
-                    </div>
+                    {!isPie && state.chartDonutIcon !== 'none' && (CenterIcon ? (
+                      <div className="absolute flex items-center justify-center pointer-events-none">
+                        <CenterIcon
+                          className="transition-transform"
+                          style={{
+                            width: `${Math.round(44 * modScale)}px`,
+                            height: `${Math.round(44 * modScale)}px`,
+                            color: isLight ? '#0F172A' : '#FFFFFF',
+                            filter: isLight
+                              ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+                              : 'drop-shadow(0 0 12px rgba(255,255,255,0.4))'
+                          }}
+                        />
+                      </div>
+                    ) : hasHeroText && (
+                      <div className="absolute flex flex-col items-center justify-center text-center">
+                        {heroMetric && (
+                          <span
+                            className={`font-normal text-3xl ${chartFont}`}
+                            style={{ color: isLight ? '#0F172A' : '#FFFFFF' }}
+                          >
+                            {heroMetric}
+                          </span>
+                        )}
+                        {heroSub && (
+                          <span className={`text-xs text-slate-400 uppercase tracking-widest font-normal pt-0.5 ${chartFont}`}>
+                            {heroSub}
+                          </span>
+                        )}
+                      </div>
+                    ))}
                   </>
                 )}
               </div>
 
               {/* Leyenda Bento de Chips */}
-              <div className="flex flex-col gap-2.5 flex-1 max-w-[55%]">
-                {state.chartBars.map((bar, idx) => {
-                  const sliceColor = bar.color || defaultPalette[idx % defaultPalette.length];
+              <div className="flex flex-col gap-2.5 flex-1 max-w-[58%]">
+                {slices.slice(0, 5).map((bar, idx) => {
+                  const sliceColor = dynamicChartColors[idx % dynamicChartColors.length];
                   return (
                     <div
                       key={idx}
-                      className="flex items-center justify-between gap-2 text-xs font-mono p-2.5 rounded-xl border"
+                      className="flex items-center justify-between gap-3 text-xs p-3 rounded-xl border"
                       style={{
                         backgroundColor: isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.04)',
                         borderColor: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'
                       }}
                     >
-                      <div className="flex items-center gap-2.5 truncate">
+                      <div className="flex items-center gap-3 truncate">
                         <span
-                          className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
+                          className="w-4 h-4 rounded-full shrink-0 shadow-sm ring-1 ring-white/10"
                           style={{ backgroundColor: sliceColor }}
                         />
-                        <span className={`truncate text-xs font-semibold ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                        <span
+                          className={`truncate font-normal ${chartFont} ${isLight ? 'text-slate-800' : 'text-slate-100'}`}
+                          style={{ fontSize: `${Math.max(14, Math.round(baseTextSize * 0.95))}px` }}
+                        >
                           {bar.label}
                         </span>
                       </div>
-                      <span className="font-bold text-white shrink-0 text-xs px-2.5 py-0.5 rounded-lg bg-slate-900/90 border border-white/10">
+                      <span
+                        className={`font-normal ${chartFont} shrink-0 ${isLight ? 'text-slate-800' : 'text-slate-100'}`}
+                        style={{ fontSize: `${Math.max(14, Math.round(baseTextSize * 0.95))}px` }}
+                      >
                         {bar.pct}%
                       </span>
                     </div>
@@ -1565,29 +1732,39 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                 })}
               </div>
             </div>
-          );
-        })()}
+          </div>
+        );
+      })()}
 
         {/* ================================================================= */}
-        {/* 5. GRÁFICOS: LÍNEAS / TENDENCIA CURVADA SPLINE CON PICO ATH       */}
+        {/* 5. GRÁFICOS: LÍNEAS / TENDENCIA CURVADA SPLINE                    */}
         {/* ================================================================= */}
         {(state.activeModule === 'chart-line' || (state.activeModule === 'chart' && state.chartType === 'line')) && (() => {
-          const bars1 = state.chartBars.length > 0 ? state.chartBars : [{ label: 'Q1', pct: 40 }, { label: 'Q2', pct: 85 }];
-          const isDualSeries = state.chartLineSeries === 2;
-          const bars2 = state.chartLineSeries2 && state.chartLineSeries2.length > 0
-            ? state.chartLineSeries2
-            : bars1.map((b) => ({ ...b, pct: Math.max(10, Math.round(b.pct * 0.7)) }));
-          const color2 = state.chartLineColor2 || '#06B6D4';
+          const rawPoints = (state.chartLinePoints && state.chartLinePoints.length > 0)
+            ? state.chartLinePoints
+            : (state.chartBars && state.chartBars.length > 0 ? state.chartBars : [
+                { label: 'Ene', pct: 25 },
+                { label: 'Feb', pct: 45 },
+                { label: 'Mar', pct: 60 },
+                { label: 'Abr', pct: 80 },
+                { label: 'May', pct: 95 }
+              ]);
+          const bars1 = rawPoints.slice(0, 12);
           const strokeW = state.chartLineStroke || 4;
-          const isCurved = state.chartLineCurved !== false;
-          const showGrid = state.chartLineShowGrid !== false;
-          const showAth = state.chartLineShowAth !== false;
+          const isCurved = false; // Línea recta por defecto
+          const showGrid = true; // Cuadrícula siempre visible
 
-          const svgW = 460;
-          const svgH = 175;
-          const padX = 45;
-          const padY = 32;
-          const maxPct = Math.max(100, ...bars1.map((b) => b.pct), ...(isDualSeries ? bars2.map((b) => b.pct) : []));
+          const widthPct = Math.min(100, Math.max(50, state.chartLineWidthPct ?? 75));
+          const svgW = 600;
+          const heightPct = state.chartLineHeightPct !== undefined
+            ? Math.min(100, Math.max(50, state.chartLineHeightPct))
+            : (state.chartLineHeight
+                ? Math.min(100, Math.max(50, Math.round(50 + ((state.chartLineHeight - 200) / 100) * 50)))
+                : 50);
+          const svgH = Math.round(200 + ((heightPct - 50) / 50) * 100);
+          const padX = bars1.length >= 10 ? 18 : (bars1.length >= 7 ? 24 : 32);
+          const padY = 28;
+          const maxPct = Math.max(100, ...bars1.map((b) => b.pct));
 
           const points1 = bars1.map((b, idx) => {
             const x = padX + (idx / Math.max(1, bars1.length - 1)) * (svgW - 2 * padX);
@@ -1595,7 +1772,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
             return { x, y, ...b };
           });
 
-          // Helper para generar curva Bezier Spline suave
+          // Helper para generar curva Bezier Spline suave (si se reactiva en el futuro)
           const getCurvedPath = (pts: typeof points1) => {
             if (pts.length <= 1) return '';
             let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
@@ -1617,154 +1794,121 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
 
           const areaD1 = `${pathD1} L ${points1[points1.length - 1].x.toFixed(1)} ${(svgH - padY).toFixed(1)} L ${points1[0].x.toFixed(1)} ${(svgH - padY).toFixed(1)} Z`;
 
-          let pathD2 = '';
-          let points2: typeof points1 = [];
-          if (isDualSeries) {
-            points2 = bars2.map((b, idx) => {
-              const x = padX + (idx / Math.max(1, bars2.length - 1)) * (svgW - 2 * padX);
-              const y = svgH - padY - (b.pct / maxPct) * (svgH - 2 * padY);
-              return { x, y, ...b };
-            });
-            pathD2 = isCurved
-              ? getCurvedPath(points2)
-              : points2.reduce((acc, pt, i) => `${acc} ${i === 0 ? 'M' : 'L'} ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`, '');
-          }
-
-          // Punto pico ATH
-          const athPoint = points1.reduce((prev, curr) => (curr.pct > prev.pct ? curr : prev), points1[0]);
-
           return (
-            <div
-              className="w-full rounded-2xl p-5 border flex flex-col items-center backdrop-blur-xl shadow-2xl"
-              style={{
-                backgroundColor: isLight ? 'rgba(255, 255, 255, 0.9)' : 'rgba(15, 23, 42, 0.85)',
-                borderColor: isLight ? 'rgba(0,0,0,0.08)' : `rgba(${rgb}, 0.35)`,
-                boxShadow: `0 20px 40px -10px rgba(${rgb}, 0.2)`
-              }}
-            >
-              <svg className="w-full h-44 overflow-visible" viewBox={`0 0 ${svgW} ${svgH}`}>
-                <defs>
-                  <linearGradient id="chartLineGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor={state.currentColor} stopOpacity="0.45" />
-                    <stop offset="100%" stopColor={state.currentColor} stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-
-                {/* Guías Horizontales con Escalas */}
-                {showGrid && (
-                  <>
-                    <line x1={padX} y1={padY} x2={svgW - padX} y2={padY} stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />
-                    <text x={padX - 8} y={padY + 4} textAnchor="end" fill="#64748B" fontSize="9" fontFamily="monospace">100%</text>
-
-                    <line x1={padX} y1={(padY + svgH - padY) / 2} x2={svgW - padX} y2={(padY + svgH - padY) / 2} stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />
-                    <text x={padX - 8} y={(padY + svgH - padY) / 2 + 4} textAnchor="end" fill="#64748B" fontSize="9" fontFamily="monospace">50%</text>
-
-                    <line x1={padX} y1={svgH - padY} x2={svgW - padX} y2={svgH - padY} stroke="rgba(255,255,255,0.15)" />
-                    <text x={padX - 8} y={svgH - padY + 4} textAnchor="end" fill="#64748B" fontSize="9" fontFamily="monospace">0%</text>
-                  </>
-                )}
-
-                {/* Área con Relleno Degradado de Serie 1 */}
-                <path d={areaD1} fill="url(#chartLineGrad1)" />
-
-                {/* Serie 2 (Si está activa) */}
-                {isDualSeries && (
-                  <path
-                    d={pathD2}
-                    fill="none"
-                    stroke={color2}
-                    strokeWidth={Math.max(2, strokeW - 1)}
-                    strokeDasharray="5 5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                )}
-
-                {/* Línea Principal de Serie 1 */}
-                <path
-                  d={pathD1}
-                  fill="none"
-                  stroke={state.currentColor}
-                  strokeWidth={strokeW}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ filter: `drop-shadow(0 0 6px ${state.currentColor}80)` }}
-                />
-
-                {/* Tooltip ATH (Pico Histórico) */}
-                {showAth && athPoint && (
-                  <g transform={`translate(${athPoint.x}, ${athPoint.y - 36})`}>
-                    <rect
-                      x="-38"
-                      y="-12"
-                      width="76"
-                      height="22"
-                      rx="11"
-                      fill={state.currentColor}
-                      className="filter drop-shadow-lg"
-                    />
-                    <text
-                      x="0"
-                      y="3"
-                      textAnchor="middle"
-                      fill="#FFFFFF"
-                      fontSize="9"
-                      fontFamily="monospace"
-                      fontWeight="bold"
+            <div className="w-full flex flex-col items-center">
+              <div
+                className="flex flex-col items-center mx-auto transition-all duration-300"
+                style={{ width: `${widthPct}%`, maxWidth: '100%' }}
+              >
+                {/* Cabecera / Título de Gráfico (Integrado, en Mayúsculas, sin punto ni línea inferior) */}
+                {state.chartTitle && (
+                  <div className={`flex items-center w-full mb-3 ${
+                    state.chartTitleAlign === 'center' ? 'justify-center text-center' :
+                    state.chartTitleAlign === 'right' ? 'justify-end text-right' :
+                    'justify-start text-left'
+                  }`}>
+                    <span
+                      className={`font-bold uppercase tracking-wider text-white ${chartFont}`}
+                      style={{ fontSize: `${Math.round(18 * modScale)}px` }}
                     >
-                      {state.chartLineAthLabel || '★ ATH MÁX'}
-                    </text>
-                  </g>
+                      {state.chartTitle.toUpperCase()}
+                    </span>
+                  </div>
                 )}
 
-                {/* Puntos y Etiquetas de Serie 1 */}
-                {points1.map((pt, idx) => (
-                  <g key={idx}>
-                    <circle
-                      cx={pt.x}
-                      cy={pt.y}
-                      r="6"
-                      fill={state.currentColor}
-                      stroke="#FFFFFF"
-                      strokeWidth="2.5"
-                      className="shadow-lg"
-                    />
-                    <text
-                      x={pt.x}
-                      y={svgH - padY + 18}
-                      textAnchor="middle"
-                      fill={isLight ? '#475569' : '#CBD5E1'}
-                      fontSize="12"
-                      fontFamily="monospace"
-                      fontWeight="bold"
+                <div className="w-full">
+                  <div className="w-full relative" style={{ height: `${svgH}px` }}>
+                    <svg
+                      className="w-full h-full overflow-visible block"
+                      style={{ width: '100%', height: `${svgH}px` }}
+                      viewBox={`0 0 ${svgW} ${svgH}`}
+                      preserveAspectRatio="none"
                     >
-                      {pt.label}
-                    </text>
-                  </g>
-                ))}
+                      <defs>
+                        <linearGradient id="chartLineGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor={state.currentColor} stopOpacity="0.45" />
+                          <stop offset="100%" stopColor={state.currentColor} stopOpacity="0.0" />
+                        </linearGradient>
+                      </defs>
 
-                {/* Puntos de Serie 2 */}
-                {isDualSeries && points2.map((pt, idx) => (
-                  <circle
-                    key={`p2-${idx}`}
-                    cx={pt.x}
-                    cy={pt.y}
-                    r="4.5"
-                    fill={color2}
-                    stroke="#FFFFFF"
-                    strokeWidth="2"
-                  />
-                ))}
-              </svg>
+                      {/* Guías Horizontales con Escalas */}
+                      {showGrid && (
+                        <>
+                          <line x1={0} y1={padY} x2={svgW} y2={padY} stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />
+                          <line x1={0} y1={(padY + svgH - padY) / 2} x2={svgW} y2={(padY + svgH - padY) / 2} stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />
+                          <line x1={0} y1={svgH - padY} x2={svgW} y2={svgH - padY} stroke="rgba(255,255,255,0.15)" />
+                        </>
+                      )}
+
+                      {/* Área con Relleno Degradado */}
+                      <path d={areaD1} fill="url(#chartLineGrad1)" />
+
+                      {/* Línea Principal de Serie */}
+                      <path
+                        d={pathD1}
+                        fill="none"
+                        stroke={state.currentColor}
+                        strokeWidth={strokeW}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        style={{ filter: `drop-shadow(0 0 8px ${state.currentColor}90)` }}
+                      />
+                    </svg>
+
+                    {/* Puntos de la Serie (HTML con geometría 1:1 estricta - NUNCA se deforma en óvalo) */}
+                    {points1.map((pt, idx) => {
+                      const dotD = Math.max(12, Math.round(16 * modScale));
+                      const borderW = Math.max(2, Math.round(2.5 * modScale));
+                      return (
+                        <div
+                          key={idx}
+                          className="absolute rounded-full shadow-lg pointer-events-none transform -translate-x-1/2 -translate-y-1/2 transition-all"
+                          style={{
+                            left: `${(pt.x / svgW) * 100}%`,
+                            top: `${pt.y}px`,
+                            width: `${dotD}px`,
+                            height: `${dotD}px`,
+                            backgroundColor: state.currentColor,
+                            border: `${borderW}px solid #FFFFFF`,
+                            boxShadow: `0 0 10px ${state.currentColor}80`
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+
+                  {/* Fila de Etiquetas de Hitos Eje X (HTML puro sin distorsión) */}
+                  <div className="flex justify-between items-center w-full pt-4 px-2">
+                    {points1.map((pt, idx) => {
+                      const hitoFontSize = bars1.length >= 10
+                        ? Math.max(14, Math.round(18 * modScale))
+                        : (bars1.length >= 7 ? Math.max(16, Math.round(21 * modScale)) : Math.max(18, Math.round(24 * modScale)));
+                      return (
+                        <span
+                          key={idx}
+                          className={`text-center font-semibold truncate ${chartFont}`}
+                          style={{
+                            color: isLight ? '#1E293B' : '#F1F5F9',
+                            fontSize: `${hitoFontSize}px`
+                          }}
+                        >
+                          {pt.label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
           );
         })()}
 
+
         {/* ================================================================= */}
-        {/* 6. MÓDULO DE CHAT MULTIPLATAFORMA (WHATSAPP, IMESSAGE, SLACK)     */}
+        {/* 6. MÓDULO DE CHAT WHATSAPP ULTRA REALISTA                        */}
         {/* ================================================================= */}
         {state.activeModule === 'chat' && (() => {
-          const platform = state.chatPlatform || 'whatsapp';
+          const chatIsLight = state.chatTheme ? state.chatTheme === 'light' : isLight;
 
           const renderFormattedText = (raw: string) => {
             const tokens = raw.split(/(\*\*.*?\*\*|\*[^*]+\*|__.*?__|_.*?_)/g);
@@ -1783,67 +1927,42 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
 
           return (
             <div className="flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-white/10 w-full h-auto backdrop-blur-xl">
-              {/* Cabecera según Plataforma */}
-              {platform === 'whatsapp' && (
-                <div
-                  className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.08]"
-                  style={{ backgroundColor: isLight ? '#F0F2F5' : '#1F2C34' }}
-                >
-                  <div className="flex items-center gap-3">
+              {/* Cabecera WhatsApp Optimizada */}
+              <div
+                className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.08]"
+                style={{ backgroundColor: chatIsLight ? '#F0F2F5' : '#1F2C34' }}
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  {state.customLogoUrl ? (
+                    <img
+                      src={state.customLogoUrl}
+                      alt="Avatar"
+                      className="w-11 h-11 rounded-full object-cover shadow-md shrink-0 ring-2 ring-white/20"
+                    />
+                  ) : (
                     <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-mono font-bold shadow-md shrink-0 ring-2 ring-white/20"
+                      className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-base shadow-md shrink-0 ring-2 ring-white/20"
                       style={{ backgroundColor: state.currentColor }}
                     >
                       {(state.chatContactName ? state.chatContactName.charAt(0).toUpperCase() : 'A')}
                     </div>
-                    <div className="flex flex-col">
-                      <span className={`font-mono font-bold text-sm tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                        {state.chatContactName || 'Aleric Partner'}
-                      </span>
-                      <div className="flex items-center gap-1.5 text-xs font-mono">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                        <span className="text-emerald-400 font-semibold">{state.chatOnlineStatus ?? 'en línea'}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {platform === 'imessage' && (
-                <div className="flex flex-col items-center px-4 py-3 bg-slate-900/90 border-b border-white/10">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-slate-700 to-slate-500 flex items-center justify-center text-white font-bold text-sm shadow-md ring-1 ring-white/20">
-                    {(state.chatContactName ? state.chatContactName.charAt(0).toUpperCase() : 'i')}
-                  </div>
-                  <span className="text-xs font-bold text-white mt-1">
-                    {state.chatContactName || 'Cliente VIP'}
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-mono">iMessage</span>
-                </div>
-              )}
-
-              {platform === 'slack' && (
-                <div className="flex items-center justify-between px-4 py-2.5 bg-[#1A1D21] border-b border-white/10">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-black text-slate-400 text-sm">#</span>
-                    <span className="font-bold text-xs text-white">
-                      {state.chatContactName ? state.chatContactName.toLowerCase().replace(/\s+/g, '-') : 'general'}
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
-                    Slack Active
+                  )}
+                  <span className={`font-bold text-base sm:text-lg tracking-tight truncate ${chatIsLight ? 'text-slate-900' : 'text-white'}`}>
+                    {state.chatContactName || 'Aleric Partner'}
                   </span>
                 </div>
-              )}
+
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono shrink-0">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                  <span className="text-emerald-400 font-semibold">{state.chatOnlineStatus || 'en línea'}</span>
+                </div>
+              </div>
 
               {/* Mensajes del Chat */}
               <div
                 className="p-5 space-y-3.5"
                 style={{
-                  backgroundColor: platform === 'whatsapp'
-                    ? (isLight ? '#EFEAE2' : '#0B141A')
-                    : platform === 'imessage'
-                    ? '#05070A'
-                    : '#1A1D21'
+                  backgroundColor: state.chatBgColor || (chatIsLight ? '#EFEAE2' : '#0B141A')
                 }}
               >
                 {state.chatMessages.map((msg, idx) => {
@@ -1855,39 +1974,19 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                     >
                       <div
                         className={`relative max-w-[85%] px-4 py-3 rounded-2xl shadow-md transition-all ${
-                          platform === 'imessage'
-                            ? isBot
-                              ? 'bg-blue-600 text-white rounded-br-xs'
-                              : 'bg-slate-800 text-slate-100 rounded-bl-xs'
-                            : platform === 'slack'
-                            ? isBot
-                              ? 'bg-indigo-950/80 border border-indigo-500/30 text-indigo-100'
-                              : 'bg-slate-900 border border-white/10 text-slate-200'
-                            : isBot
-                            ? isLight
+                          isBot
+                            ? chatIsLight
                               ? 'bg-[#D9FDD3] text-[#111B21] rounded-tr-xs'
                               : 'bg-[#005C4B] text-[#E9EDEF] rounded-tr-xs'
-                            : isLight
+                            : chatIsLight
                             ? 'bg-[#FFFFFF] text-[#111B21] rounded-tl-xs'
                             : 'bg-[#202C33] text-[#E9EDEF] rounded-tl-xs'
                         }`}
-                        style={{ fontSize: `${Math.round(modFontSize * 1.05)}px` }}
+                        style={{ fontSize: `${Math.max(14, Math.round(baseTextSize * 1.02))}px` }}
                       >
                         <p className="leading-relaxed whitespace-pre-wrap font-sans">
                           {renderFormattedText(msg.text)}
                         </p>
-
-                        <div className="flex items-center justify-end gap-1.5 mt-1.5 select-none">
-                          <span className={`text-[10px] font-mono ${isLight && platform === 'whatsapp' ? 'text-slate-500' : 'text-slate-400'}`}>
-                            {msg.time}
-                          </span>
-                          {isBot && platform === 'whatsapp' && (
-                            <CheckCheck className="w-4 h-4 text-[#53BDEB]" />
-                          )}
-                          {isBot && platform === 'imessage' && (
-                            <span className="text-[9px] text-blue-200 font-mono">Entregado</span>
-                          )}
-                        </div>
 
                         {/* Reacción Emoji Flotante (en el último mensaje) */}
                         {state.chatReaction && idx === state.chatMessages.length - 1 && (
@@ -1930,24 +2029,12 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
         {/* 7. MÓDULO DE PASOS / FASES CON TIMELINE CONECTADA                 */}
         {/* ================================================================= */}
         {state.activeModule === 'steps' && (() => {
-          const isTimeline = state.stepsLayout === 'connected-timeline';
-          const formatLabel = (num: number, fmt?: string) => {
-            const pad = num < 10 ? `0${num}` : `${num}`;
-            switch (fmt) {
-              case 'number': return `#${pad}`;
-              case 'paso': return `PASO ${pad}`;
-              case 'sprint': return `SPRINT ${pad}`;
-              case 'hito': return `HITO ${String.fromCharCode(64 + num)}`;
-              case 'minimal': return `${num}`;
-              case 'fase':
-              default:
-                return `FASE ${pad}`;
-            }
-          };
-
+          const variant = state.stepsVisualVariant || (state.stepsLayout === 'connected-timeline' ? 'timeline' : 'bento');
           const stepsList = state.steps || state.stepsData || [];
+          const stepFont = state.subtitleFont || state.titleFont || 'font-inter';
 
-          if (isTimeline) {
+          // 1. TIMELINE VERTICAL CONECTADA
+          if (variant === 'timeline') {
             return (
               <div className="w-full flex flex-col gap-3 py-2">
                 {stepsList.map((st, idx) => {
@@ -1955,7 +2042,6 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                   const isLast = idx === stepsList.length - 1;
                   return (
                     <div key={idx} className="flex items-start gap-4 relative">
-                      {/* Línea conectora entre nodos */}
                       {!isLast && (
                         <div
                           className="absolute left-4 top-8 bottom-0 w-0.5"
@@ -1964,7 +2050,6 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                           }}
                         />
                       )}
-                      {/* Nodo numérico con brillo */}
                       <div
                         className="w-8 h-8 rounded-full flex items-center justify-center font-mono font-black text-xs text-white shrink-0 shadow-lg z-10 ring-4 ring-slate-900"
                         style={{ backgroundColor: state.currentColor }}
@@ -1972,7 +2057,6 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         {stepNum}
                       </div>
 
-                      {/* Tarjeta del Paso */}
                       <div
                         className="flex-1 p-4 rounded-xl border backdrop-blur-xl transition-all shadow-md"
                         style={{
@@ -1980,26 +2064,15 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                           borderColor: isLight ? 'rgba(0,0,0,0.08)' : `rgba(${rgb}, 0.35)`
                         }}
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <span
-                            className="text-[10px] font-mono px-2 py-0.5 rounded font-bold uppercase"
-                            style={{ backgroundColor: `rgba(${rgb}, 0.15)`, color: state.currentColor }}
-                          >
-                            {formatLabel(stepNum, state.stepsFormat)}
-                          </span>
-                          <span className="text-[10px] font-mono text-slate-400">
-                            {idx === 0 ? '✓ Completado' : idx === 1 ? '● En Proceso' : '○ Planificado'}
-                          </span>
-                        </div>
                         <h4
-                          className={`font-bold text-white ${state.titleFont || 'font-inter'}`}
+                          className={`font-normal text-white ${stepFont}`}
                           style={{ fontSize: `${Math.round(modFontSize * 1.15)}px` }}
                         >
                           {st.title}
                         </h4>
                         <p
-                          className="text-slate-400 leading-relaxed mt-1"
-                          style={{ fontSize: `${modFontSize}px` }}
+                          className={`text-slate-300 leading-relaxed font-normal mt-1 ${stepFont}`}
+                          style={{ fontSize: `${baseTextSize}px` }}
                         >
                           {st.desc || st.description}
                         </p>
@@ -2011,7 +2084,98 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
             );
           }
 
-          // Layout estándar Grid 2x2
+          // 2. MINIMAL: LISTADO LIMPIO CON ACENTO LATERAL
+          if (variant === 'minimal') {
+            return (
+              <div className="w-full flex flex-col gap-3.5 py-1">
+                {stepsList.map((st, idx) => {
+                  const stepNum = st.stepNumber || (idx + 1);
+                  return (
+                    <div
+                      key={idx}
+                      className="flex items-start gap-3.5 pl-3 border-l-3 transition-all"
+                      style={{ borderLeftColor: state.currentColor }}
+                    >
+                      <span
+                        className="font-mono font-black text-xs px-2 py-0.5 rounded text-white shrink-0"
+                        style={{ backgroundColor: `rgba(${rgb}, 0.25)`, color: state.currentColor }}
+                      >
+                        0{stepNum}
+                      </span>
+                      <div className="flex flex-col">
+                        <h4
+                          className={`font-normal text-white ${stepFont}`}
+                          style={{ fontSize: `${Math.round(baseTextSize * 1.1)}px` }}
+                        >
+                          {st.title}
+                        </h4>
+                        <p
+                          className={`text-slate-300 leading-relaxed text-xs mt-0.5 font-normal ${stepFont}`}
+                          style={{ fontSize: `${Math.round(baseTextSize * 0.95)}px` }}
+                        >
+                          {st.desc || st.description}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          }
+
+          // 3. BADGES / CHIPS: TARJETAS DE FASES CON TEXTO COMPLETO MULTILÍNEA
+          if (variant === 'badges') {
+            return (
+              <div className="flex flex-col gap-3 w-full">
+                {stepsList.map((st, idx) => {
+                  const stepNum = st.stepNumber || (idx + 1);
+                  return (
+                    <div
+                      key={idx}
+                      className="flex items-start gap-3.5 p-3.5 rounded-xl border backdrop-blur-md transition-all shadow-sm"
+                      style={{
+                        backgroundColor: isLight ? 'rgba(255,255,255,0.85)' : 'rgba(15, 23, 42, 0.75)',
+                        borderColor: isLight ? 'rgba(0,0,0,0.06)' : `rgba(${rgb}, 0.25)`
+                      }}
+                    >
+                      <span
+                        className="w-7 h-7 rounded-lg flex items-center justify-center font-mono font-bold text-xs text-white shrink-0 mt-0.5 shadow-sm"
+                        style={{ backgroundColor: state.currentColor }}
+                      >
+                        {stepNum}
+                      </span>
+                      <div className="flex flex-col flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span
+                            className={`font-normal text-white ${stepFont}`}
+                            style={{ fontSize: `${Math.round(baseTextSize * 1.05)}px` }}
+                          >
+                            {st.title}
+                          </span>
+                          <span
+                            className="text-[11px] uppercase tracking-wider font-mono opacity-70 shrink-0"
+                            style={{ color: state.currentColor }}
+                          >
+                            0{stepNum}
+                          </span>
+                        </div>
+                        {(st.desc || st.description) && (
+                          <p
+                            className={`text-slate-300 leading-relaxed font-normal mt-1 ${stepFont}`}
+                            style={{ fontSize: `${Math.max(13, Math.round(baseTextSize * 0.95))}px` }}
+                          >
+                            {st.desc || st.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          }
+
+          // 4. BENTO (DEFAULT): GRID DE TARJETAS 2x2
           return (
             <div
               className="grid grid-cols-2 w-full"
@@ -2037,25 +2201,16 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                       >
                         {stepNum}
                       </span>
-                      <span
-                        className="text-xs font-mono px-2.5 py-0.5 rounded-md font-bold uppercase tracking-wider"
-                        style={{
-                          backgroundColor: `rgba(${rgb}, 0.12)`,
-                          color: state.currentColor
-                        }}
-                      >
-                        {formatLabel(stepNum, state.stepsFormat)}
-                      </span>
                     </div>
                     <h4
-                      className={`font-bold text-white ${state.titleFont || 'font-inter'}`}
-                      style={{ fontSize: `${Math.round(modFontSize * 1.15)}px` }}
+                      className={`font-normal text-white ${stepFont}`}
+                      style={{ fontSize: `${Math.round(baseTextSize * 1.15)}px` }}
                     >
                       {st.title}
                     </h4>
                     <p
-                      className="text-slate-400 leading-relaxed line-clamp-3"
-                      style={{ fontSize: `${modFontSize}px` }}
+                      className={`text-slate-300 leading-relaxed line-clamp-3 font-normal ${stepFont}`}
+                      style={{ fontSize: `${baseTextSize}px` }}
                     >
                       {stepDesc}
                     </p>
@@ -2126,7 +2281,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                   {state.ctaActionBenefit && (
                     <span
                       className="text-xs font-mono text-slate-400 text-center pt-0.5"
-                      style={{ fontSize: `${Math.max(11, Math.round(modFontSize * 0.88))}px` }}
+                      style={{ fontSize: `${Math.max(11, Math.round(baseTextSize * 0.88))}px` }}
                     >
                       {state.ctaActionBenefit}
                     </span>
@@ -2218,7 +2373,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
               <blockquote
                 className={`italic font-medium leading-relaxed z-10 px-4 max-w-[95%] ${state.subtitleFont || state.titleFont || 'font-inter'}`}
                 style={{
-                  fontSize: `${Math.round((state.moduleFontSize || 16) * 1.35)}px`,
+                  fontSize: `${Math.round(baseTextSize * 1.35)}px`,
                   color: isLight ? '#0F172A' : '#F8FAFC'
                 }}
               >
@@ -2397,6 +2552,264 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                   </div>
                 );
               })}
+            </div>
+          );
+        })()}
+
+        {/* ================================================================= */}
+        {/* 10. MÓDULO COMPARATIVA (ANTES VS DESPUÉS / SPLIT CARD)             */}
+        {/* ================================================================= */}
+        {state.activeModule === 'comparison' && (() => {
+          const badgeLeft = state.comparisonBadgeLeft || 'ANTES';
+          const titleLeft = state.comparisonTitleLeft || 'Procesos Manuales & Excel';
+          const pointsLeft = state.comparisonPointsLeft || [
+            'Datos duplicados y fórmulas rotas',
+            'Cero control de accesos por roles',
+            'Reportes tardíos de 3 a 5 días'
+          ];
+
+          const badgeRight = state.comparisonBadgeRight || 'HOY';
+          const titleRight = state.comparisonTitleRight || 'Plataforma Web a Medida';
+          const pointsRight = state.comparisonPointsRight || [
+            'Base de datos PostgreSQL en tiempo real',
+            'Seguridad RBAC y auditoría total',
+            'Métricas automáticas con 1 clic'
+          ];
+
+          return (
+            <div className="grid grid-cols-2 gap-8 w-full h-auto">
+              {/* Columna Izquierda: Problema / Antes */}
+              <div
+                className="p-6 sm:p-7 rounded-2xl border flex flex-col justify-between transition-all shadow-xl relative overflow-hidden backdrop-blur-xl"
+                style={{
+                  backgroundColor: isLight ? 'rgba(254, 242, 242, 0.9)' : 'rgba(25, 15, 20, 0.85)',
+                  borderColor: isLight ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.35)',
+                  borderTopWidth: '4px',
+                  borderTopColor: '#EF4444'
+                }}
+              >
+                <div className="flex flex-col gap-3.5">
+                  <div className="flex items-center justify-between">
+                    <span className="px-4 py-1.5 rounded-full text-sm font-mono font-bold tracking-wider uppercase bg-rose-500/20 border border-rose-500/40 text-rose-400">
+                      {badgeLeft}
+                    </span>
+                    <span className="w-7 h-7 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                      ✕
+                    </span>
+                  </div>
+
+                  <h3
+                    className={`font-bold tracking-tight text-white ${state.titleFont || 'font-inter'}`}
+                    style={{
+                      fontSize: `${Math.round(baseTextSize * 1.35)}px`,
+                      color: isLight ? '#991B1B' : '#FCA5A5'
+                    }}
+                  >
+                    {titleLeft}
+                  </h3>
+
+                  <ul className="space-y-3 pt-1">
+                    {pointsLeft.map((pt, pi) => (
+                      <li
+                        key={pi}
+                        className="flex items-start gap-2.5 leading-relaxed font-mono"
+                        style={{
+                          fontSize: `${baseTextSize}px`,
+                          color: isLight ? '#64748B' : '#CBD5E1'
+                        }}
+                      >
+                        <span className="text-rose-400 shrink-0 mt-0.5 font-bold">•</span>
+                        <span>{pt}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Columna Derecha: Solución / Hoy */}
+              <div
+                className="p-6 sm:p-7 rounded-2xl border flex flex-col justify-between transition-all shadow-xl relative overflow-hidden backdrop-blur-xl"
+                style={{
+                  backgroundColor: isLight ? 'rgba(240, 253, 244, 0.95)' : `rgba(15, 23, 42, 0.85)`,
+                  borderColor: isLight ? 'rgba(16, 185, 129, 0.3)' : `rgba(16, 185, 129, 0.45)`,
+                  borderTopWidth: '4px',
+                  borderTopColor: '#10B981',
+                  boxShadow: `0 15px 35px -10px rgba(16, 185, 129, 0.25)`
+                }}
+              >
+                {/* Halo de resplandor esmeralda */}
+                <div
+                  className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-25 blur-xl bg-emerald-500"
+                />
+
+                <div className="flex flex-col gap-3.5 z-10">
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="px-4 py-1.5 rounded-full text-sm font-mono font-bold tracking-wider uppercase bg-emerald-500/20 border border-emerald-500/40 text-emerald-400"
+                    >
+                      {badgeRight}
+                    </span>
+                    <div
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-sm shadow-sm bg-emerald-500 text-white font-bold"
+                    >
+                      ✓
+                    </div>
+                  </div>
+
+                  <h3
+                    className={`font-bold tracking-tight ${state.titleFont || 'font-inter'}`}
+                    style={{
+                      fontSize: `${Math.round(baseTextSize * 1.35)}px`,
+                      color: isLight ? '#065F46' : '#FFFFFF'
+                    }}
+                  >
+                    {titleRight}
+                  </h3>
+
+                  <ul className="space-y-3 pt-1">
+                    {pointsRight.map((pt, pi) => (
+                      <li
+                        key={pi}
+                        className="flex items-start gap-2.5 leading-relaxed font-mono"
+                        style={{
+                          fontSize: `${baseTextSize}px`,
+                          color: isLight ? '#1E293B' : '#E2E8F0'
+                        }}
+                      >
+                        <CheckCircle2
+                          className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400"
+                        />
+                        <span className="font-medium">{pt}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* ================================================================= */}
+        {/* 11. MÓDULO NOTIFICACIÓN DE SISTEMA (PUSH ALERT / TOAST)            */}
+        {/* ================================================================= */}
+        {state.activeModule === 'notification' && (() => {
+          const appName = state.notificationApp || 'Aleric Platform';
+          const title = state.notificationTitle || 'Despliegue a Producción';
+          const message = state.notificationMessage || 'Pipeline CI/CD completado. Base de datos migrada con éxito.';
+          const highlight = state.notificationHighlight || '+1,420 transacciones procesadas';
+          const time = state.notificationTime || 'hace 2 min';
+          const iconType = state.notificationIcon || 'rocket';
+
+          const renderNotifIcon = () => {
+            const iconProps = { className: 'w-5 h-5 text-white' };
+            if (iconType === 'check') return <CheckCheck {...iconProps} />;
+            if (iconType === 'dollar') return <DollarSign {...iconProps} />;
+            if (iconType === 'zap') return <Zap {...iconProps} />;
+            if (iconType === 'shield') return <Shield {...iconProps} />;
+            if (iconType === 'bell') return <Bell {...iconProps} />;
+            if (iconType === 'user') return <User {...iconProps} />;
+            if (iconType === 'star') return <Star {...iconProps} />;
+            if (iconType === 'chart') return <TrendingUp {...iconProps} />;
+            return <Rocket {...iconProps} />;
+          };
+
+          return (
+            <div
+              className="w-full rounded-2xl p-6 sm:p-7 border flex flex-col gap-4 shadow-2xl relative overflow-hidden backdrop-blur-2xl transition-all"
+              style={{
+                backgroundColor: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(15, 23, 42, 0.9)',
+                borderColor: isLight ? 'rgba(0,0,0,0.1)' : `rgba(${rgb}, 0.4)`,
+                boxShadow: isLight
+                  ? '0 20px 45px -10px rgba(0,0,0,0.12)'
+                  : `0 25px 60px -12px rgba(0,0,0,0.8), 0 0 35px rgba(${rgb}, 0.2)`
+              }}
+            >
+              {/* Halo decorativo de fondo */}
+              <div
+                className="absolute -top-12 -right-12 w-40 h-40 rounded-full pointer-events-none opacity-25 blur-2xl"
+                style={{ backgroundColor: state.currentColor }}
+              />
+
+              {/* Fila Superior: App + Icon + Tiempo */}
+              <div
+                className="flex items-center justify-between w-full z-10 border-b pb-3.5"
+                style={{ borderColor: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)' }}
+              >
+                <div className="flex items-center gap-3.5">
+                  <div
+                    className="rounded-xl flex items-center justify-center shadow-md ring-2 ring-white/20 shrink-0"
+                    style={{
+                      width: `${Math.round(40 * modScale)}px`,
+                      height: `${Math.round(40 * modScale)}px`,
+                      backgroundColor: state.currentColor
+                    }}
+                  >
+                    {renderNotifIcon()}
+                  </div>
+                  <span
+                    className="font-bold tracking-tight uppercase"
+                    style={{
+                      fontSize: `${Math.round(17 * modScale)}px`,
+                      color: isLight ? '#0F172A' : '#FFFFFF'
+                    }}
+                  >
+                    {appName}
+                  </span>
+                </div>
+
+                <div
+                  className="flex items-center gap-2 rounded-full bg-slate-900/60 border border-white/10 font-mono text-slate-300"
+                  style={{
+                    fontSize: `${Math.round(13 * modScale)}px`,
+                    padding: `${Math.round(4 * modScale)}px ${Math.round(11 * modScale)}px`
+                  }}
+                >
+                  <span
+                    className="rounded-full bg-emerald-400 shrink-0"
+                    style={{
+                      width: `${Math.round(7 * modScale)}px`,
+                      height: `${Math.round(7 * modScale)}px`
+                    }}
+                  />
+                  <span>{time}</span>
+                </div>
+              </div>
+
+              {/* Contenido Central: Título y Métrica Gigante */}
+              <div className="flex flex-col gap-2 z-10 my-1">
+                <span
+                  className="font-bold tracking-tight leading-snug"
+                  style={{
+                    fontSize: `${Math.round(baseTextSize * 1.3)}px`,
+                    color: isLight ? '#1E293B' : '#F1F5F9'
+                  }}
+                >
+                  {title}
+                </span>
+
+                {highlight && (
+                  <div
+                    className="font-mono font-black tracking-tight"
+                    style={{
+                      fontSize: `${Math.round(baseTextSize * 2.2)}px`,
+                      color: state.currentColor,
+                      textShadow: isLight ? 'none' : `0 0 25px rgba(${rgb}, 0.35)`
+                    }}
+                  >
+                    {highlight}
+                  </div>
+                )}
+
+                <p
+                  className="leading-relaxed"
+                  style={{
+                    fontSize: `${baseTextSize}px`,
+                    color: isLight ? '#64748B' : '#94A3B8'
+                  }}
+                >
+                  {message}
+                </p>
+              </div>
             </div>
           );
         })()}
@@ -2862,43 +3275,54 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
           ? (state.handleCustomColor || state.currentColor) 
           : state.currentColor;
 
+        const hasCta = Boolean(state.cta && state.cta.trim());
+        const hasHandle = Boolean(state.handle && state.handle.trim());
+
         return (
           <footer className={footerClass} style={footerInlineStyle}>
             {(state.ctaOrder || 'cta-first') === 'cta-first' ? (
               <>
-                <div className="flex items-center gap-2.5 shrink min-w-0">
-                  <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: state.currentColor }} />
-                  <p
-                    className="font-medium truncate pr-4 transition-all"
-                    style={{ fontSize: `${footerSize * 1.3}px`, color: ctaColor }}
+                {hasCta && (
+                  <div className="flex items-center gap-2.5 shrink min-w-0">
+                    <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: state.currentColor }} />
+                    <p
+                      className="font-medium truncate pr-4 transition-all"
+                      style={{ fontSize: `${footerSize * 1.3}px`, color: ctaColor }}
+                    >
+                      {state.cta}
+                    </p>
+                  </div>
+                )}
+                {hasHandle && (
+                  <div
+                    className="font-mono font-bold tracking-wide shrink-0 transition-all ml-auto"
+                    style={{ fontSize: `${footerSize * 1.55}px`, color: handleColor }}
                   >
-                    {state.cta || 'Escríbenos y migramos tu operación a la nube.'}
-                  </p>
-                </div>
-                <div
-                  className="font-mono font-bold tracking-wide shrink-0 transition-all"
-                  style={{ fontSize: `${footerSize * 1.55}px`, color: handleColor }}
-                >
-                  {state.handle || 'tumarca.dev'}
-                </div>
+                    {state.handle}
+                  </div>
+                )}
               </>
             ) : (
               <>
-                <div
-                  className="font-mono font-bold tracking-wide shrink-0 transition-all"
-                  style={{ fontSize: `${footerSize * 1.55}px`, color: handleColor }}
-                >
-                  {state.handle || 'tumarca.dev'}
-                </div>
-                <div className="flex items-center gap-2.5 shrink min-w-0">
-                  <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: state.currentColor }} />
-                  <p
-                    className="font-medium truncate pr-4 transition-all"
-                    style={{ fontSize: `${footerSize * 1.3}px`, color: ctaColor }}
+                {hasHandle && (
+                  <div
+                    className="font-mono font-bold tracking-wide shrink-0 transition-all"
+                    style={{ fontSize: `${footerSize * 1.55}px`, color: handleColor }}
                   >
-                    {state.cta || 'Escríbenos y migramos tu operación a la nube.'}
-                  </p>
-                </div>
+                    {state.handle}
+                  </div>
+                )}
+                {hasCta && (
+                  <div className="flex items-center gap-2.5 shrink min-w-0 ml-auto">
+                    <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: state.currentColor }} />
+                    <p
+                      className="font-medium truncate pr-4 transition-all"
+                      style={{ fontSize: `${footerSize * 1.3}px`, color: ctaColor }}
+                    >
+                      {state.cta}
+                    </p>
+                  </div>
+                )}
               </>
             )}
           </footer>

@@ -1,4 +1,4 @@
-export type AspectRatioKey = '4:5' | '1:1' | '9:16' | '16:9';
+export type AspectRatioKey = '1:1' | '3:4' | '4:5' | '9:16';
 
 export interface AspectRatioConfig {
   nativeW: number;
@@ -10,6 +10,8 @@ export interface AspectRatioConfig {
 export type ModuleType = 
   | 'code' 
   | 'kpi' 
+  | 'comparison'
+  | 'notification'
   | 'chart-bars' 
   | 'chart-pie' 
   | 'chart-line' 
@@ -44,6 +46,17 @@ export type TagsPosition = 'above-title' | 'below-subtitle';
 export type LayoutFlow = 'text-first' | 'content-first';
 
 export type TitleColorMode = 'contrast' | 'category' | 'custom';
+
+export type TitleHighlightStyle = 
+  | 'marker-strip'   // Franja rotulador detrás del texto (como en imágenes 2 y 3)
+  | 'solid-block'    // Bloque sólido con texto en contraste (como en imagen 1 y 4)
+  | 'brush-stroke'   // Pincel / trazo orgánico (como en imagen 5)
+  | 'underline-thick'// Subrayado grueso estilizado (como en imagen 1)
+  | 'colored-text'   // Texto en color de acento sin fondo (como en imagen 1)
+  | 'circle-sketch'; // Óvalo / círculo trazado a mano que rodea la palabra
+
+export type TitleHighlightWeight = 'thin' | 'normal' | 'bold' | 'black';
+export type TitleHighlightColorMode = 'inverted' | 'contrast' | 'custom';
 
 export type SubtitleColorMode = 'muted' | 'contrast' | 'category' | 'custom' | 'dimmed';
 
@@ -260,6 +273,7 @@ export interface PostTemplate {
   tagsAlign?: TextAlign;
   tagsColorMode?: 'inherit' | 'contrast' | 'custom';
   tagsCustomColor?: string;
+  tagsBadgeStyle?: BadgeStyle;
   ratingValue?: number;
   ratingCount?: string;
   authorName?: string;
@@ -295,6 +309,8 @@ export interface PostTemplate {
   chartLineColor2?: string;
   chartDonutText?: string;
   chartDonutThickness?: 'thin' | 'medium' | 'full';
+  chartDonutIcon?: string;
+  chartLineWidthPct?: number;
   chatMessages?: ChatMessage[];
   chatContactName?: string;
   chatOnlineStatus?: string;
@@ -344,8 +360,30 @@ export interface PostTemplate {
   cta?: string;
   handle?: string;
   ctaOrder?: CtaOrder;
-  ctaAlign?: CtaAlign;
   brandIcon?: string;
+  // Module: Comparison & Notification & Extended Sliders
+  comparisonBadgeLeft?: string;
+  comparisonTitleLeft?: string;
+  comparisonPointsLeft?: string[];
+  comparisonBadgeRight?: string;
+  comparisonTitleRight?: string;
+  comparisonPointsRight?: string[];
+  comparisonLayout?: 'split' | 'cards';
+  notificationApp?: string;
+  notificationTitle?: string;
+  notificationIcon?: 'rocket' | 'check' | 'dollar' | 'zap' | 'bell' | 'shield' | 'user' | 'star' | 'chart';
+  chartTitle?: string;
+  chartHighlightIndex?: number;
+  chartBarsGap?: number;
+  chartBarHighlightMode?: 'first' | 'normal';
+  chartLineLabels?: string;
+  chartLineValues?: string;
+  chartPieStyle?: 'donut' | 'pie' | 'gauge';
+  chatTheme?: 'dark' | 'light';
+  chatBgColor?: string;
+  stepsVisualVariant?: 'timeline' | 'bento' | 'minimal' | 'badges';
+  kpiValueSize?: number;
+  modulePadding?: number;
 }
 
 export interface BrandProfile {
@@ -404,6 +442,12 @@ export interface PostState {
   titleCustomColor: string;
   titleAlign: TextAlign;
   textAlign: TextAlign; // fallback retrocompatibilidad
+  titleHighlightStyle?: TitleHighlightStyle;
+  titleHighlightColor?: string;
+  titleHighlightFont?: string;
+  titleHighlightWeight?: TitleHighlightWeight;
+  titleHighlightColorMode?: TitleHighlightColorMode;
+  titleHighlightTextColor?: string;
   subtitle: string;
   subtitleSize: number;
   subtitlePos: SubtitlePos;
@@ -420,6 +464,7 @@ export interface PostState {
   tagsAlign?: TextAlign;
   tagsColorMode?: 'inherit' | 'contrast' | 'custom';
   tagsCustomColor?: string;
+  tagsBadgeStyle?: BadgeStyle;
   ratingValue: number;
   ratingCount: string;
   authorName: string;
@@ -450,6 +495,7 @@ export interface PostState {
   moduleGlowIntensity?: number;
   moduleColorMode?: 'accent' | 'mono' | 'custom';
   moduleCustomColor?: string;
+  moduleMarginTop?: number;
   activeModule: ModuleType;
   chartType?: ChartType;
   code: string;
@@ -496,29 +542,46 @@ export interface PostState {
   kpiLayout?: 'grid' | 'bento' | 'stack';
 
   // Module 3 (Chart Bars)
+  chartTitle?: string;
+  chartTitleAlign?: 'left' | 'center' | 'right';
+  chartHighlightIndex?: number;
+  chartBarsGap?: number;
+  chartBarHighlightMode?: 'first' | 'normal';
   chartUnit?: string;
   chartShowRank?: boolean;
   chartCardStyle?: 'glass' | 'minimal' | 'neon';
 
   // Module 4 (Chart Pie / Donut)
   chartPieMode?: 'donut' | 'gauge';
+  chartPieStyle?: 'donut' | 'pie' | 'gauge';
+  chartPieSlices?: ChartBar[];
   chartDonutHeroText?: string;
   chartDonutHeroSub?: string;
+  chartDonutIcon?: string;
 
   // Module 5 (Chart Line)
+  chartLinePoints?: ChartBar[];
+  chartLineHeight?: number;
+  chartLineHeightPct?: number;
+  chartLineLabels?: string;
+  chartLineValues?: string;
   chartLineCurved?: boolean;
   chartLineShowAth?: boolean;
   chartLineAthLabel?: string;
   chartLineShowGrid?: boolean;
+  chartLineWidthPct?: number;
 
   // Module 6 (Chat)
   chatPlatform?: 'whatsapp' | 'imessage' | 'slack';
+  chatTheme?: 'dark' | 'light';
+  chatBgColor?: string;
   chatShowVoiceNote?: boolean;
   chatVoiceNoteDuration?: string;
   chatReaction?: string;
 
   // Module 7 (Steps)
   stepsLayout?: 'connected-timeline' | 'bento-cards' | 'grid';
+  stepsVisualVariant?: 'timeline' | 'bento' | 'minimal' | 'badges';
 
   // Module 8 (Quote / CTA / Promo)
   quoteAuthorAvatar?: string;
@@ -537,6 +600,27 @@ export interface PostState {
   imageBorderStyle: ImageBorderStyle;
   imageAspectRatio?: 'auto' | '1:1' | '16:9' | '4:5' | '4:3';
   imageFit?: 'cover' | 'contain';
+
+  // Module 10: Comparison (Antes vs Después)
+  comparisonBadgeLeft?: string;
+  comparisonTitleLeft?: string;
+  comparisonPointsLeft?: string[];
+  comparisonBadgeRight?: string;
+  comparisonTitleRight?: string;
+  comparisonPointsRight?: string[];
+  comparisonLayout?: 'split' | 'cards';
+
+  // Module 11: Notification (Alerta de Sistema / Push)
+  notificationApp?: string;
+  notificationTitle?: string;
+  notificationMessage?: string;
+  notificationHighlight?: string;
+  notificationTime?: string;
+  notificationIcon?: 'rocket' | 'check' | 'dollar' | 'zap' | 'bell' | 'shield' | 'user' | 'star' | 'chart';
+
+  // Extended Sliders
+  kpiValueSize?: number; // 36 a 76 px
+  modulePadding?: number; // 16 a 64 px
 
   // Footer in Step 1
   cta: string;

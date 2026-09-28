@@ -151,6 +151,8 @@ export const LandingShowcasePreview: React.FC<LandingShowcasePreviewProps> = ({
     title: currentTheme.title,
     subtitle: currentTheme.subtitle,
     activeModule: currentTheme.module,
+    moduleVisible: true,
+    tagsGroupVisible: Boolean(currentTheme.tags),
     code: currentTheme.code || initialPostState.code,
     codeFilename: currentTheme.codeFilename || initialPostState.codeFilename,
     kpis: currentTheme.kpis || initialPostState.kpis,

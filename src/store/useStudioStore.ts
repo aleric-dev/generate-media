@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { toast as sonnerToast } from 'sonner';
 import { PostState, PostTemplate, BrandProfile } from '../types';
-import { getDefaultBrand } from '../utils/brandStorage';
+import { getDefaultBrand, setActiveBrandId as persistActiveBrandId } from '../utils/brandStorage';
 
 const getInitialDefaultBrand = (): BrandProfile | null => {
   if (typeof window === 'undefined') return null;
@@ -17,13 +17,13 @@ export const initialPostState: PostState = {
 
   canvasMode: 'dark',
   currentColor: defaultBrand?.primaryColor || '#4F46E5',
-  category: 'DESARROLLO A LA MEDIDA',
+  category: '',
   aspectRatio: '4:5',
 
   titleFont: defaultBrand?.titleFont || 'font-space-mono',
   subtitleFont: defaultBrand?.subtitleFont || 'font-inter',
 
-  companyName: defaultBrand?.companyName || 'Tu Empresa',
+  companyName: defaultBrand?.companyName || '',
   headerBrandMode: defaultBrand?.headerBrandMode || 'icon-text',
   brandIcon: defaultBrand?.brandIcon || 'terminal',
   logoAspectRatio: 'square',
@@ -34,36 +34,43 @@ export const initialPostState: PostState = {
   badgeColorMode: 'inherit',
   badgeCustomColor: '#4F46E5',
 
-  title: '¿Tu empresa ya superó a Excel? 3 señales de que necesitas un panel propio',
+  title: '',
   titleSize: 48,
   titleColorMode: 'contrast',
   titleCustomColor: '#FFFFFF',
   titleAlign: 'center',
   textAlign: 'center',
-  subtitle: 'Centraliza pedidos, inventarios y permisos en una sola plataforma web en la nube sin errores de fórmula.',
+  titleHighlightStyle: 'marker-strip',
+  titleHighlightColor: '',
+  titleHighlightFont: 'inherit',
+  titleHighlightWeight: 'bold',
+  titleHighlightColorMode: 'contrast',
+  titleHighlightTextColor: '#FFFFFF',
+  subtitle: '',
   subtitleSize: 24,
   subtitlePos: 'below',
   subtitleColorMode: 'muted',
   subtitleCustomColor: '#94A3B8',
   subtitleAlign: 'center',
 
-  tagsGroupVisible: true,
+  tagsGroupVisible: false,
   tagsGroupType: 'badges',
   tagsPosition: 'below-subtitle',
-  tags: 'PostgreSQL, Next.js, FastAPI, Roles Seguros',
+  tags: '',
   tagsSize: 14,
   tagsAlign: 'center',
   tagsColorMode: 'inherit',
   tagsCustomColor: '#4F46E5',
+  tagsBadgeStyle: 'pill',
   ratingValue: 5.0,
-  ratingCount: '+500 clientes satisfechos',
-  authorName: 'Nombre Apellido',
-  authorRole: 'Cargo o Rol',
-  authorAvatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
-  socialProofText: '👥 +10,000 usuarios activos',
-  statusPillText: '🟢 Production Ready',
-  metricChipHighlight: '⚡ +450% ARR',
-  metricChipLabel: 'Crecimiento Cloud Verificado',
+  ratingCount: '',
+  authorName: '',
+  authorRole: '',
+  authorAvatarUrl: '',
+  socialProofText: '',
+  statusPillText: '',
+  metricChipHighlight: '',
+  metricChipLabel: '',
 
   layoutFlow: 'text-first',
   contentBlockOrder: ['tags', 'title', 'subtitle', 'module'],
@@ -72,11 +79,14 @@ export const initialPostState: PostState = {
   gapTextToTags: 20,
   gapTagsToModule: 24,
 
-  moduleVisible: true,
+  moduleVisible: false,
   moduleSize: 'normal',
   moduleScale: 100,
   moduleFontSize: 14,
-  moduleContainerStyle: 'glass',
+  moduleMarginTop: 0,
+  moduleContainerStyle: 'minimal',
+  modulePadding: 0,
+  chartTitleAlign: 'left',
   activeModule: 'kpi',
   chartType: 'horizontal-bars',
   code: "system.migrate({ from: 'Inventario_Final_v3.xlsx', to: 'CloudDB' });",
@@ -90,7 +100,13 @@ export const initialPostState: PostState = {
   chartBarHeight: 18,
   chartLineSeries: 1,
   chartLineStroke: 4,
-  chartDonutText: 'Líder',
+  chartLineHeight: 200,
+  chartLineHeightPct: 50,
+  chartLineWidthPct: 75,
+  chartLineCurved: false,
+  chartLineShowGrid: true,
+  chartDonutText: '',
+  chartDonutHeroText: '',
   chartDonutThickness: 'medium',
   quoteCtaMode: 'cta',
   stepsGap: 16,
@@ -102,9 +118,24 @@ export const initialPostState: PostState = {
     { val: '< 0.4s', label: 'TIEMPO DE RESPUESTA CLOUD', prefix: '', suffix: '', trend: 'down', borderTop: true },
   ],
   chartBars: [
-    { label: 'Procesamiento Manual', pct: 28, color: '#EF4444' },
-    { label: 'Arquitectura Automatizada', pct: 98, color: '#10B981' },
-    { label: 'Disponibilidad Cloud SLA', pct: 99, color: '#6366F1' },
+    { label: 'Procesamiento Manual', pct: 28, color: '#4F46E5' },
+    { label: 'Arquitectura Automatizada', pct: 98, color: '#EAB308' },
+    { label: 'Disponibilidad Cloud SLA', pct: 99, color: '#EF4444' },
+  ],
+  chartBarHighlightMode: 'normal',
+  chartBarsGap: 22,
+  chartPieSlices: [
+    { label: 'Frontend', pct: 40, color: '#4F46E5' },
+    { label: 'Backend & Cloud', pct: 35, color: '#EAB308' },
+    { label: 'DevOps & CI/CD', pct: 25, color: '#EF4444' },
+  ],
+  chartLinePoints: [
+    { label: 'Ene', pct: 25 },
+    { label: 'Feb', pct: 45 },
+    { label: 'Mar', pct: 60 },
+    { label: 'Abr', pct: 80 },
+    { label: 'May', pct: 95 },
+    { label: 'Jun', pct: 110 },
   ],
   chatMessages: [
     { sender: 'client', text: 'Hola, ¿cuánto cuesta desarrollar una plataforma para gestionar pedidos y clientes?', time: '10:14 AM' },
@@ -112,14 +143,14 @@ export const initialPostState: PostState = {
   ],
   chatContactName: 'Asistente Digital',
   chatOnlineStatus: 'en línea',
-  contentHighlightText: 'Automatiza tu operación y escala sin límites con software diseñado a tu medida.',
-  contentHighlightAuthor: 'Nombre Apellido',
-  contentHighlightRole: 'Cargo o Rol',
+  contentHighlightText: '',
+  contentHighlightAuthor: '',
+  contentHighlightRole: '',
   contentHighlightStyle: 'card',
   ctaActionBadge: '⚡ SOLUCIÓN DIRECTA',
-  ctaActionPhrase: 'Migra hoy tus procesos manuales a la nube y reduce tiempos de respuesta en un 60%.',
+  ctaActionPhrase: '',
   ctaActionButtonText: 'Solicitar Sesión de Arquitectura ➔',
-  ctaActionBenefit: 'Diagnóstico inicial sin costo • Despliegue en producción garantizado',
+  ctaActionBenefit: '',
   steps: [
     { step: '01', title: 'Auditoría & Diagnóstico', desc: 'Identificamos cuellos de botella en tu operación actual.' },
     { step: '02', title: 'Arquitectura Cloud', desc: 'Diseñamos sistemas escalables en microservicios y bases seguras.' },
@@ -141,8 +172,31 @@ export const initialPostState: PostState = {
   ],
   imageBorderStyle: 'none',
 
-  cta: 'Escríbenos y migramos tu operación a la nube.',
-  handle: defaultBrand?.handle || 'tumarca.dev',
+  comparisonBadgeLeft: 'ANTES',
+  comparisonTitleLeft: 'Procesos Manuales & Excel',
+  comparisonPointsLeft: [
+    'Datos duplicados y fórmulas rotas',
+    'Cero control de accesos por roles',
+    'Reportes tardíos de 3 a 5 días'
+  ],
+  comparisonBadgeRight: 'HOY',
+  comparisonTitleRight: 'Plataforma Web a Medida',
+  comparisonPointsRight: [
+    'Base de datos PostgreSQL en tiempo real',
+    'Seguridad RBAC y auditoría total',
+    'Métricas automáticas con 1 clic'
+  ],
+  comparisonLayout: 'split',
+
+  notificationApp: 'Aleric Platform',
+  notificationTitle: 'Despliegue a Producción',
+  notificationMessage: 'Pipeline CI/CD completado. Base de datos migrada con éxito.',
+  notificationHighlight: '+1,420 transacciones procesadas',
+  notificationTime: 'hace 2 min',
+  notificationIcon: 'rocket',
+
+  cta: '',
+  handle: defaultBrand?.handle || '',
   ctaOrder: 'cta-first',
   ctaAlign: 'between',
   footerSize: 13,
@@ -212,6 +266,10 @@ interface StudioStore {
   recordCurrentSnapshot: () => void;
   updatePostState: (partial: Partial<PostState>) => void;
 
+  // Marca Activa
+  activeBrandId: string | null;
+  setActiveBrandId: (id: string | null) => void;
+
   // Modales
   templatesModalOpen: boolean;
   setTemplatesModalOpen: (open: boolean) => void;
@@ -235,6 +293,16 @@ interface StudioStore {
   showToast: (message: string, type?: 'success' | 'info' | 'error') => void;
   hideToast: () => void;
 
+  // Modo Carrusel (Multi-Slide)
+  slides: PostState[];
+  activeSlideIndex: number;
+  setActiveSlideIndex: (index: number) => void;
+  addSlide: (templateType?: 'duplicate' | 'blank' | 'comparison' | 'kpi' | 'code' | 'cta') => void;
+  duplicateSlide: (index?: number) => void;
+  removeSlide: (index: number) => void;
+  reorderSlides: (fromIndex: number, toIndex: number) => void;
+  resetCarousel: () => void;
+
   // Acciones de alto nivel
   applyTemplate: (tpl: PostTemplate) => void;
   applyBrandProfile: (brand: BrandProfile) => void;
@@ -245,6 +313,12 @@ interface StudioStore {
 
 export const useStudioStore = create<StudioStore>((set, get) => ({
   postState: initialPostState,
+
+  activeBrandId: defaultBrand?.id || null,
+  setActiveBrandId: (id) => {
+    persistActiveBrandId(id);
+    set({ activeBrandId: id });
+  },
 
   currentProjectId: null,
   currentProjectName: null,
@@ -262,10 +336,173 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
       lastSavedSnapshot: JSON.stringify(extractSavableState(state.postState)),
     })),
 
-  updatePostState: (partial) =>
+  slides: [initialPostState],
+  activeSlideIndex: 0,
+
+  setActiveSlideIndex: (index) =>
+    set((state) => {
+      if (index < 0 || index >= state.slides.length) return state;
+      return {
+        activeSlideIndex: index,
+        postState: { ...state.slides[index] },
+      };
+    }),
+
+  addSlide: (templateType = 'duplicate') =>
+    set((state) => {
+      if (state.slides.length >= 10) {
+        sonnerToast.info('El límite máximo para carruseles es de 10 diapositivas.');
+        return state;
+      }
+      const current = state.postState;
+      let newSlide: PostState;
+
+      if (templateType === 'comparison') {
+        newSlide = {
+          ...current,
+          title: 'El antes y el después de nuestra solución',
+          subtitle: 'Compara el impacto de modernizar tu stack tecnológico con Aleric.',
+          activeModule: 'comparison',
+          moduleVisible: true,
+          comparisonBadgeLeft: 'ANTES',
+          comparisonTitleLeft: 'Operación Manual & Excel',
+          comparisonPointsLeft: [
+            'Procesos lentos y desarticulados',
+            'Falta de visibilidad de datos',
+            'Errores humanos recurrentes'
+          ],
+          comparisonBadgeRight: 'HOY',
+          comparisonTitleRight: 'Operación Automatizada',
+          comparisonPointsRight: [
+            'Flujos 100% integrados y en la nube',
+            'Dashboard analítico en tiempo real',
+            'Cero fricción y soporte continuo'
+          ]
+        };
+      } else if (templateType === 'kpi') {
+        newSlide = {
+          ...current,
+          title: 'Resultados comprobados en producción',
+          subtitle: 'Métricas de tracción y rendimiento tras 90 días de implementación.',
+          activeModule: 'kpi',
+          moduleVisible: true,
+          kpis: [
+            { val: '+180%', label: 'INCREMENTO DE EFICIENCIA', prefix: '', suffix: '', trend: 'up', borderTop: true },
+            { val: '99.9%', label: 'DISPONIBILIDAD DE SERVICIO', prefix: '', suffix: '', trend: 'up', borderTop: true },
+          ]
+        };
+      } else if (templateType === 'code') {
+        newSlide = {
+          ...current,
+          title: 'Arquitectura escalable en pocas líneas',
+          subtitle: 'Diseñado bajo estándares de ingeniería de alto rendimiento.',
+          activeModule: 'code',
+          moduleVisible: true,
+          code: 'const aleric = new EnterprisePlatform({\n  cloud: true,\n  security: "RBAC",\n  automation: true\n});\naleric.scale();',
+          codeFilename: 'enterprise.ts',
+          codeLanguage: 'typescript'
+        };
+      } else if (templateType === 'cta') {
+        newSlide = {
+          ...current,
+          title: '¿Listo para llevar tu empresa al siguiente nivel?',
+          subtitle: 'Agenda una sesión de arquitectura técnica con nuestro equipo.',
+          activeModule: 'quote-cta',
+          quoteCtaMode: 'cta',
+          moduleVisible: true,
+          ctaActionPhrase: 'Escríbenos hoy y construyamos la solución digital que tu operación necesita.',
+          ctaActionButtonText: 'Agendar Consulta ➔'
+        };
+      } else {
+        // 'duplicate'
+        newSlide = { ...current };
+      }
+
+      const nextSlides = [...state.slides, newSlide];
+      const nextIndex = nextSlides.length - 1;
+      sonnerToast.success(`Diapositiva #${nextIndex + 1} añadida al carrusel`);
+      return {
+        slides: nextSlides,
+        activeSlideIndex: nextIndex,
+        postState: newSlide,
+      };
+    }),
+
+  duplicateSlide: (index) =>
+    set((state) => {
+      if (state.slides.length >= 10) {
+        sonnerToast.info('Límite máximo de 10 diapositivas alcanzado.');
+        return state;
+      }
+      const targetIndex = index !== undefined ? index : state.activeSlideIndex;
+      const targetSlide = state.slides[targetIndex] || state.postState;
+      const duplicated: PostState = { ...targetSlide };
+      const nextSlides = [...state.slides];
+      nextSlides.splice(targetIndex + 1, 0, duplicated);
+      const nextIndex = targetIndex + 1;
+      sonnerToast.success(`Diapositiva #${nextIndex + 1} duplicada con éxito`);
+      return {
+        slides: nextSlides,
+        activeSlideIndex: nextIndex,
+        postState: duplicated,
+      };
+    }),
+
+  removeSlide: (index) =>
+    set((state) => {
+      if (state.slides.length <= 1) {
+        sonnerToast.error('El carrusel debe tener al menos una diapositiva.');
+        return state;
+      }
+      const nextSlides = state.slides.filter((_, i) => i !== index);
+      let nextIndex = state.activeSlideIndex;
+      if (index <= state.activeSlideIndex) {
+        nextIndex = Math.max(0, state.activeSlideIndex - 1);
+      }
+      if (nextIndex >= nextSlides.length) {
+        nextIndex = nextSlides.length - 1;
+      }
+      sonnerToast.info(`Diapositiva eliminada`);
+      return {
+        slides: nextSlides,
+        activeSlideIndex: nextIndex,
+        postState: { ...nextSlides[nextIndex] },
+      };
+    }),
+
+  reorderSlides: (fromIndex, toIndex) =>
+    set((state) => {
+      if (fromIndex === toIndex) return state;
+      const nextSlides = [...state.slides];
+      const [moved] = nextSlides.splice(fromIndex, 1);
+      nextSlides.splice(toIndex, 0, moved);
+      return {
+        slides: nextSlides,
+        activeSlideIndex: toIndex,
+        postState: { ...nextSlides[toIndex] },
+      };
+    }),
+
+  resetCarousel: () =>
     set((state) => ({
-      postState: { ...state.postState, ...partial },
+      slides: [{ ...state.postState }],
+      activeSlideIndex: 0,
     })),
+
+  updatePostState: (partial) =>
+    set((state) => {
+      const nextPostState = { ...state.postState, ...partial };
+      const nextSlides = [...state.slides];
+      if (nextSlides[state.activeSlideIndex]) {
+        nextSlides[state.activeSlideIndex] = nextPostState;
+      } else {
+        nextSlides[0] = nextPostState;
+      }
+      return {
+        postState: nextPostState,
+        slides: nextSlides,
+      };
+    }),
 
   loadProjectState: (projectState, projectId = null, projectName = null) => {
     const finalState: PostState = {
@@ -275,6 +512,8 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
     };
     set({
       postState: finalState,
+      slides: [finalState],
+      activeSlideIndex: 0,
       currentProjectId: projectId,
       currentProjectName: projectName,
       lastSavedSnapshot: projectId ? JSON.stringify(extractSavableState(finalState)) : null,
@@ -316,8 +555,8 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
   hideToast: () => sonnerToast.dismiss(),
 
   applyTemplate: (tpl) =>
-    set((state) => ({
-      postState: {
+    set((state) => {
+      const updatedPostState: PostState = {
         ...state.postState,
         title: tpl.title,
         subtitle: tpl.subtitle,
@@ -362,18 +601,30 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
         contentHighlightStyle: tpl.contentHighlightStyle || state.postState.contentHighlightStyle,
         cta: tpl.cta || state.postState.cta,
         moduleVisible: true,
-        activeStep: 1,
-      },
-      currentProjectId: null,
-      currentProjectName: null,
-      lastSavedSnapshot: null,
-      templatesModalOpen: false,
-    })),
+        activeStep: 1 as const,
+      };
 
-  applyBrandProfile: (brand) =>
-    set((state) => ({
-      postState: {
-        ...state.postState,
+      const nextSlides = [...state.slides];
+      if (nextSlides[state.activeSlideIndex]) {
+        nextSlides[state.activeSlideIndex] = updatedPostState;
+      } else {
+        nextSlides[0] = updatedPostState;
+      }
+
+      return {
+        postState: updatedPostState,
+        slides: nextSlides,
+        currentProjectId: null,
+        currentProjectName: null,
+        lastSavedSnapshot: null,
+        templatesModalOpen: false,
+      };
+    }),
+
+  applyBrandProfile: (brand) => {
+    persistActiveBrandId(brand.id);
+    set((state) => {
+      const brandUpdates = {
         companyName: brand.companyName,
         handle: brand.handle,
         logoType: brand.logoType,
@@ -384,26 +635,72 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
         headerBrandMode: brand.headerBrandMode || state.postState.headerBrandMode,
         headerShape: brand.headerShape || state.postState.headerShape,
         footerShape: brand.footerShape || state.postState.footerShape,
-      },
-    })),
+      };
+
+      // Actualizar slide actual y sincronizar todas las slides del carrusel con la identidad de marca
+      const updatedPostState = {
+        ...state.postState,
+        ...brandUpdates,
+      };
+
+      const updatedSlides = state.slides.map((s) => ({
+        ...s,
+        ...brandUpdates,
+      }));
+
+      return {
+        activeBrandId: brand.id,
+        postState: updatedPostState,
+        slides: updatedSlides,
+      };
+    });
+  },
 
   resetToScratch: () =>
-    set((state) => ({
-      postState: {
+    set((state) => {
+      const brand = getDefaultBrand();
+      const cleanState: PostState = {
         ...state.postState,
         title: '',
         subtitle: '',
+        category: '',
         tags: '',
+        tagsGroupVisible: false,
         cta: '',
-        handle: '',
+        handle: brand?.handle || '',
+        companyName: brand?.companyName || '',
+        currentColor: brand?.primaryColor || state.postState.currentColor,
+        titleFont: brand?.titleFont || state.postState.titleFont,
+        subtitleFont: brand?.subtitleFont || state.postState.subtitleFont,
+        brandIcon: brand?.brandIcon || state.postState.brandIcon,
+        headerBrandMode: brand?.headerBrandMode || state.postState.headerBrandMode,
+        logoType: brand?.logoType || state.postState.logoType,
+        customLogoUrl: brand?.customLogoUrl || null,
+        headerShape: brand?.headerShape || state.postState.headerShape,
+        footerShape: brand?.footerShape || state.postState.footerShape,
+        ratingCount: '',
+        authorName: '',
+        authorRole: '',
+        authorAvatarUrl: '',
+        socialProofText: '',
+        statusPillText: '',
+        metricChipHighlight: '',
+        metricChipLabel: '',
+        contentHighlightText: '',
+        ctaActionPhrase: '',
         moduleVisible: false,
         activeStep: 1,
         panelOpen: true,
-      },
-      currentProjectId: null,
-      currentProjectName: null,
-      lastSavedSnapshot: null,
-    })),
+      };
+      return {
+        postState: cleanState,
+        slides: [cleanState],
+        activeSlideIndex: 0,
+        currentProjectId: null,
+        currentProjectName: null,
+        lastSavedSnapshot: null,
+      };
+    }),
 
   setZoom: (level, mode) =>
     set((state) => ({

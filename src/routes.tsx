@@ -19,8 +19,9 @@ export const AppRoutes: React.FC = () => {
         <Route path="/menu" element={<Navigate to="/inicio" replace />} />
       </Route>
 
-      {/* Ruta del Editor con su propio layout dedicado */}
+      {/* Ruta del Editor con su propio layout dedicado (con o sin ID de proyecto) */}
       <Route path="/editor" element={<EditorPage />} />
+      <Route path="/editor/:projectId" element={<EditorPage />} />
 
       {/* Fallback general a la raíz (LandingPage) */}
       <Route path="*" element={<Navigate to="/" replace />} />
