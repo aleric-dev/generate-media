@@ -417,14 +417,14 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
     );
   };
 
-  // Badge Superior Estilos
-  const badgeStyle = state.headerBadgeStyle || state.badgeStyle || 'pill';
-  const badgeColorMode = state.headerBadgeColorMode || state.badgeColorMode || 'inherit';
+  // Badge Superior Estilos (Exclusivo de Cabecera)
+  const badgeStyle = state.headerBadgeStyle || 'pill';
+  const badgeColorMode = state.headerBadgeColorMode || 'inherit';
   let badgeColor = state.currentColor;
   if (badgeColorMode === 'contrast') {
     badgeColor = isLight ? '#0F172A' : '#FFFFFF';
-  } else if (badgeColorMode === 'custom' && (state.headerBadgeCustomColor || state.badgeCustomColor)) {
-    badgeColor = state.headerBadgeCustomColor || state.badgeCustomColor;
+  } else if (badgeColorMode === 'custom' && state.headerBadgeCustomColor) {
+    badgeColor = state.headerBadgeCustomColor;
   }
 
   const renderHeaderBadge = () => {
@@ -761,25 +761,130 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
       );
     }
 
-    // Default 'badges'
+    // Default 'badges' con 6 estilos visuales dedicados
     if (tagsList.length === 0) return null;
+    const tagStyle = state.tagsBadgeStyle || 'pill';
+
     return (
       <div id="view-tags-container" className={`flex flex-wrap gap-2.5 pt-1 ${tagsJustifyClass}`}>
-        {tagsList.map((tag, idx) => (
-          <span
-            key={idx}
-            className="rounded-lg font-mono font-medium tracking-wide shadow-xs transition-all"
-            style={{
-              fontSize: `${tagPx}px`,
-              color: tagTextColor,
-              backgroundColor: tagBgColor,
-              border: `1px solid ${tagBorderColor}`,
-              padding: `${Math.round(tagPx * 0.3)}px ${Math.round(tagPx * 0.85)}px`
-            }}
-          >
-            {tag}
-          </span>
-        ))}
+        {tagsList.map((tag, idx) => {
+          if (tagStyle === 'bracket') {
+            return (
+              <span
+                key={idx}
+                className="font-mono font-medium tracking-wide flex items-center transition-all"
+                style={{
+                  fontSize: `${tagPx}px`,
+                  color: tagTextColor,
+                  padding: `${Math.round(tagPx * 0.25)}px ${Math.round(tagPx * 0.5)}px`
+                }}
+              >
+                <span className="opacity-40 mr-1 font-mono">[</span>
+                <span>{tag}</span>
+                <span className="opacity-40 ml-1 font-mono">]</span>
+              </span>
+            );
+          }
+
+          if (tagStyle === 'minimal-dot') {
+            return (
+              <span
+                key={idx}
+                className="rounded-md font-mono font-medium tracking-wide flex items-center gap-1.5 shadow-xs transition-all"
+                style={{
+                  fontSize: `${tagPx}px`,
+                  color: tagTextColor,
+                  backgroundColor: isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}`,
+                  padding: `${Math.round(tagPx * 0.3)}px ${Math.round(tagPx * 0.85)}px`
+                }}
+              >
+                <span
+                  className="rounded-full shrink-0"
+                  style={{
+                    width: `${Math.max(5, Math.round(tagPx * 0.42))}px`,
+                    height: `${Math.max(5, Math.round(tagPx * 0.42))}px`,
+                    backgroundColor: tagTextColor
+                  }}
+                />
+                <span>{tag}</span>
+              </span>
+            );
+          }
+
+          if (tagStyle === 'outline') {
+            return (
+              <span
+                key={idx}
+                className="rounded-lg font-mono font-medium tracking-wide shadow-xs transition-all"
+                style={{
+                  fontSize: `${tagPx}px`,
+                  color: tagTextColor,
+                  backgroundColor: 'transparent',
+                  border: `1.5px solid ${tagTextColor}`,
+                  padding: `${Math.round(tagPx * 0.3)}px ${Math.round(tagPx * 0.85)}px`
+                }}
+              >
+                {tag}
+              </span>
+            );
+          }
+
+          if (tagStyle === 'neon') {
+            return (
+              <span
+                key={idx}
+                className="rounded-lg font-mono font-bold tracking-wide shadow-md transition-all"
+                style={{
+                  fontSize: `${tagPx}px`,
+                  color: tagTextColor,
+                  backgroundColor: `${tagTextColor}18`,
+                  border: `1.5px solid ${tagTextColor}`,
+                  boxShadow: `0 0 12px ${tagTextColor}50, inset 0 0 6px ${tagTextColor}20`,
+                  padding: `${Math.round(tagPx * 0.3)}px ${Math.round(tagPx * 0.9)}px`
+                }}
+              >
+                {tag}
+              </span>
+            );
+          }
+
+          if (tagStyle === 'glass') {
+            return (
+              <span
+                key={idx}
+                className="rounded-xl font-mono font-medium tracking-wide shadow-md backdrop-blur-md transition-all"
+                style={{
+                  fontSize: `${tagPx}px`,
+                  color: tagTextColor,
+                  backgroundColor: isLight ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.07)',
+                  border: `1px solid ${isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.16)'}`,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+                  padding: `${Math.round(tagPx * 0.35)}px ${Math.round(tagPx * 0.95)}px`
+                }}
+              >
+                {tag}
+              </span>
+            );
+          }
+
+          // Default 'pill'
+          return (
+            <span
+              key={idx}
+              className="rounded-full font-mono font-medium tracking-wide shadow-xs transition-all"
+              style={{
+                fontSize: `${tagPx}px`,
+                color: tagTextColor,
+                backgroundColor: tagBgColor,
+                border: `1px solid ${tagBorderColor}`,
+                padding: `${Math.round(tagPx * 0.35)}px ${Math.round(tagPx * 1.1)}px`
+              }}
+            >
+              {tag}
+            </span>
+          );
+        })}
       </div>
     );
   };

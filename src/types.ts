@@ -262,6 +262,7 @@ export interface PostTemplate {
   tagsAlign?: TextAlign;
   tagsColorMode?: 'inherit' | 'contrast' | 'custom';
   tagsCustomColor?: string;
+  tagsBadgeStyle?: BadgeStyle;
   ratingValue?: number;
   ratingCount?: string;
   authorName?: string;
@@ -446,6 +447,7 @@ export interface PostState {
   tagsAlign?: TextAlign;
   tagsColorMode?: 'inherit' | 'contrast' | 'custom';
   tagsCustomColor?: string;
+  tagsBadgeStyle?: BadgeStyle;
   ratingValue: number;
   ratingCount: string;
   authorName: string;

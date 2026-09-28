@@ -114,8 +114,8 @@ export const BrandPanel: React.FC<BrandPanelProps> = ({
     setEditingBrand(null);
     setBrandFormName('');
     setBrandFormHandle('');
-    setBrandFormColor(state.currentColor);
-    setSyncWithEditorStyles(true);
+    setBrandFormColor(state.currentColor || '#4F46E5');
+    setSyncWithEditorStyles(false);
     setIsFormOpen(true);
   };
 
@@ -187,12 +187,13 @@ export const BrandPanel: React.FC<BrandPanelProps> = ({
       showToast(`¡Marca "${res.brand.name}" actualizada con éxito!`, 'success');
     } else {
       // 2. MODO CREACIÓN
+      const chosenColor = brandFormColor.trim() || state.currentColor || '#4F46E5';
       const res = saveBrandWithValidation({
         name: cleanName,
         companyName: cleanName,
         handle: brandFormHandle.trim() || 'tumarca.dev',
         logoType: (state.headerBrandMode as any) || 'icon-text',
-        primaryColor: state.currentColor || '#4F46E5',
+        primaryColor: chosenColor,
         titleFont: state.titleFont,
         subtitleFont: state.subtitleFont,
         brandIcon: state.brandIcon,
@@ -411,6 +412,55 @@ export const BrandPanel: React.FC<BrandPanelProps> = ({
                   placeholder="ej. aleric.dev"
                   className="w-full py-1.5 px-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
                 />
+              </div>
+
+              {/* Color Primario de la Marca con Colorpicker */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10px] text-slate-400 font-mono">
+                    Color Primario de la Marca:
+                  </label>
+                  <span className="text-[10px] font-mono text-indigo-300 font-bold uppercase">
+                    {syncWithEditorStyles ? state.currentColor : (brandFormColor || state.currentColor || '#4F46E5')}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <div className="relative flex items-center justify-center p-0.5 rounded-xl border border-slate-700 bg-slate-900 overflow-hidden shrink-0 w-8 h-8 shadow-xs">
+                    <input
+                      type="color"
+                      value={syncWithEditorStyles ? state.currentColor : (brandFormColor || state.currentColor || '#4F46E5')}
+                      onChange={(e) => {
+                        setBrandFormColor(e.target.value);
+                        setSyncWithEditorStyles(false);
+                      }}
+                      className="w-12 h-12 -m-2 cursor-pointer border-0 bg-transparent p-0"
+                    />
+                  </div>
+
+                  <input
+                    type="text"
+                    value={syncWithEditorStyles ? state.currentColor : brandFormColor}
+                    onChange={(e) => {
+                      setBrandFormColor(e.target.value);
+                      setSyncWithEditorStyles(false);
+                    }}
+                    placeholder={state.currentColor || '#4F46E5'}
+                    className="flex-1 py-1.5 px-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white font-mono placeholder-slate-500 focus:outline-none focus:border-indigo-500 uppercase"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBrandFormColor(state.currentColor);
+                      setSyncWithEditorStyles(false);
+                    }}
+                    title="Usar color actual del lienzo"
+                    className="py-1.5 px-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[10px] font-mono text-slate-400 hover:text-white transition shrink-0"
+                  >
+                    Usar Lienzo
+                  </button>
+                </div>
               </div>
 
               {/* Opciones adicionales para Edición */}
@@ -672,7 +722,7 @@ export const BrandPanel: React.FC<BrandPanelProps> = ({
       {/* ========================================================================= */}
       <AccordionSection
         id="header-brand"
-        title="3. Cabecera de Marca (Header)"
+        title="3. Cabecera de Marca"
         icon={Heading}
         badge={`${state.headerShape || 'line'} • ${state.companyName || 'Marca'}`}
         isOpen={activeSection === 'header-brand'}
@@ -1073,7 +1123,7 @@ export const BrandPanel: React.FC<BrandPanelProps> = ({
       {/* ========================================================================= */}
       <AccordionSection
         id="footer-brand"
-        title="4. Pie de Página (Footer)"
+        title="4. Pie de Página"
         icon={Footprints}
         badge={`${state.footerShape || 'line'} • ${state.handle || 'Footer'}`}
         isOpen={activeSection === 'footer-brand'}

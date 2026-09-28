@@ -434,7 +434,7 @@ export const TextPanel: React.FC<TextPanelProps> = ({
       {/* ========================================================================= */}
       <AccordionSection
         id="tags"
-        title="3. Badges & Metadatos (Elementos Intermedios)"
+        title="3. Badges & Metadatos"
         icon={Tag}
         badge={state.tagsGroupVisible ? `${state.tagsSize || 14}px • ${state.tagsGroupType || 'badges'}` : 'Oculto'}
         isOpen={activeSection === 'tags'}
@@ -545,36 +545,6 @@ export const TextPanel: React.FC<TextPanelProps> = ({
                 </div>
               </div>
 
-              {/* Estilo Visual del Badge (6 Opciones en 2 Filas de 3) */}
-              <div>
-                <label className="text-[10px] text-slate-400 block mb-1 font-mono">
-                  Estilo Visual del Marco / Badge (2 filas de 3):
-                </label>
-                <div className="grid grid-cols-3 gap-1.5 text-[11px] font-mono">
-                  {[
-                    { id: 'pill' as BadgeStyle, label: 'Pastilla' },
-                    { id: 'bracket' as BadgeStyle, label: '[ Bracket ]' },
-                    { id: 'neon' as BadgeStyle, label: 'Neón Glow' },
-                    { id: 'glass' as BadgeStyle, label: 'Glass' },
-                    { id: 'minimal-dot' as BadgeStyle, label: '• Minimal' },
-                    { id: 'outline' as BadgeStyle, label: 'Contorno' },
-                  ].map((badge) => (
-                    <button
-                      key={badge.id}
-                      type="button"
-                      onClick={() => updateState({ badgeStyle: badge.id, headerBadgeStyle: badge.id })}
-                      className={`py-2 px-1.5 rounded-xl text-center transition font-semibold truncate ${
-                        (state.badgeStyle || 'pill') === badge.id
-                          ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400'
-                          : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900'
-                      }`}
-                    >
-                      {badge.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* SELECTOR DE COLOR DE TAGS (3 OPCIONES CANÓNICAS) */}
               <div className="pt-2 border-t border-slate-800/80">
                 <div className="flex items-center justify-between mb-1.5">
@@ -646,17 +616,49 @@ export const TextPanel: React.FC<TextPanelProps> = ({
 
               {/* INPUTS CONTEXTUALES SEGÚN EL TIPO (SIN DATOS POR DEFECTO FORZADOS) */}
               {(!state.tagsGroupType || state.tagsGroupType === 'badges') && (
-                <div>
-                  <label className="text-[10px] text-slate-400 block mb-1 font-mono">
-                    Badges de Tecnologías (separadas por comas):
-                  </label>
-                  <input
-                    type="text"
-                    value={state.tags ?? ''}
-                    onChange={(e) => updateState({ tags: e.target.value })}
-                    placeholder="Ej: PostgreSQL, Next.js, Cloudflare, Docker"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
-                  />
+                <div className="space-y-3">
+                  {/* Estilo Visual de las Tags / Badges (Solo visible para la 1ª opción: Badges Tech) */}
+                  <div>
+                    <label className="text-[10px] text-slate-400 block mb-1 font-mono">
+                      Estilo Visual de Badges / Tags (2 filas de 3):
+                    </label>
+                    <div className="grid grid-cols-3 gap-1.5 text-[11px] font-mono">
+                      {[
+                        { id: 'pill' as BadgeStyle, label: 'Pastilla' },
+                        { id: 'outline' as BadgeStyle, label: 'Contorno' },
+                        { id: 'neon' as BadgeStyle, label: 'Neón Glow' },
+                        { id: 'glass' as BadgeStyle, label: 'Glass' },
+                        { id: 'minimal-dot' as BadgeStyle, label: '• Con Punto' },
+                        { id: 'bracket' as BadgeStyle, label: '[ Bracket ]' },
+                      ].map((badge) => (
+                        <button
+                          key={badge.id}
+                          type="button"
+                          onClick={() => updateState({ tagsBadgeStyle: badge.id })}
+                          className={`py-2 px-1.5 rounded-xl text-center transition font-semibold truncate ${
+                            (state.tagsBadgeStyle || 'pill') === badge.id
+                              ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400'
+                              : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900'
+                          }`}
+                        >
+                          {badge.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-slate-400 block mb-1 font-mono">
+                      Badges de Tecnologías (separadas por comas):
+                    </label>
+                    <input
+                      type="text"
+                      value={state.tags ?? ''}
+                      onChange={(e) => updateState({ tags: e.target.value })}
+                      placeholder="Ej: PostgreSQL, Next.js, Cloudflare, Docker"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+                    />
+                  </div>
                 </div>
               )}
 

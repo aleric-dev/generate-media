@@ -55,6 +55,7 @@ export const initialPostState: PostState = {
   tagsAlign: 'center',
   tagsColorMode: 'inherit',
   tagsCustomColor: '#4F46E5',
+  tagsBadgeStyle: 'pill',
   ratingValue: 5.0,
   ratingCount: '',
   authorName: '',
