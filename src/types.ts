@@ -47,6 +47,17 @@ export type LayoutFlow = 'text-first' | 'content-first';
 
 export type TitleColorMode = 'contrast' | 'category' | 'custom';
 
+export type TitleHighlightStyle = 
+  | 'marker-strip'   // Franja rotulador detrás del texto (como en imágenes 2 y 3)
+  | 'solid-block'    // Bloque sólido con texto en contraste (como en imagen 1 y 4)
+  | 'brush-stroke'   // Pincel / trazo orgánico (como en imagen 5)
+  | 'underline-thick'// Subrayado grueso estilizado (como en imagen 1)
+  | 'colored-text'   // Texto en color de acento sin fondo (como en imagen 1)
+  | 'circle-sketch'; // Óvalo / círculo trazado a mano que rodea la palabra
+
+export type TitleHighlightWeight = 'thin' | 'normal' | 'bold' | 'black';
+export type TitleHighlightColorMode = 'inverted' | 'contrast' | 'custom';
+
 export type SubtitleColorMode = 'muted' | 'contrast' | 'category' | 'custom' | 'dimmed';
 
 export type TextAlign = 'left' | 'center' | 'right';
@@ -431,6 +442,12 @@ export interface PostState {
   titleCustomColor: string;
   titleAlign: TextAlign;
   textAlign: TextAlign; // fallback retrocompatibilidad
+  titleHighlightStyle?: TitleHighlightStyle;
+  titleHighlightColor?: string;
+  titleHighlightFont?: string;
+  titleHighlightWeight?: TitleHighlightWeight;
+  titleHighlightColorMode?: TitleHighlightColorMode;
+  titleHighlightTextColor?: string;
   subtitle: string;
   subtitleSize: number;
   subtitlePos: SubtitlePos;

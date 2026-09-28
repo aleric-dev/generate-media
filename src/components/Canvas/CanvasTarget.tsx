@@ -3,6 +3,7 @@ import { PostState, ShapePlacement, ShapeStyleVariant, ShapeGeometry, ShapeProxi
 import { aspectRatios } from '../../constants/templates';
 import { getBrandIconComponent } from '../../constants/brandIcons';
 import { FIXED_CHART_COLORS, getChartColors } from '../../constants/chartColors';
+import { formatTitleText } from '../../utils/textFormatter';
 import { 
   Star, CheckCircle2, Radio, User, Sparkles, Tag, ArrowRight, 
   FileCode, Terminal, TrendingUp, TrendingDown, CheckCheck, Minus, 
@@ -892,16 +893,28 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
   // Elementos Modulares Desacoplados para Ordenamiento Libre
   const renderTitleElement = () => {
     if (!state.title) return null;
+    const hasExplicitBold = state.title.includes('*');
     return (
       <div key="block-title" className={titleAlignClass}>
         <h2
-          className={`font-extrabold leading-[1.22] tracking-tight drop-shadow-lg transition-all ${state.titleFont || 'font-inter'}`}
+          className={`${hasExplicitBold ? 'font-medium' : 'font-extrabold'} leading-[1.22] tracking-tight drop-shadow-lg transition-all ${state.titleFont || 'font-inter'}`}
           style={{
             fontSize: `${state.titleSize}px`,
             color: titleColor
           }}
         >
-          {state.title}
+          {formatTitleText(state.title, {
+            accentColor: state.titleHighlightColor || state.currentColor || '#FF5722',
+            titleColor,
+            isDark: !isLight,
+            highlightStyle: state.titleHighlightStyle || 'marker-strip',
+            hasExplicitBold,
+            highlightFont: state.titleHighlightFont || 'inherit',
+            highlightWeight: state.titleHighlightWeight || 'bold',
+            highlightColorMode: state.titleHighlightColorMode || 'contrast',
+            highlightTextColor: state.titleHighlightTextColor || '#FFFFFF',
+            canvasBgColor: isLight ? '#FFFFFF' : '#0B0F19',
+          })}
         </h2>
       </div>
     );
