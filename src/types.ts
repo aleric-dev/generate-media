@@ -1,4 +1,4 @@
-export type AspectRatioKey = '4:5' | '1:1' | '9:16' | '16:9';
+export type AspectRatioKey = '1:1' | '3:4' | '4:5' | '9:16';
 
 export interface AspectRatioConfig {
   nativeW: number;
@@ -297,6 +297,8 @@ export interface PostTemplate {
   chartLineColor2?: string;
   chartDonutText?: string;
   chartDonutThickness?: 'thin' | 'medium' | 'full';
+  chartDonutIcon?: string;
+  chartLineWidthPct?: number;
   chatMessages?: ChatMessage[];
   chatContactName?: string;
   chatOnlineStatus?: string;
@@ -474,6 +476,7 @@ export interface PostState {
   moduleGlowIntensity?: number;
   moduleColorMode?: 'accent' | 'mono' | 'custom';
   moduleCustomColor?: string;
+  moduleMarginTop?: number;
   activeModule: ModuleType;
   chartType?: ChartType;
   code: string;
@@ -521,6 +524,7 @@ export interface PostState {
 
   // Module 3 (Chart Bars)
   chartTitle?: string;
+  chartTitleAlign?: 'left' | 'center' | 'right';
   chartHighlightIndex?: number;
   chartBarsGap?: number;
   chartBarHighlightMode?: 'first' | 'normal';
@@ -534,16 +538,19 @@ export interface PostState {
   chartPieSlices?: ChartBar[];
   chartDonutHeroText?: string;
   chartDonutHeroSub?: string;
+  chartDonutIcon?: string;
 
   // Module 5 (Chart Line)
   chartLinePoints?: ChartBar[];
   chartLineHeight?: number;
+  chartLineHeightPct?: number;
   chartLineLabels?: string;
   chartLineValues?: string;
   chartLineCurved?: boolean;
   chartLineShowAth?: boolean;
   chartLineAthLabel?: string;
   chartLineShowGrid?: boolean;
+  chartLineWidthPct?: number;
 
   // Module 6 (Chat)
   chatPlatform?: 'whatsapp' | 'imessage' | 'slack';

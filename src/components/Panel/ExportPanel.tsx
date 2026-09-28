@@ -44,12 +44,12 @@ const RATIO_CONFIG: Record<AspectRatioKey, RatioQuickInfo> = {
     px: '1080 × 1920 px',
     desc: '9:16 vertical de pantalla completa inmersiva para Instagram Stories, WhatsApp Estados, Reels y TikTok.',
   },
-  '16:9': {
-    badge: '16:9',
-    name: 'Panorámico (Landscape)',
-    subtitle: 'Landscape',
-    px: '1920 × 1080 px',
-    desc: '16:9 horizontal para miniaturas de YouTube, cabeceras de artículos, banners web y posts en X.',
+  '3:4': {
+    badge: '3:4',
+    name: 'Instagram 3:4 (Feed)',
+    subtitle: 'Feed Vertical',
+    px: '1080 × 1440 px',
+    desc: '3:4 vertical nativo optimizado para publicaciones de feed y carruseles en Instagram con máxima cobertura visual.',
   },
 };
 
@@ -90,7 +90,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
 
         {/* 4 Botones de Formato Limpios y sin texto cortado */}
         <div className="grid grid-cols-4 gap-1.5 font-mono">
-          {(['4:5', '1:1', '9:16', '16:9'] as AspectRatioKey[]).map((key) => {
+          {(['1:1', '3:4', '4:5', '9:16'] as AspectRatioKey[]).map((key) => {
             const item = RATIO_CONFIG[key];
             const isSelected = selectedRatio === key;
 

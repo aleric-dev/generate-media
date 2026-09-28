@@ -1,10 +1,10 @@
 import { PostTemplate, AspectRatioKey, AspectRatioConfig } from '../types';
 
 export const aspectRatios: Record<AspectRatioKey, AspectRatioConfig> = {
-  '4:5':  { nativeW: 1080, nativeH: 1350, px: '1080 × 1350 px', label: 'Instagram 4:5 (Vertical)' },
   '1:1':  { nativeW: 1080, nativeH: 1080, px: '1080 × 1080 px', label: 'Cuadrado 1:1 (Post)' },
+  '3:4':  { nativeW: 1080, nativeH: 1440, px: '1080 × 1440 px', label: 'Instagram 3:4 (Feed Vertical)' },
+  '4:5':  { nativeW: 1080, nativeH: 1350, px: '1080 × 1350 px', label: 'Instagram 4:5 (Vertical)' },
   '9:16': { nativeW: 1080, nativeH: 1920, px: '1080 × 1920 px', label: 'Story / Reel 9:16' },
-  '16:9': { nativeW: 1920, nativeH: 1080, px: '1920 × 1080 px', label: 'Landscape 16:9 (Banner)' },
 };
 
 export const defaultTemplates: PostTemplate[] = [

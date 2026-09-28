@@ -115,164 +115,55 @@ export const ModulePanel: React.FC<ModulePanelProps> = ({ state, updateState }) 
       {state.moduleVisible && (
         <>
           {/* ========================================================================= */}
-          {/* 1. SELECCIÓN DE MÓDULO CENTRAL Y CONFIGURACIÓN DE CONTENIDO               */}
+          {/* 1. SELECCIÓN DE TIPO DE MÓDULO CENTRAL                                    */}
           {/* ========================================================================= */}
           <AccordionSection
-            id="module-content"
-            title="1. Tipo de Módulo Central & Contenido"
+            id="module-type"
+            title="1. Tipo de Módulo Central"
             icon={Sliders}
-            isOpen={activeSection === 'module-content'}
-            onToggle={() => toggleSection('module-content')}
+            isOpen={activeSection === 'module-type'}
+            onToggle={() => toggleSection('module-type')}
           >
-            <div className="space-y-3.5">
-              {/* Cuadrícula Simétrica 4x2 de los 8 Módulos */}
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">
-                  Elige el Módulo Central:
-                </span>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {MODULE_OPTIONS.map((m) => {
-                    const IconComponent = m.icon;
-                    const isSelected = currentModule === m.id;
-                    return (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => {
-                          if (m.id === 'chart') {
-                            updateState({ activeModule: 'chart', chartType: state.chartType || 'horizontal-bars' });
-                          } else {
-                            updateState({ activeModule: m.id });
-                          }
-                        }}
-                        className={`py-2 px-1 rounded-xl transition flex flex-col items-center justify-center gap-1 relative cursor-pointer text-center ${
-                          isSelected
-                            ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400'
-                            : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900'
-                        }`}
-                      >
-                        <IconComponent className="w-4 h-4 shrink-0" />
-                        <span className="text-[9px] leading-tight font-medium truncate w-full">{m.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+            <div className="space-y-3">
+              <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">
+                Selecciona el módulo para el lienzo:
+              </span>
+              <div className="grid grid-cols-4 gap-1.5">
+                {MODULE_OPTIONS.map((m) => {
+                  const IconComponent = m.icon;
+                  const isSelected = currentModule === m.id;
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => {
+                        if (m.id === 'chart') {
+                          updateState({ activeModule: 'chart', chartType: state.chartType || 'horizontal-bars' });
+                        } else {
+                          updateState({ activeModule: m.id });
+                        }
+                      }}
+                      className={`py-2 px-1 rounded-xl transition flex flex-col items-center justify-center gap-1 relative cursor-pointer text-center ${
+                        isSelected
+                          ? 'bg-indigo-600 text-white font-bold shadow-sm ring-1 ring-indigo-400'
+                          : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900'
+                      }`}
+                    >
+                      <IconComponent className="w-4 h-4 shrink-0" />
+                      <span className="text-[9px] leading-tight font-medium truncate w-full">{m.label}</span>
+                    </button>
+                  );
+                })}
               </div>
 
-              {/* Subsección: Personalización de Contenido */}
-              <div className="pt-2 border-t border-slate-800/80 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">
-                    Contenido del Módulo Central
-                  </span>
-                  <span className="text-[10px] font-mono text-indigo-400 font-bold">
-                    {MODULE_LABELS[currentModule] || 'Personalización'}
-                  </span>
-                </div>
-
-                <div className="p-3.5 bg-slate-950/60 border border-slate-800/80 rounded-xl space-y-3.5">
-                  {/* KPI */}
-                  {currentModule === 'kpi' && (
-                    <KpiModuleConfig state={state} updateState={updateState} />
-                  )}
-
-                  {/* GRÁFICOS (Barras / Donut / Líneas) */}
-                  {currentModule === 'chart' && (
-                    <div className="space-y-3">
-                      {/* Pestañas de tipo de gráfico */}
-                      <div className="grid grid-cols-3 gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
-                        <button
-                          type="button"
-                          onClick={() => updateState({ activeModule: 'chart', chartType: 'horizontal-bars' })}
-                          className={`py-1.5 rounded-lg text-xs font-mono font-medium flex items-center justify-center gap-1 transition ${
-                            chartType === 'horizontal-bars'
-                              ? 'bg-indigo-600 text-white font-bold shadow-xs'
-                              : 'text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          <BarChart3 className="w-3.5 h-3.5" />
-                          <span>Barras</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => updateState({ activeModule: 'chart', chartType: 'pie' })}
-                          className={`py-1.5 rounded-lg text-xs font-mono font-medium flex items-center justify-center gap-1 transition ${
-                            chartType === 'pie'
-                              ? 'bg-indigo-600 text-white font-bold shadow-xs'
-                              : 'text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          <PieChart className="w-3.5 h-3.5" />
-                          <span>Donut / Pie</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => updateState({ activeModule: 'chart', chartType: 'line' })}
-                          className={`py-1.5 rounded-lg text-xs font-mono font-medium flex items-center justify-center gap-1 transition ${
-                            chartType === 'line'
-                              ? 'bg-indigo-600 text-white font-bold shadow-xs'
-                              : 'text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          <Activity className="w-3.5 h-3.5" />
-                          <span>Líneas</span>
-                        </button>
-                      </div>
-
-                      {chartType === 'horizontal-bars' && (
-                        <ChartBarsModuleConfig state={state} updateState={updateState} />
-                      )}
-                      {chartType === 'pie' && (
-                        <ChartDonutModuleConfig state={state} updateState={updateState} />
-                      )}
-                      {chartType === 'line' && (
-                        <ChartLineModuleConfig state={state} updateState={updateState} />
-                      )}
-                    </div>
-                  )}
-
-                  {/* COMPARATIVA */}
-                  {currentModule === 'comparison' && (
-                    <ComparisonModuleConfig state={state} updateState={updateState} />
-                  )}
-
-                  {/* CÓDIGO IDE */}
-                  {currentModule === 'code' && (
-                    <CodeModuleConfig state={state} updateState={updateState} />
-                  )}
-
-                  {/* WHATSAPP CHAT */}
-                  {currentModule === 'chat' && (
-                    <ChatModuleConfig state={state} updateState={updateState} />
-                  )}
-
-                  {/* NOTIFICACIÓN / PUSH ALERT */}
-                  {currentModule === 'notification' && (
-                    <NotificationModuleConfig state={state} updateState={updateState} />
-                  )}
-
-                  {/* PASOS / FASES */}
-                  {currentModule === 'steps' && (
-                    <StepsModuleConfig state={state} updateState={updateState} />
-                  )}
-
-                  {/* IMAGEN MOCKUP */}
-                  {currentModule === 'image' && (
-                    <ImageMockupModuleConfig state={state} updateState={updateState} />
-                  )}
-                </div>
-              </div>
-
-              {/* Botón ergonómico de navegación rápida hacia Escala */}
-              <div className="pt-1">
+              {/* Botón de acceso directo al contenido del módulo */}
+              <div className="pt-1.5">
                 <button
                   type="button"
-                  onClick={() => toggleSection('module-container')}
-                  className="w-full py-2.5 px-3 bg-slate-900/90 hover:bg-slate-800 border border-slate-800 rounded-xl text-xs font-mono text-indigo-300 hover:text-white transition flex items-center justify-between group"
+                  onClick={() => setActiveSection('module-content')}
+                  className="w-full py-2 px-3 bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/30 rounded-xl text-xs font-mono text-indigo-300 hover:text-white transition flex items-center justify-between group"
                 >
-                  <span>Ajustar Escala General Uniforme</span>
+                  <span>Editar contenido de {MODULE_LABELS[currentModule] || 'este módulo'}</span>
                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </div>
@@ -280,16 +171,119 @@ export const ModulePanel: React.FC<ModulePanelProps> = ({ state, updateState }) 
           </AccordionSection>
 
           {/* ========================================================================= */}
-          {/* 2. ESCALA DEL MÓDULO CENTRAL                                              */}
+          {/* 2. CONTENIDO DEL MÓDULO + ESCALA INTEGRADA                                */}
           {/* ========================================================================= */}
           <AccordionSection
-            id="module-container"
-            title="2. Escala del Módulo Central"
-            icon={Sliders}
-            isOpen={activeSection === 'module-container'}
-            onToggle={() => toggleSection('module-container')}
+            id="module-content"
+            title={`2. Contenido (${MODULE_LABELS[currentModule] || 'Módulo'})`}
+            icon={BarChart3}
+            isOpen={activeSection === 'module-content'}
+            onToggle={() => toggleSection('module-content')}
           >
-            <ContainerDimensionsConfig state={state} updateState={updateState} />
+            <div className="space-y-4">
+              {/* Formulario de Contenido Específico */}
+              <div className="p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl space-y-3.5">
+                {/* KPI */}
+                {currentModule === 'kpi' && (
+                  <KpiModuleConfig state={state} updateState={updateState} />
+                )}
+
+                {/* GRÁFICOS (Barras / Donut / Líneas) */}
+                {currentModule === 'chart' && (
+                  <div className="space-y-3">
+                    {/* Pestañas de tipo de gráfico */}
+                    <div className="grid grid-cols-3 gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
+                      <button
+                        type="button"
+                        onClick={() => updateState({ activeModule: 'chart', chartType: 'horizontal-bars' })}
+                        className={`py-1.5 rounded-lg text-xs font-mono font-medium flex items-center justify-center gap-1 transition ${
+                          chartType === 'horizontal-bars'
+                            ? 'bg-indigo-600 text-white font-bold shadow-xs'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <BarChart3 className="w-3.5 h-3.5" />
+                        <span>Barras</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => updateState({ activeModule: 'chart', chartType: 'pie' })}
+                        className={`py-1.5 rounded-lg text-xs font-mono font-medium flex items-center justify-center gap-1 transition ${
+                          chartType === 'pie'
+                            ? 'bg-indigo-600 text-white font-bold shadow-xs'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <PieChart className="w-3.5 h-3.5" />
+                        <span>Donut / Pie</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => updateState({ activeModule: 'chart', chartType: 'line' })}
+                        className={`py-1.5 rounded-lg text-xs font-mono font-medium flex items-center justify-center gap-1 transition ${
+                          chartType === 'line'
+                            ? 'bg-indigo-600 text-white font-bold shadow-xs'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        <Activity className="w-3.5 h-3.5" />
+                        <span>Líneas</span>
+                      </button>
+                    </div>
+
+                    {chartType === 'horizontal-bars' && (
+                      <ChartBarsModuleConfig state={state} updateState={updateState} />
+                    )}
+                    {chartType === 'pie' && (
+                      <ChartDonutModuleConfig state={state} updateState={updateState} />
+                    )}
+                    {chartType === 'line' && (
+                      <ChartLineModuleConfig state={state} updateState={updateState} />
+                    )}
+                  </div>
+                )}
+
+                {/* COMPARATIVA */}
+                {currentModule === 'comparison' && (
+                  <ComparisonModuleConfig state={state} updateState={updateState} />
+                )}
+
+                {/* CÓDIGO IDE */}
+                {currentModule === 'code' && (
+                  <CodeModuleConfig state={state} updateState={updateState} />
+                )}
+
+                {/* WHATSAPP CHAT */}
+                {currentModule === 'chat' && (
+                  <ChatModuleConfig state={state} updateState={updateState} />
+                )}
+
+                {/* NOTIFICACIÓN / PUSH ALERT */}
+                {currentModule === 'notification' && (
+                  <NotificationModuleConfig state={state} updateState={updateState} />
+                )}
+
+                {/* PASOS / FASES */}
+                {currentModule === 'steps' && (
+                  <StepsModuleConfig state={state} updateState={updateState} />
+                )}
+
+                {/* IMAGEN MOCKUP */}
+                {currentModule === 'image' && (
+                  <ImageMockupModuleConfig state={state} updateState={updateState} />
+                )}
+              </div>
+
+              {/* ESCALA GENERAL UNIFORME INTEGRADA DIRECTAMENTE AL FINAL DEL CONTENIDO */}
+              <div className="pt-3 border-t border-slate-800/80 space-y-2">
+                <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">
+                  Escala y Proporción General del Módulo
+                </span>
+                <ContainerDimensionsConfig state={state} updateState={updateState} />
+              </div>
+            </div>
           </AccordionSection>
         </>
       )}

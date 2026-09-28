@@ -324,7 +324,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ========================================================================= */}
-      {/* 5. MULTI-FORMATO: LOS 4 ASPECT RATIOS EN 1080P (9:16 -> 4:5 -> 1:1 -> 16:9) */}
+      {/* 5. MULTI-FORMATO: LOS 4 ASPECT RATIOS EN 1080P (9:16 -> 3:4 -> 4:5 -> 1:1) */}
       {/* ========================================================================= */}
       <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20 z-10 border-t border-slate-800/60">
         <div className="text-center space-y-3 pb-12">
@@ -336,8 +336,8 @@ export const LandingPage: React.FC = () => {
             Exporta en la proporción exacta para cada canal
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 font-mono max-w-xl mx-auto">
-            Visualiza la altura y proporción matemática real de cada formato: desde el formato vertical completo 9:16
-            hasta el panorámico 16:9.
+            Visualiza la altura y proporción matemática real de cada formato: desde el vertical inmersivo 9:16
+            hasta el 3:4 de Instagram y el cuadrado 1:1.
           </p>
         </div>
 
@@ -509,55 +509,53 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* ================================================================= */}
-          {/* 4. RATIO 16:9 (PANORÁMICO / EL MÁS BAJO - 1920 × 1080 px)          */}
+          {/* 4. RATIO 3:4 (INSTAGRAM VERTICAL - 1080 × 1440 px)                */}
           {/* ================================================================= */}
           <div className="p-4 sm:p-5 rounded-2xl bg-[#080D1A]/85 border border-slate-800 hover:border-purple-500/40 transition-all duration-200 flex flex-col justify-between space-y-4 group">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono text-xs font-bold border border-purple-500/30">
-                  16:9
+                  3:4
                 </span>
-                <span className="text-[11px] font-mono text-slate-400">1920 × 1080 px</span>
+                <span className="text-[11px] font-mono text-slate-400">1080 × 1440 px</span>
               </div>
-              <h3 className="text-sm font-bold text-white">Landscape & X (Twitter)</h3>
+              <h3 className="text-sm font-bold text-white">Instagram Feed & Carruseles</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                El más ancho y bajo. Ideal para cabeceras de artículos técnicos, Open Graph cards y banners de X.
+                El ratio vertical preferido de Instagram. Máxima cobertura de pantalla en feed y retención en carruseles.
               </p>
             </div>
 
-            {/* Escenario responsive: en móvil h-[160px] centrado, en desktop h-[300px] base alineada */}
+            {/* Escenario responsive: mockup 3:4 con proporción h=1.33*w */}
             <div className="w-full h-[160px] sm:h-[300px] bg-slate-950/70 rounded-xl border border-slate-800/80 p-3 flex items-center sm:items-end justify-center relative overflow-hidden">
               <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#c084fc_1px,transparent_1px)] [background-size:12px_12px]" />
               <div className="absolute bottom-0 inset-x-0 h-px bg-slate-800" />
 
-              {/* Mockup 16:9 Proporcional Real: w:230px, h:130px en móvil / w:204px, h:115px en desktop */}
+              {/* Mockup 3:4 Proporcional: w:100px, h:133px en móvil / w:140px, h:187px en desktop */}
               <div
-                className="w-[230px] h-[130px] sm:w-[204px] sm:h-[115px] bg-slate-900 rounded-xl border border-purple-500/40 p-2.5 flex flex-col justify-between shadow-xl relative z-10 transition-transform duration-300 group-hover:-translate-y-1"
+                className="w-[100px] h-[133px] sm:w-[140px] sm:h-[187px] bg-slate-900 rounded-xl border border-purple-500/40 p-2.5 flex flex-col justify-between shadow-xl relative z-10 transition-transform duration-300 group-hover:-translate-y-1"
                 style={{
                   boxShadow: '0 15px 30px -10px rgba(0,0,0,0.8), 0 0 20px rgba(192,132,252,0.15)',
                 }}
               >
-                {/* Header 16:9 */}
+                {/* Header 3:4 */}
                 <div className="flex items-center justify-between">
-                  <div className="h-2 w-12 bg-purple-400 rounded-full" />
-                  <div className="h-1.5 w-10 bg-slate-700 rounded" />
+                  <div className="h-2 w-8 bg-purple-400 rounded-full" />
+                  <div className="h-1.5 w-6 bg-slate-700 rounded" />
                 </div>
 
-                {/* Contenido Horizontal en 2 columnas */}
-                <div className="grid grid-cols-2 gap-2 items-center my-auto">
-                  <div className="space-y-1">
-                    <div className="h-2 w-full bg-slate-300/80 rounded" />
-                    <div className="h-1.5 w-3/4 bg-slate-500 rounded" />
-                  </div>
-                  <div className="h-6 bg-slate-950 rounded border border-slate-800 flex items-center justify-center">
-                    <span className="text-[7px] font-mono text-purple-300 font-bold">1920×1080</span>
+                {/* Contenido Vertical 3:4 */}
+                <div className="space-y-1.5 my-auto">
+                  <div className="h-2 w-full bg-slate-300/80 rounded" />
+                  <div className="h-1.5 w-4/5 bg-slate-500 rounded" />
+                  <div className="h-8 bg-slate-950 rounded border border-slate-800 flex items-center justify-center">
+                    <span className="text-[7px] font-mono text-purple-300 font-bold">1080×1440</span>
                   </div>
                 </div>
 
-                {/* Footer 16:9 */}
+                {/* Footer 3:4 */}
                 <div className="flex items-center justify-between pt-1 border-t border-slate-800">
-                  <div className="h-1.5 w-16 bg-slate-500 rounded" />
-                  <span className="text-[8px] font-mono text-purple-400 font-bold">@banner</span>
+                  <div className="h-1.5 w-10 bg-slate-500 rounded" />
+                  <span className="text-[7px] font-mono text-purple-400 font-bold">@post</span>
                 </div>
               </div>
             </div>

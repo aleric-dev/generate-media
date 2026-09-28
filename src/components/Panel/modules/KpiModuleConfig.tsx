@@ -50,10 +50,52 @@ export const KpiModuleConfig: React.FC<KpiModuleConfigProps> = ({ state, updateS
             key={idx}
             className="p-3.5 bg-slate-900/90 border border-slate-800 rounded-xl space-y-3 relative group"
           >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono font-bold text-indigo-400">
-                Métrica
-              </span>
+            <div className="flex items-center justify-between pb-1 border-b border-slate-800/80">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-mono text-slate-400 mr-1">Tendencia:</span>
+                {/* Subida */}
+                <button
+                  type="button"
+                  onClick={() => updateKpi(idx, 'trend', 'up')}
+                  title="Tendencia: Subida"
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center transition ${
+                    kpi.trend === 'up'
+                      ? 'bg-emerald-600 text-white shadow-sm ring-1 ring-emerald-400'
+                      : 'border border-emerald-500/40 text-emerald-400 hover:bg-emerald-950/40'
+                  }`}
+                >
+                  <TrendingUp className="w-3.5 h-3.5" />
+                </button>
+
+                {/* Bajada */}
+                <button
+                  type="button"
+                  onClick={() => updateKpi(idx, 'trend', 'down')}
+                  title="Tendencia: Bajada"
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center transition ${
+                    kpi.trend === 'down'
+                      ? 'bg-rose-600 text-white shadow-sm ring-1 ring-rose-400'
+                      : 'border border-rose-500/40 text-rose-400 hover:bg-rose-950/40'
+                  }`}
+                >
+                  <TrendingDown className="w-3.5 h-3.5" />
+                </button>
+
+                {/* Neutro */}
+                <button
+                  type="button"
+                  onClick={() => updateKpi(idx, 'trend', 'none')}
+                  title="Tendencia: Neutro"
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center transition ${
+                    !kpi.trend || kpi.trend === 'none'
+                      ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400'
+                      : 'border border-indigo-500/40 text-indigo-400 hover:bg-indigo-950/40'
+                  }`}
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
               {state.kpis.length > 1 && (
                 <button
                   type="button"
@@ -106,51 +148,6 @@ export const KpiModuleConfig: React.FC<KpiModuleConfigProps> = ({ state, updateS
                   placeholder="+18.4% / -2.1s"
                   className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white font-mono text-xs focus:border-indigo-500 focus:outline-none"
                 />
-              </div>
-            </div>
-
-            {/* Selector de Tendencia */}
-            <div>
-              <label className="text-[10px] text-slate-400 block mb-1 font-mono">
-                Tendencia:
-              </label>
-              <div className="grid grid-cols-3 gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => updateKpi(idx, 'trend', 'up')}
-                  className={`py-1.5 px-2 rounded-lg text-xs font-mono font-medium flex items-center justify-center gap-1 transition ${
-                    kpi.trend === 'up'
-                      ? 'bg-emerald-600 text-white font-bold shadow-xs'
-                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <TrendingUp className="w-3.5 h-3.5" />
-                  <span>Subida</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => updateKpi(idx, 'trend', 'down')}
-                  className={`py-1.5 px-2 rounded-lg text-xs font-mono font-medium flex items-center justify-center gap-1 transition ${
-                    kpi.trend === 'down'
-                      ? 'bg-rose-600 text-white font-bold shadow-xs'
-                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <TrendingDown className="w-3.5 h-3.5" />
-                  <span>Bajada</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => updateKpi(idx, 'trend', 'none')}
-                  className={`py-1.5 px-2 rounded-lg text-xs font-mono font-medium flex items-center justify-center gap-1 transition ${
-                    !kpi.trend || kpi.trend === 'none'
-                      ? 'bg-indigo-600 text-white font-bold shadow-xs'
-                      : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <Minus className="w-3.5 h-3.5" />
-                  <span>Neutro</span>
-                </button>
               </div>
             </div>
           </div>

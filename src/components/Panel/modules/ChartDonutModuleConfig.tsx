@@ -1,21 +1,58 @@
 import React from 'react';
 import { PostState } from '../../../types';
-import { Plus, Trash2, PieChart, Disc, Gauge, Check } from 'lucide-react';
+import {
+  Plus,
+  Trash2,
+  PieChart,
+  Disc,
+  Gauge,
+  Check,
+  TrendingUp,
+  Activity,
+  Zap,
+  Target,
+  Shield,
+  Award,
+  Sparkles,
+  BarChart3,
+  Percent,
+  DollarSign,
+  Ban,
+  AlignLeft,
+  AlignCenter,
+  AlignRight
+} from 'lucide-react';
+import { getChartColors } from '../../../constants/chartColors';
 
 interface ChartDonutModuleConfigProps {
   state: PostState;
   updateState: (updates: Partial<PostState>) => void;
 }
 
-const FIXED_CHART_COLORS = ['#6366F1', '#06B6D4', '#10B981', '#F59E0B', '#EC4899'];
+const DONUT_ICONS = [
+  { id: 'trending-up', label: 'Crecimiento', icon: TrendingUp },
+  { id: 'pie-chart', label: 'Donut', icon: PieChart },
+  { id: 'activity', label: 'Actividad', icon: Activity },
+  { id: 'zap', label: 'Velocidad', icon: Zap },
+  { id: 'target', label: 'Objetivo', icon: Target },
+  { id: 'shield', label: 'Seguridad', icon: Shield },
+  { id: 'award', label: 'Hito', icon: Award },
+  { id: 'sparkles', label: 'Innovación', icon: Sparkles },
+  { id: 'bar-chart', label: 'Métricas', icon: BarChart3 },
+  { id: 'percent', label: 'Porcentaje', icon: Percent },
+  { id: 'dollar', label: 'Finanzas', icon: DollarSign },
+  { id: 'none', label: 'Sin icono', icon: Ban },
+];
 
 export const ChartDonutModuleConfig: React.FC<ChartDonutModuleConfigProps> = ({ state, updateState }) => {
+  const chartColors = getChartColors(state.currentColor);
+
   const slices = state.chartPieSlices && state.chartPieSlices.length > 0
     ? state.chartPieSlices
     : (state.chartBars.length > 0 ? state.chartBars : [
-        { label: 'Frontend', pct: 40, color: '#6366F1' },
-        { label: 'Backend', pct: 35, color: '#06B6D4' },
-        { label: 'Cloud / DevOps', pct: 25, color: '#10B981' }
+        { label: 'Frontend', pct: 40, color: chartColors[0] },
+        { label: 'Backend', pct: 35, color: chartColors[1] },
+        { label: 'Cloud / DevOps', pct: 25, color: chartColors[2] }
       ]);
 
   const currentTotal = slices.reduce((sum, b) => sum + (b.pct || 0), 0);
@@ -37,14 +74,14 @@ export const ChartDonutModuleConfig: React.FC<ChartDonutModuleConfigProps> = ({ 
 
   const addSlice = () => {
     if (slices.length >= 5) return;
-    const nextColor = FIXED_CHART_COLORS[slices.length % FIXED_CHART_COLORS.length];
+    const nextColor = chartColors[slices.length % chartColors.length];
     updateState({
       chartPieSlices: [...slices, { label: 'Nueva Categoría', pct: 20, color: nextColor }]
     });
   };
 
   const removeSlice = (idx: number) => {
-    if (slices.length <= 1) return;
+    if (slices.length <= 2) return;
     updateState({
       chartPieSlices: slices.filter((_, i) => i !== idx)
     });
@@ -57,14 +94,55 @@ export const ChartDonutModuleConfig: React.FC<ChartDonutModuleConfigProps> = ({ 
   };
 
   const activeMode = state.chartPieStyle || (state.chartPieMode === 'gauge' ? 'gauge' : 'donut');
+  const selectedIcon = state.chartDonutIcon || 'trending-up';
 
   return (
     <div className="space-y-3.5">
-      {/* 1. TÍTULO OPCIONAL */}
-      <div>
-        <label className="text-[10px] text-slate-400 block mb-1 font-mono">
-          Título del Gráfico (Opcional):
-        </label>
+      {/* 1. TÍTULO OPCIONAL CON ALINEACIÓN */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <label className="text-[10px] text-slate-400 font-mono">
+            Título del Gráfico (Opcional):
+          </label>
+          <div className="flex items-center bg-slate-950 border border-slate-800 rounded-lg p-0.5 gap-0.5">
+            <button
+              type="button"
+              onClick={() => updateState({ chartTitleAlign: 'left' })}
+              title="Alinear a la Izquierda"
+              className={`p-1 rounded cursor-pointer transition ${
+                (state.chartTitleAlign || 'left') === 'left'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <AlignLeft className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => updateState({ chartTitleAlign: 'center' })}
+              title="Centrar Título"
+              className={`p-1 rounded cursor-pointer transition ${
+                state.chartTitleAlign === 'center'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <AlignCenter className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => updateState({ chartTitleAlign: 'right' })}
+              title="Alinear a la Derecha"
+              className={`p-1 rounded cursor-pointer transition ${
+                state.chartTitleAlign === 'right'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <AlignRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
         <input
           type="text"
           value={state.chartTitle ?? ''}
@@ -74,24 +152,7 @@ export const ChartDonutModuleConfig: React.FC<ChartDonutModuleConfigProps> = ({ 
         />
       </div>
 
-      {/* 2. TEXTO EN EL CENTRO DEL DONUT / VELOCÍMETRO */}
-      <div>
-        <label className="text-[10px] text-slate-400 block mb-1 font-mono">
-          Texto Central en el Donut / Velocímetro (Opcional):
-        </label>
-        <input
-          type="text"
-          value={state.chartDonutHeroText ?? ''}
-          onChange={(e) => updateState({ chartDonutHeroText: e.target.value, chartDonutText: e.target.value })}
-          placeholder="Ej: 100% o Total (por defecto auto)"
-          className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-white font-mono text-xs focus:border-indigo-500 focus:outline-none"
-        />
-        <span className="text-[10px] text-slate-500 font-mono mt-1 block">
-          Aparece en el centro del donut o bajo el arco del velocímetro.
-        </span>
-      </div>
-
-      {/* 3. SELECTOR DE FORMATO: PIE, DONUT O VELOCÍMETRO */}
+      {/* 2. SELECTOR DE FORMATO: PIE, DONUT O VELOCÍMETRO */}
       <div>
         <label className="text-[10px] text-slate-400 block mb-1 font-mono">
           Geometría del Gráfico:
@@ -138,6 +199,41 @@ export const ChartDonutModuleConfig: React.FC<ChartDonutModuleConfigProps> = ({ 
         </div>
       </div>
 
+      {/* 3. ÍCONO EN EL CENTRO DEL DONUT / VELOCÍMETRO */}
+      {activeMode !== 'pie' && (
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label className="text-[10px] text-slate-400 font-mono">
+              Ícono en el Centro del Donut / Velocímetro:
+            </label>
+            <span className="text-[9px] font-mono text-indigo-400 font-bold uppercase">
+              {DONUT_ICONS.find(i => i.id === selectedIcon)?.label || selectedIcon}
+            </span>
+          </div>
+          <div className="grid grid-cols-6 gap-1.5">
+            {DONUT_ICONS.map((ico) => {
+              const IconComp = ico.icon;
+              const isSelected = selectedIcon === ico.id;
+              return (
+                <button
+                  key={ico.id}
+                  type="button"
+                  onClick={() => updateState({ chartDonutIcon: ico.id })}
+                  title={ico.label}
+                  className={`p-2 rounded-xl flex items-center justify-center transition cursor-pointer ${
+                    isSelected
+                      ? 'bg-indigo-600 text-white shadow-xs ring-1 ring-indigo-400'
+                      : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+                  }`}
+                >
+                  <IconComp className="w-4 h-4 shrink-0" />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* 4. TOTAL Y NORMALIZADOR A 100% */}
       <div className="flex items-center justify-between p-2.5 bg-slate-950 border border-slate-800 rounded-xl">
         <div className="text-xs font-mono">
@@ -162,43 +258,53 @@ export const ChartDonutModuleConfig: React.FC<ChartDonutModuleConfigProps> = ({ 
           Segmentos del Gráfico ({slices.length}/5):
         </label>
 
-        {slices.map((bar, idx) => (
-          <div
-            key={idx}
-            className="p-3 bg-slate-950 border border-slate-800 rounded-xl space-y-2"
-          >
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={bar.label}
-                onChange={(e) => updateSlice(idx, 'label', e.target.value)}
-                placeholder="Categoría..."
-                className="flex-1 bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-white font-medium text-xs focus:border-indigo-400 focus:outline-none"
-              />
-              <span className="font-mono font-bold text-xs text-indigo-300 min-w-[38px] text-right">
-                {bar.pct}%
-              </span>
-              {slices.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeSlice(idx)}
-                  className="p-1.5 text-slate-500 hover:text-rose-400 rounded-lg hover:bg-slate-900 transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
+        {slices.map((bar, idx) => {
+          const sliceColor = chartColors[idx % chartColors.length];
 
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={bar.pct}
-              onChange={(e) => updateSlice(idx, 'pct', Number(e.target.value))}
-              className="w-full accent-indigo-500 bg-slate-900 h-1.5 rounded-lg cursor-pointer"
-            />
-          </div>
-        ))}
+          return (
+            <div
+              key={idx}
+              className="p-3 bg-slate-950 border border-slate-800 rounded-xl space-y-2"
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm ring-1 ring-white/20"
+                  style={{ backgroundColor: sliceColor }}
+                  title={`Color: ${sliceColor}`}
+                />
+                <input
+                  type="text"
+                  value={bar.label}
+                  onChange={(e) => updateSlice(idx, 'label', e.target.value)}
+                  placeholder="Categoría..."
+                  className="flex-1 bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-white font-medium text-xs focus:border-indigo-400 focus:outline-none"
+                />
+                <span className="font-mono font-bold text-xs text-indigo-300 min-w-[38px] text-right">
+                  {bar.pct}%
+                </span>
+                {slices.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={() => removeSlice(idx)}
+                    className="p-1.5 text-slate-500 hover:text-rose-400 rounded-lg hover:bg-slate-900 transition-colors cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={bar.pct}
+                onChange={(e) => updateSlice(idx, 'pct', Number(e.target.value))}
+                style={{ accentColor: sliceColor }}
+                className="w-full bg-slate-900 h-1.5 rounded-lg cursor-pointer"
+              />
+            </div>
+          );
+        })}
 
         {slices.length < 5 && (
           <button

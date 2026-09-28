@@ -1,25 +1,26 @@
 import React from 'react';
 import { PostState } from '../../../types';
-import { Plus, Trash2, Sliders, Star } from 'lucide-react';
+import { Plus, Trash2, Sliders, Star, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
+import { getChartColors } from '../../../constants/chartColors';
 
 interface ChartBarsModuleConfigProps {
   state: PostState;
   updateState: (updates: Partial<PostState>) => void;
 }
 
-const FIXED_CHART_COLORS = ['#6366F1', '#06B6D4', '#10B981', '#F59E0B', '#EC4899'];
-
 export const ChartBarsModuleConfig: React.FC<ChartBarsModuleConfigProps> = ({ state, updateState }) => {
+  const chartColors = getChartColors(state.currentColor);
+
   const addBar = () => {
     if (state.chartBars.length >= 5) return;
-    const nextColor = FIXED_CHART_COLORS[state.chartBars.length % FIXED_CHART_COLORS.length];
+    const nextColor = chartColors[state.chartBars.length % chartColors.length];
     updateState({
       chartBars: [...state.chartBars, { label: 'Métrica Nueva', pct: 75, color: nextColor }]
     });
   };
 
   const removeBar = (idx: number) => {
-    if (state.chartBars.length <= 1) return;
+    if (state.chartBars.length <= 2) return;
     updateState({
       chartBars: state.chartBars.filter((_, i) => i !== idx)
     });
@@ -31,15 +32,55 @@ export const ChartBarsModuleConfig: React.FC<ChartBarsModuleConfigProps> = ({ st
     updateState({ chartBars: updated });
   };
 
-  const isHighlightFirst = state.chartBarHighlightMode !== 'normal';
+  const isHighlightFirst = state.chartBarHighlightMode === 'first';
 
   return (
     <div className="space-y-3.5">
-      {/* 1. TÍTULO OPCIONAL DEL GRÁFICO */}
-      <div>
-        <label className="text-[10px] text-slate-400 block mb-1 font-mono">
-          Título del Gráfico (Opcional):
-        </label>
+      {/* 1. TÍTULO OPCIONAL DEL GRÁFICO CON ALINEACIÓN */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <label className="text-[10px] text-slate-400 font-mono">
+            Título del Gráfico (Opcional):
+          </label>
+          <div className="flex items-center bg-slate-950 border border-slate-800 rounded-lg p-0.5 gap-0.5">
+            <button
+              type="button"
+              onClick={() => updateState({ chartTitleAlign: 'left' })}
+              title="Alinear a la Izquierda"
+              className={`p-1 rounded cursor-pointer transition ${
+                (state.chartTitleAlign || 'left') === 'left'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <AlignLeft className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => updateState({ chartTitleAlign: 'center' })}
+              title="Centrar Título"
+              className={`p-1 rounded cursor-pointer transition ${
+                state.chartTitleAlign === 'center'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <AlignCenter className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => updateState({ chartTitleAlign: 'right' })}
+              title="Alinear a la Derecha"
+              className={`p-1 rounded cursor-pointer transition ${
+                state.chartTitleAlign === 'right'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <AlignRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
         <input
           type="text"
           value={state.chartTitle ?? ''}
@@ -111,6 +152,9 @@ export const ChartBarsModuleConfig: React.FC<ChartBarsModuleConfigProps> = ({ st
 
         {state.chartBars.map((bar, idx) => {
           const isTargetHighlighted = isHighlightFirst && idx === 0;
+          const barColor = isTargetHighlighted
+            ? state.currentColor
+            : chartColors[idx % chartColors.length];
 
           return (
             <div
@@ -122,7 +166,11 @@ export const ChartBarsModuleConfig: React.FC<ChartBarsModuleConfigProps> = ({ st
               }`}
             >
               <div className="flex items-center gap-2">
-                {/* Input visible para el nombre/label de la barra */}
+                <span
+                  className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm ring-1 ring-white/20"
+                  style={{ backgroundColor: barColor }}
+                  title={`Color: ${barColor}`}
+                />
                 <input
                   type="text"
                   value={bar.label}
@@ -135,11 +183,11 @@ export const ChartBarsModuleConfig: React.FC<ChartBarsModuleConfigProps> = ({ st
                   {bar.pct}%
                 </span>
 
-                {state.chartBars.length > 1 && (
+                {state.chartBars.length > 2 && (
                   <button
                     type="button"
                     onClick={() => removeBar(idx)}
-                    className="p-1.5 text-slate-500 hover:text-rose-400 rounded-lg hover:bg-slate-900 transition-colors"
+                    className="p-1.5 text-slate-500 hover:text-rose-400 rounded-lg hover:bg-slate-900 transition-colors cursor-pointer"
                     title="Eliminar barra"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -155,7 +203,8 @@ export const ChartBarsModuleConfig: React.FC<ChartBarsModuleConfigProps> = ({ st
                   max={100}
                   value={bar.pct}
                   onChange={(e) => updateBar(idx, 'pct', Number(e.target.value))}
-                  className="w-full accent-indigo-500 bg-slate-900 h-1.5 rounded-lg cursor-pointer"
+                  style={{ accentColor: barColor }}
+                  className="w-full bg-slate-900 h-1.5 rounded-lg cursor-pointer"
                 />
               </div>
             </div>

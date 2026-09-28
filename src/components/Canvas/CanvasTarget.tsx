@@ -2,6 +2,7 @@ import React, { forwardRef, useMemo, useState } from 'react';
 import { PostState, ShapePlacement, ShapeStyleVariant, ShapeGeometry, ShapeProximity, BackgroundLayerOrder, PatternVignette } from '../../types';
 import { aspectRatios } from '../../constants/templates';
 import { getBrandIconComponent } from '../../constants/brandIcons';
+import { FIXED_CHART_COLORS, getChartColors } from '../../constants/chartColors';
 import { 
   Star, CheckCircle2, Radio, User, Sparkles, Tag, ArrowRight, 
   FileCode, Terminal, TrendingUp, TrendingDown, CheckCheck, Minus, 
@@ -9,8 +10,27 @@ import {
   Heart, Flame, Palette, Compass, MessageSquare, Share2,
   Lock, Server, Cloud, DollarSign, ShoppingCart, Percent, Award,
   Globe, Mic, Copy, Check, Shield, CircleDot, Play, ExternalLink,
-  GitBranch, Bell
+  GitBranch, Bell, PieChart, Activity, Target, BarChart3
 } from 'lucide-react';
+
+const getDonutCenterIcon = (iconId?: string) => {
+  switch (iconId) {
+    case 'pie-chart': return PieChart;
+    case 'activity': return Activity;
+    case 'zap': return Zap;
+    case 'target': return Target;
+    case 'shield': return Shield;
+    case 'award': return Award;
+    case 'sparkles': return Sparkles;
+    case 'bar-chart': return BarChart3;
+    case 'percent': return Percent;
+    case 'dollar': return DollarSign;
+    case 'none': return null;
+    case 'trending-up':
+    default:
+      return TrendingUp;
+  }
+};
 
 interface CanvasTargetProps {
   state: PostState;
@@ -19,7 +39,7 @@ interface CanvasTargetProps {
 export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ state }, ref) => {
   const r = aspectRatios[state.aspectRatio] || aspectRatios['4:5'];
   const isLight = state.canvasMode === 'light';
-  const isWidescreen = state.aspectRatio === '16:9';
+  const isWidescreen = false;
 
   // Cálculo de color RGB para iluminaciones y formas
   const cleanColor = (state.currentColor || '#4F46E5').replace('#', '');
@@ -38,6 +58,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
   const duoRgb = `${dRed}, ${dGreen}, ${dBlue}`;
 
   // Factores de iluminación
+  const dynamicChartColors = useMemo(() => getChartColors(state.currentColor), [state.currentColor]);
   const lightFactor = (state.lightIntensity ?? 40) / 100;
   const lightA1 = (lightFactor * (isLight ? 0.35 : 0.65)).toFixed(3);
   const lightA2 = (lightFactor * (isLight ? 0.18 : 0.35)).toFixed(3);
@@ -696,7 +717,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
               color: tagTextColor
             }}
           >
-            <span className="rounded-full animate-pulse" style={{ width: `${Math.round(tagPx * 0.55)}px`, height: `${Math.round(tagPx * 0.55)}px`, backgroundColor: tagTextColor }} />
+            <span className="rounded-full shrink-0" style={{ width: `${Math.round(tagPx * 0.55)}px`, height: `${Math.round(tagPx * 0.55)}px`, backgroundColor: tagTextColor }} />
             <span>{state.statusPillText}</span>
           </div>
         </div>
@@ -855,7 +876,8 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
 
     let moduleContainerClasses = `${roundedClass} ${moduleMinH} transition-all w-full flex flex-col justify-center h-auto`;
     let moduleContainerStyles: React.CSSProperties = {
-      padding: `${Math.round(basePadding * modScale)}px`
+      padding: `${Math.round(basePadding * modScale)}px`,
+      marginTop: state.moduleMarginTop ? `${state.moduleMarginTop}px` : undefined
     };
 
     const bgOpacity = (state.moduleBgOpacity ?? 85) / 100;
@@ -1212,10 +1234,10 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                     {/* Cabecera de la Tarjeta KPI con Etiqueta */}
                     <div className="flex items-center justify-between gap-2 z-10 mb-2">
                       <span
-                        className="font-mono font-bold uppercase tracking-wider truncate"
+                        className={`font-normal uppercase tracking-wider truncate ${state.subtitleFont || state.titleFont || 'font-inter'}`}
                         style={{
                           fontSize: `${Math.max(13, Math.round(baseTextSize * 1.05))}px`,
-                          color: isLight ? '#475569' : '#CBD5E1'
+                          color: isLight ? '#0F172A' : '#FFFFFF'
                         }}
                       >
                         {kpi.label}
@@ -1225,7 +1247,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                     {/* Valor Central & Tendencia */}
                     <div className="flex items-baseline gap-2 flex-wrap z-10 my-1 justify-between">
                       <span
-                        className="font-mono font-black tracking-tight"
+                        className={`font-normal tracking-tight ${state.subtitleFont || state.titleFont || 'font-inter'}`}
                         style={{
                           fontSize: `${Math.round(44 * fontMult)}px`,
                           color: isLight ? '#0F172A' : '#FFFFFF',
@@ -1237,7 +1259,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
 
                       {kpi.trend === 'up' && (
                         <span
-                          className="font-mono font-black text-emerald-400 bg-emerald-500/20 border border-emerald-500/40 rounded-xl flex items-center justify-center shadow-md shrink-0"
+                          className={`font-normal text-emerald-400 bg-emerald-500/20 border border-emerald-500/40 rounded-xl flex items-center justify-center shadow-md shrink-0 ${state.subtitleFont || state.titleFont || 'font-inter'}`}
                           style={{
                             fontSize: `${Math.round(15 * modScale)}px`,
                             padding: `${Math.round(6 * modScale)}px ${Math.round(14 * modScale)}px`
@@ -1248,7 +1270,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                       )}
                       {kpi.trend === 'down' && (
                         <span
-                          className="font-mono font-black text-rose-400 bg-rose-500/20 border border-rose-500/40 rounded-xl flex items-center justify-center shadow-md shrink-0"
+                          className={`font-normal text-rose-400 bg-rose-500/20 border border-rose-500/40 rounded-xl flex items-center justify-center shadow-md shrink-0 ${state.subtitleFont || state.titleFont || 'font-inter'}`}
                           style={{
                             fontSize: `${Math.round(15 * modScale)}px`,
                             padding: `${Math.round(6 * modScale)}px ${Math.round(14 * modScale)}px`
@@ -1269,69 +1291,58 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
         {/* 3. GRÁFICOS: BARRAS HORIZONTALES CON RANKING Y CONTENEDOR ANALYTIC*/}
         {/* ================================================================= */}
         {(state.activeModule === 'chart-bars' || (state.activeModule === 'chart' && (!state.chartType || state.chartType === 'horizontal-bars'))) && (() => {
-          const FIXED_CHART_COLORS = ['#6366F1', '#06B6D4', '#10B981', '#F59E0B', '#EC4899'];
-
           return (
             <div
-              className="w-full rounded-2xl p-6 border flex flex-col gap-5 backdrop-blur-xl shadow-2xl"
+              className="w-full flex flex-col gap-5"
               style={{
-                backgroundColor: isLight ? 'rgba(255, 255, 255, 0.9)' : 'rgba(15, 23, 42, 0.85)',
-                borderColor: isLight ? 'rgba(0,0,0,0.08)' : `rgba(${rgb}, 0.35)`,
-                boxShadow: `0 20px 40px -10px rgba(${rgb}, 0.2)`
+                backgroundColor: 'transparent',
+                border: 'none',
+                boxShadow: 'none',
+                padding: 0
               }}
             >
-              {/* Cabecera / Título de Gráfico */}
+              {/* Cabecera / Título de Gráfico (Integrado, en Mayúsculas, sin punto ni línea inferior) */}
               {state.chartTitle && (
-                <div className="flex items-center gap-2.5 border-b border-white/10 pb-3">
+                <div className={`flex items-center w-full mb-3 ${
+                  state.chartTitleAlign === 'center' ? 'justify-center text-center' :
+                  state.chartTitleAlign === 'right' ? 'justify-end text-right' :
+                  'justify-start text-left'
+                }`}>
                   <span
-                    className="rounded-full animate-pulse"
-                    style={{
-                      backgroundColor: state.currentColor,
-                      width: `${Math.round(12 * modScale)}px`,
-                      height: `${Math.round(12 * modScale)}px`
-                    }}
-                  />
-                  <span
-                    className={`font-bold tracking-wider text-white ${chartFont}`}
+                    className={`font-bold uppercase tracking-wider text-white ${chartFont}`}
                     style={{ fontSize: `${Math.round(18 * modScale)}px` }}
                   >
-                    {state.chartTitle}
+                    {state.chartTitle.toUpperCase()}
                   </span>
                 </div>
               )}
 
-              {/* Lista de Barras con barra resaltada y neutras */}
+              {/* Lista de Barras con colores planos sólidos de alto contraste */}
               <div
                 className="flex flex-col w-full"
-                style={{ gap: `${state.chartBarsGap ?? 20}px` }}
+                style={{ gap: `${state.chartBarsGap ?? 22}px` }}
               >
                 {state.chartBars.slice(0, 5).map((bar, idx) => {
                   const barH = state.chartBarHeight || 20;
-                  const isHighlighted = state.chartBarHighlightMode === 'normal' ? true : idx === 0;
-                  const defaultColor = FIXED_CHART_COLORS[idx % FIXED_CHART_COLORS.length];
-                  const activeColor = state.chartBarHighlightMode === 'normal'
-                    ? (bar.color || defaultColor)
-                    : (isHighlighted ? (bar.color || state.currentColor) : (isLight ? '#94A3B8' : '#475569'));
-                  const activeGrad = state.chartBarHighlightMode === 'normal'
-                    ? `linear-gradient(90deg, ${activeColor}88, ${activeColor})`
-                    : isHighlighted
-                    ? `linear-gradient(90deg, ${activeColor}88, ${activeColor})`
-                    : isLight
-                    ? 'linear-gradient(90deg, #94A3B8, #64748B)'
-                    : 'linear-gradient(90deg, #334155, #475569)';
+                  const isHighlightFirst = state.chartBarHighlightMode === 'first';
+                  const isHighlighted = isHighlightFirst ? idx === 0 : true;
+                  const barColor = dynamicChartColors[idx % dynamicChartColors.length];
+                  const activeColor = isHighlightFirst
+                    ? (idx === 0 ? (state.currentColor || barColor) : (isLight ? '#94A3B8' : '#475569'))
+                    : barColor;
 
                   return (
-                    <div key={idx} className="flex flex-col gap-2 w-full">
+                    <div key={idx} className="flex flex-col gap-3.5 w-full">
                       <div className="flex justify-between items-center text-xs">
                         <span
-                          className={`font-bold ${chartFont} ${isHighlighted ? (isLight ? 'text-slate-900' : 'text-white') : (isLight ? 'text-slate-600' : 'text-slate-400')}`}
+                          className={`font-normal ${chartFont} ${isHighlighted ? (isLight ? 'text-slate-900' : 'text-white') : (isLight ? 'text-slate-700' : 'text-slate-200')}`}
                           style={{ fontSize: `${Math.max(14, Math.round(baseTextSize * 1.05))}px` }}
                         >
                           {bar.label}
                         </span>
                         <span
-                          className={`font-bold font-mono ${
-                            isHighlighted ? (isLight ? 'text-slate-900' : 'text-white') : (isLight ? 'text-slate-500' : 'text-slate-400')
+                          className={`font-normal ${chartFont} ${
+                            isHighlighted ? (isLight ? 'text-slate-900' : 'text-white') : (isLight ? 'text-slate-700' : 'text-slate-300')
                           }`}
                           style={{
                             fontSize: `${Math.max(14, Math.round(baseTextSize * 1.05))}px`
@@ -1345,15 +1356,15 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         style={{
                           height: `${barH}px`,
                           backgroundColor: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(15, 23, 42, 0.8)',
-                          borderColor: isHighlighted ? `rgba(${rgb}, 0.3)` : (isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)')
+                          borderColor: isHighlighted ? `${activeColor}50` : (isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)')
                         }}
                       >
                         <div
                           className="h-full rounded-full transition-all duration-700 shadow-sm relative"
                           style={{
                             width: `${Math.min(100, Math.max(0, bar.pct))}%`,
-                            background: activeGrad,
-                            boxShadow: isHighlighted ? `0 0 14px ${activeColor}90` : 'none'
+                            backgroundColor: activeColor,
+                            boxShadow: isHighlighted ? `0 0 14px ${activeColor}80` : 'none'
                           }}
                         />
                       </div>
@@ -1377,7 +1388,6 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                 { label: 'APIs & Micro', pct: 25, color: '#10B981' }
               ]);
           const totalPct = slices.reduce((acc, b) => acc + (b.pct || 0), 0) || 100;
-          const FIXED_CHART_COLORS = ['#6366F1', '#06B6D4', '#10B981', '#F59E0B', '#EC4899'];
           const pieStyle = state.chartPieStyle || (state.chartPieMode === 'gauge' ? 'gauge' : 'donut');
           const isGauge = pieStyle === 'gauge';
           const isPie = pieStyle === 'pie';
@@ -1387,39 +1397,31 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
           const heroSub = state.chartDonutHeroSub || '';
           const hasHeroText = Boolean(heroMetric || heroSub);
 
+          const CenterIcon = getDonutCenterIcon(state.chartDonutIcon);
+
           return (
-            <div
-              className="flex flex-col gap-4 w-full p-5 rounded-2xl border backdrop-blur-xl shadow-2xl"
-              style={{
-                backgroundColor: isLight ? 'rgba(255, 255, 255, 0.9)' : 'rgba(15, 23, 42, 0.85)',
-                borderColor: isLight ? 'rgba(0,0,0,0.08)' : `rgba(${rgb}, 0.35)`,
-                boxShadow: `0 20px 40px -10px rgba(${rgb}, 0.2)`
-              }}
-            >
+            <div className="flex flex-col gap-4 w-full">
+              {/* Cabecera / Título de Gráfico (Integrado, en Mayúsculas, sin punto ni línea inferior) */}
               {state.chartTitle && (
-                <div className="flex items-center gap-2.5 border-b border-white/10 pb-3">
+                <div className={`flex items-center w-full mb-3 ${
+                  state.chartTitleAlign === 'center' ? 'justify-center text-center' :
+                  state.chartTitleAlign === 'right' ? 'justify-end text-right' :
+                  'justify-start text-left'
+                }`}>
                   <span
-                    className="rounded-full"
-                    style={{
-                      backgroundColor: state.currentColor,
-                      width: `${Math.round(12 * modScale)}px`,
-                      height: `${Math.round(12 * modScale)}px`
-                    }}
-                  />
-                  <span
-                    className={`font-bold tracking-wider text-white ${chartFont}`}
+                    className={`font-bold uppercase tracking-wider text-white ${chartFont}`}
                     style={{ fontSize: `${Math.round(18 * modScale)}px` }}
                   >
-                    {state.chartTitle}
+                    {state.chartTitle.toUpperCase()}
                   </span>
                 </div>
               )}
               <div className="flex items-center justify-around gap-6 w-full">
               {/* Contenedor Gráfico Circular, Donut o Gauge */}
-              <div className="relative w-56 h-56 shrink-0 flex items-center justify-center">
+              <div className="relative w-64 h-64 shrink-0 flex items-center justify-center">
                 {isGauge ? (
                   // Velocímetro / Gauge 180° Ampliado
-                  <div className="relative w-64 h-44 flex items-end justify-center">
+                  <div className="relative w-72 h-48 flex items-end justify-center">
                     <svg className="w-full h-full overflow-visible" viewBox="0 0 180 105">
                       {/* Arco base con corte lineal */}
                       <path
@@ -1439,7 +1441,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                           const dashArray = `${sliceLength.toFixed(2)} ${arcLength.toFixed(2)}`;
                           const dashOffset = (-accumulated).toFixed(2);
                           accumulated += sliceLength;
-                          const sliceColor = slice.color || FIXED_CHART_COLORS[idx % FIXED_CHART_COLORS.length];
+                          const sliceColor = dynamicChartColors[idx % dynamicChartColors.length];
 
                           return (
                             <path
@@ -1458,23 +1460,46 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         });
                       })()}
                     </svg>
-                    {hasHeroText && (
-                      <div className="absolute bottom-2 flex flex-col items-center text-center">
-                        {heroMetric && (
-                          <span
-                            className={`font-black text-3xl tracking-tight ${chartFont}`}
-                            style={{ color: isLight ? '#0F172A' : '#FFFFFF' }}
-                          >
-                            {heroMetric}
-                          </span>
-                        )}
-                        {heroSub && (
-                          <span className={`text-[10px] text-slate-400 uppercase tracking-widest font-bold ${chartFont}`}>
-                            {heroSub}
-                          </span>
-                        )}
-                      </div>
-                    )}
+                    {(() => {
+                      if (state.chartDonutIcon === 'none') return null;
+                      if (CenterIcon) {
+                        return (
+                          <div className="absolute bottom-8 flex items-center justify-center pointer-events-none">
+                            <CenterIcon
+                              className="transition-transform"
+                              style={{
+                                width: `${Math.round(40 * modScale)}px`,
+                                height: `${Math.round(40 * modScale)}px`,
+                                color: isLight ? '#0F172A' : '#FFFFFF',
+                                filter: isLight
+                                  ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+                                  : 'drop-shadow(0 0 12px rgba(255,255,255,0.4))'
+                              }}
+                            />
+                          </div>
+                        );
+                      }
+                      if (hasHeroText) {
+                        return (
+                          <div className="absolute bottom-2 flex flex-col items-center text-center">
+                            {heroMetric && (
+                              <span
+                                className={`font-normal text-3xl tracking-tight ${chartFont}`}
+                                style={{ color: isLight ? '#0F172A' : '#FFFFFF' }}
+                              >
+                                {heroMetric}
+                              </span>
+                            )}
+                            {heroSub && (
+                              <span className={`text-[10px] text-slate-400 uppercase tracking-widest font-normal ${chartFont}`}>
+                                {heroSub}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
                   </div>
                 ) : (
                   // Donut 360° o Pie Completo
@@ -1498,7 +1523,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                           const strokeDasharray = `${(slicePct * circumference).toFixed(2)} ${circumference.toFixed(2)}`;
                           const strokeDashoffset = `${(-(accumulatedPct / totalPct) * circumference).toFixed(2)}`;
                           accumulatedPct += bar.pct;
-                          const sliceColor = bar.color || FIXED_CHART_COLORS[idx % FIXED_CHART_COLORS.length];
+                          const sliceColor = dynamicChartColors[idx % dynamicChartColors.length];
 
                           return (
                             <circle
@@ -1518,23 +1543,37 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         });
                       })()}
                     </svg>
-                    {!isPie && hasHeroText && (
+                    {!isPie && state.chartDonutIcon !== 'none' && (CenterIcon ? (
+                      <div className="absolute flex items-center justify-center pointer-events-none">
+                        <CenterIcon
+                          className="transition-transform"
+                          style={{
+                            width: `${Math.round(44 * modScale)}px`,
+                            height: `${Math.round(44 * modScale)}px`,
+                            color: isLight ? '#0F172A' : '#FFFFFF',
+                            filter: isLight
+                              ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+                              : 'drop-shadow(0 0 12px rgba(255,255,255,0.4))'
+                          }}
+                        />
+                      </div>
+                    ) : hasHeroText && (
                       <div className="absolute flex flex-col items-center justify-center text-center">
                         {heroMetric && (
                           <span
-                            className={`font-black text-3xl ${chartFont}`}
+                            className={`font-normal text-3xl ${chartFont}`}
                             style={{ color: isLight ? '#0F172A' : '#FFFFFF' }}
                           >
                             {heroMetric}
                           </span>
                         )}
                         {heroSub && (
-                          <span className={`text-xs text-slate-400 uppercase tracking-widest font-bold pt-0.5 ${chartFont}`}>
+                          <span className={`text-xs text-slate-400 uppercase tracking-widest font-normal pt-0.5 ${chartFont}`}>
                             {heroSub}
                           </span>
                         )}
                       </div>
-                    )}
+                    ))}
                   </>
                 )}
               </div>
@@ -1542,7 +1581,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
               {/* Leyenda Bento de Chips */}
               <div className="flex flex-col gap-2.5 flex-1 max-w-[58%]">
                 {slices.slice(0, 5).map((bar, idx) => {
-                  const sliceColor = bar.color || FIXED_CHART_COLORS[idx % FIXED_CHART_COLORS.length];
+                  const sliceColor = dynamicChartColors[idx % dynamicChartColors.length];
                   return (
                     <div
                       key={idx}
@@ -1558,15 +1597,15 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                           style={{ backgroundColor: sliceColor }}
                         />
                         <span
-                          className={`truncate font-bold ${chartFont} ${isLight ? 'text-slate-800' : 'text-slate-100'}`}
+                          className={`truncate font-normal ${chartFont} ${isLight ? 'text-slate-800' : 'text-slate-100'}`}
                           style={{ fontSize: `${Math.max(14, Math.round(baseTextSize * 0.95))}px` }}
                         >
                           {bar.label}
                         </span>
                       </div>
                       <span
-                        className="font-mono font-black text-white shrink-0 px-3 py-1 rounded-xl bg-slate-900 border border-white/20 shadow-xs"
-                        style={{ fontSize: `${Math.max(13, Math.round(baseTextSize * 0.92))}px` }}
+                        className={`font-normal ${chartFont} shrink-0 ${isLight ? 'text-slate-800' : 'text-slate-100'}`}
+                        style={{ fontSize: `${Math.max(14, Math.round(baseTextSize * 0.95))}px` }}
                       >
                         {bar.pct}%
                       </span>
@@ -1592,15 +1631,21 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                 { label: 'Abr', pct: 80 },
                 { label: 'May', pct: 95 }
               ]);
-          const bars1 = rawPoints.slice(0, 6);
+          const bars1 = rawPoints.slice(0, 12);
           const strokeW = state.chartLineStroke || 4;
-          const isCurved = state.chartLineCurved !== false;
-          const showGrid = state.chartLineShowGrid !== false;
+          const isCurved = false; // Línea recta por defecto
+          const showGrid = true; // Cuadrícula siempre visible
 
-          const svgW = 460;
-          const svgH = state.chartLineHeight || 175;
-          const padX = 45;
-          const padY = 32;
+          const widthPct = Math.min(100, Math.max(50, state.chartLineWidthPct ?? 75));
+          const svgW = 600;
+          const heightPct = state.chartLineHeightPct !== undefined
+            ? Math.min(100, Math.max(50, state.chartLineHeightPct))
+            : (state.chartLineHeight
+                ? Math.min(100, Math.max(50, Math.round(50 + ((state.chartLineHeight - 200) / 100) * 50)))
+                : 50);
+          const svgH = Math.round(200 + ((heightPct - 50) / 50) * 100);
+          const padX = bars1.length >= 10 ? 18 : (bars1.length >= 7 ? 24 : 32);
+          const padY = 28;
           const maxPct = Math.max(100, ...bars1.map((b) => b.pct));
 
           const points1 = bars1.map((b, idx) => {
@@ -1609,7 +1654,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
             return { x, y, ...b };
           });
 
-          // Helper para generar curva Bezier Spline suave
+          // Helper para generar curva Bezier Spline suave (si se reactiva en el futuro)
           const getCurvedPath = (pts: typeof points1) => {
             if (pts.length <= 1) return '';
             let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
@@ -1632,98 +1677,110 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
           const areaD1 = `${pathD1} L ${points1[points1.length - 1].x.toFixed(1)} ${(svgH - padY).toFixed(1)} L ${points1[0].x.toFixed(1)} ${(svgH - padY).toFixed(1)} Z`;
 
           return (
-            <div
-              className="w-full rounded-2xl p-5 border flex flex-col items-center backdrop-blur-xl shadow-2xl"
-              style={{
-                backgroundColor: isLight ? 'rgba(255, 255, 255, 0.9)' : 'rgba(15, 23, 42, 0.85)',
-                borderColor: isLight ? 'rgba(0,0,0,0.08)' : `rgba(${rgb}, 0.35)`,
-                boxShadow: `0 20px 40px -10px rgba(${rgb}, 0.2)`
-              }}
-            >
-              {state.chartTitle && (
-                <div className="flex items-center gap-2.5 border-b border-white/10 pb-3 mb-3 w-full">
-                  <span
-                    className="rounded-full animate-pulse"
-                    style={{
-                      backgroundColor: state.currentColor,
-                      width: `${Math.round(12 * modScale)}px`,
-                      height: `${Math.round(12 * modScale)}px`
-                    }}
-                  />
-                  <span
-                    className={`font-bold tracking-wider text-white ${chartFont}`}
-                    style={{ fontSize: `${Math.round(18 * modScale)}px` }}
-                  >
-                    {state.chartTitle}
-                  </span>
-                </div>
-              )}
-              <svg
-                className="w-full overflow-visible"
-                style={{ height: `${svgH}px` }}
-                viewBox={`0 0 ${svgW} ${svgH}`}
+            <div className="w-full flex flex-col items-center">
+              <div
+                className="flex flex-col items-center mx-auto transition-all duration-300"
+                style={{ width: `${widthPct}%`, maxWidth: '100%' }}
               >
-                <defs>
-                  <linearGradient id="chartLineGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor={state.currentColor} stopOpacity="0.45" />
-                    <stop offset="100%" stopColor={state.currentColor} stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-
-                {/* Guías Horizontales con Escalas */}
-                {showGrid && (
-                  <>
-                    <line x1={padX} y1={padY} x2={svgW - padX} y2={padY} stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />
-                    <text x={padX - 8} y={padY + 4} textAnchor="end" fill="#94A3B8" fontSize="12" className={chartFont}>100%</text>
-
-                    <line x1={padX} y1={(padY + svgH - padY) / 2} x2={svgW - padX} y2={(padY + svgH - padY) / 2} stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />
-                    <text x={padX - 8} y={(padY + svgH - padY) / 2 + 4} textAnchor="end" fill="#94A3B8" fontSize="12" className={chartFont}>50%</text>
-
-                    <line x1={padX} y1={svgH - padY} x2={svgW - padX} y2={svgH - padY} stroke="rgba(255,255,255,0.15)" />
-                    <text x={padX - 8} y={svgH - padY + 4} textAnchor="end" fill="#94A3B8" fontSize="12" className={chartFont}>0%</text>
-                  </>
+                {/* Cabecera / Título de Gráfico (Integrado, en Mayúsculas, sin punto ni línea inferior) */}
+                {state.chartTitle && (
+                  <div className={`flex items-center w-full mb-3 ${
+                    state.chartTitleAlign === 'center' ? 'justify-center text-center' :
+                    state.chartTitleAlign === 'right' ? 'justify-end text-right' :
+                    'justify-start text-left'
+                  }`}>
+                    <span
+                      className={`font-bold uppercase tracking-wider text-white ${chartFont}`}
+                      style={{ fontSize: `${Math.round(18 * modScale)}px` }}
+                    >
+                      {state.chartTitle.toUpperCase()}
+                    </span>
+                  </div>
                 )}
 
-                {/* Área con Relleno Degradado */}
-                <path d={areaD1} fill="url(#chartLineGrad1)" />
-
-                {/* Línea Principal de Serie */}
-                <path
-                  d={pathD1}
-                  fill="none"
-                  stroke={state.currentColor}
-                  strokeWidth={strokeW}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ filter: `drop-shadow(0 0 6px ${state.currentColor}80)` }}
-                />
-
-                {/* Puntos y Etiquetas */}
-                {points1.map((pt, idx) => (
-                  <g key={idx}>
-                    <circle
-                      cx={pt.x}
-                      cy={pt.y}
-                      r="6"
-                      fill={state.currentColor}
-                      stroke="#FFFFFF"
-                      strokeWidth="2.5"
-                      className="shadow-lg"
-                    />
-                    <text
-                      x={pt.x}
-                      y={svgH - padY + 22}
-                      textAnchor="middle"
-                      fill={isLight ? '#334155' : '#E2E8F0'}
-                      fontSize="15"
-                      fontWeight="bold"
-                      className={chartFont}
+                <div className="w-full">
+                  <div className="w-full relative" style={{ height: `${svgH}px` }}>
+                    <svg
+                      className="w-full h-full overflow-visible block"
+                      style={{ width: '100%', height: `${svgH}px` }}
+                      viewBox={`0 0 ${svgW} ${svgH}`}
+                      preserveAspectRatio="none"
                     >
-                      {pt.label}
-                    </text>
-                  </g>
-                ))}
-              </svg>
+                      <defs>
+                        <linearGradient id="chartLineGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor={state.currentColor} stopOpacity="0.45" />
+                          <stop offset="100%" stopColor={state.currentColor} stopOpacity="0.0" />
+                        </linearGradient>
+                      </defs>
+
+                      {/* Guías Horizontales con Escalas */}
+                      {showGrid && (
+                        <>
+                          <line x1={0} y1={padY} x2={svgW} y2={padY} stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />
+                          <line x1={0} y1={(padY + svgH - padY) / 2} x2={svgW} y2={(padY + svgH - padY) / 2} stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />
+                          <line x1={0} y1={svgH - padY} x2={svgW} y2={svgH - padY} stroke="rgba(255,255,255,0.15)" />
+                        </>
+                      )}
+
+                      {/* Área con Relleno Degradado */}
+                      <path d={areaD1} fill="url(#chartLineGrad1)" />
+
+                      {/* Línea Principal de Serie */}
+                      <path
+                        d={pathD1}
+                        fill="none"
+                        stroke={state.currentColor}
+                        strokeWidth={strokeW}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        style={{ filter: `drop-shadow(0 0 8px ${state.currentColor}90)` }}
+                      />
+                    </svg>
+
+                    {/* Puntos de la Serie (HTML con geometría 1:1 estricta - NUNCA se deforma en óvalo) */}
+                    {points1.map((pt, idx) => {
+                      const dotD = Math.max(12, Math.round(16 * modScale));
+                      const borderW = Math.max(2, Math.round(2.5 * modScale));
+                      return (
+                        <div
+                          key={idx}
+                          className="absolute rounded-full shadow-lg pointer-events-none transform -translate-x-1/2 -translate-y-1/2 transition-all"
+                          style={{
+                            left: `${(pt.x / svgW) * 100}%`,
+                            top: `${pt.y}px`,
+                            width: `${dotD}px`,
+                            height: `${dotD}px`,
+                            backgroundColor: state.currentColor,
+                            border: `${borderW}px solid #FFFFFF`,
+                            boxShadow: `0 0 10px ${state.currentColor}80`
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+
+                  {/* Fila de Etiquetas de Hitos Eje X (HTML puro sin distorsión) */}
+                  <div className="flex justify-between items-center w-full pt-4 px-2">
+                    {points1.map((pt, idx) => {
+                      const hitoFontSize = bars1.length >= 10
+                        ? Math.max(14, Math.round(18 * modScale))
+                        : (bars1.length >= 7 ? Math.max(16, Math.round(21 * modScale)) : Math.max(18, Math.round(24 * modScale)));
+                      return (
+                        <span
+                          key={idx}
+                          className={`text-center font-semibold truncate ${chartFont}`}
+                          style={{
+                            color: isLight ? '#1E293B' : '#F1F5F9',
+                            fontSize: `${hitoFontSize}px`
+                          }}
+                        >
+                          {pt.label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
           );
         })()}
@@ -1778,7 +1835,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                 </div>
 
                 <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono shrink-0">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
                   <span className="text-emerald-400 font-semibold">{state.chatOnlineStatus || 'en línea'}</span>
                 </div>
               </div>
@@ -1856,6 +1913,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
         {state.activeModule === 'steps' && (() => {
           const variant = state.stepsVisualVariant || (state.stepsLayout === 'connected-timeline' ? 'timeline' : 'bento');
           const stepsList = state.steps || state.stepsData || [];
+          const stepFont = state.subtitleFont || state.titleFont || 'font-inter';
 
           // 1. TIMELINE VERTICAL CONECTADA
           if (variant === 'timeline') {
@@ -1889,13 +1947,13 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                         }}
                       >
                         <h4
-                          className={`font-bold text-white ${state.titleFont || 'font-inter'}`}
+                          className={`font-normal text-white ${stepFont}`}
                           style={{ fontSize: `${Math.round(modFontSize * 1.15)}px` }}
                         >
                           {st.title}
                         </h4>
                         <p
-                          className="text-slate-400 leading-relaxed mt-1"
+                          className={`text-slate-300 leading-relaxed font-normal mt-1 ${stepFont}`}
                           style={{ fontSize: `${baseTextSize}px` }}
                         >
                           {st.desc || st.description}
@@ -1928,13 +1986,13 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                       </span>
                       <div className="flex flex-col">
                         <h4
-                          className={`font-bold text-white ${state.titleFont || 'font-inter'}`}
+                          className={`font-normal text-white ${stepFont}`}
                           style={{ fontSize: `${Math.round(baseTextSize * 1.1)}px` }}
                         >
                           {st.title}
                         </h4>
                         <p
-                          className="text-slate-400 leading-relaxed text-xs mt-0.5"
+                          className={`text-slate-300 leading-relaxed text-xs mt-0.5 font-normal ${stepFont}`}
                           style={{ fontSize: `${Math.round(baseTextSize * 0.95)}px` }}
                         >
                           {st.desc || st.description}
@@ -1947,40 +2005,51 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
             );
           }
 
-          // 3. BADGES / CHIPS: FILA DE PÍLDORAS RESUMEN
+          // 3. BADGES / CHIPS: TARJETAS DE FASES CON TEXTO COMPLETO MULTILÍNEA
           if (variant === 'badges') {
             return (
-              <div className="flex flex-col gap-2.5 w-full">
+              <div className="flex flex-col gap-3 w-full">
                 {stepsList.map((st, idx) => {
                   const stepNum = st.stepNumber || (idx + 1);
                   return (
                     <div
                       key={idx}
-                      className="flex items-center justify-between p-3.5 rounded-xl border backdrop-blur-md"
+                      className="flex items-start gap-3.5 p-3.5 rounded-xl border backdrop-blur-md transition-all shadow-sm"
                       style={{
-                        backgroundColor: isLight ? 'rgba(255,255,255,0.85)' : 'rgba(15, 23, 42, 0.7)',
+                        backgroundColor: isLight ? 'rgba(255,255,255,0.85)' : 'rgba(15, 23, 42, 0.75)',
                         borderColor: isLight ? 'rgba(0,0,0,0.06)' : `rgba(${rgb}, 0.25)`
                       }}
                     >
-                      <div className="flex items-center gap-3">
-                        <span
-                          className="w-6 h-6 rounded-lg flex items-center justify-center font-mono font-bold text-xs text-white"
-                          style={{ backgroundColor: state.currentColor }}
-                        >
-                          {stepNum}
-                        </span>
-                        <span
-                          className="font-bold text-white"
-                          style={{ fontSize: `${Math.round(baseTextSize * 1.05)}px` }}
-                        >
-                          {st.title}
-                        </span>
-                      </div>
                       <span
-                        className="text-xs text-slate-400 font-mono truncate max-w-[200px]"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center font-mono font-bold text-xs text-white shrink-0 mt-0.5 shadow-sm"
+                        style={{ backgroundColor: state.currentColor }}
                       >
-                        {st.desc || st.description}
+                        {stepNum}
                       </span>
+                      <div className="flex flex-col flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span
+                            className={`font-normal text-white ${stepFont}`}
+                            style={{ fontSize: `${Math.round(baseTextSize * 1.05)}px` }}
+                          >
+                            {st.title}
+                          </span>
+                          <span
+                            className="text-[11px] uppercase tracking-wider font-mono opacity-70 shrink-0"
+                            style={{ color: state.currentColor }}
+                          >
+                            0{stepNum}
+                          </span>
+                        </div>
+                        {(st.desc || st.description) && (
+                          <p
+                            className={`text-slate-300 leading-relaxed font-normal mt-1 ${stepFont}`}
+                            style={{ fontSize: `${Math.max(13, Math.round(baseTextSize * 0.95))}px` }}
+                          >
+                            {st.desc || st.description}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -2016,13 +2085,13 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                       </span>
                     </div>
                     <h4
-                      className={`font-bold text-white ${state.titleFont || 'font-inter'}`}
+                      className={`font-normal text-white ${stepFont}`}
                       style={{ fontSize: `${Math.round(baseTextSize * 1.15)}px` }}
                     >
                       {st.title}
                     </h4>
                     <p
-                      className="text-slate-400 leading-relaxed line-clamp-3"
+                      className={`text-slate-300 leading-relaxed line-clamp-3 font-normal ${stepFont}`}
                       style={{ fontSize: `${baseTextSize}px` }}
                     >
                       {stepDesc}
@@ -2578,7 +2647,7 @@ export const CanvasTarget = forwardRef<HTMLDivElement, CanvasTargetProps>(({ sta
                   }}
                 >
                   <span
-                    className="rounded-full bg-emerald-400 animate-pulse"
+                    className="rounded-full bg-emerald-400 shrink-0"
                     style={{
                       width: `${Math.round(7 * modScale)}px`,
                       height: `${Math.round(7 * modScale)}px`
