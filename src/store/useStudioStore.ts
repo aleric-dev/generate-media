@@ -309,6 +309,7 @@ interface StudioStore {
   resetToScratch: () => void;
   setZoom: (level: number, mode?: 'fit-height' | 'fit-width' | 'manual') => void;
   loadProjectState: (projectState: PostState, projectId?: string | null, projectName?: string | null) => void;
+  importExternalPayload: (encodedPayload: string) => boolean;
 }
 
 export const useStudioStore = create<StudioStore>((set, get) => ({
@@ -518,6 +519,35 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
       currentProjectName: projectName,
       lastSavedSnapshot: projectId ? JSON.stringify(extractSavableState(finalState)) : null,
     });
+  },
+
+  importExternalPayload: (encodedPayload: string) => {
+    try {
+      const decodedJson = decodeURIComponent(escape(atob(encodedPayload)));
+      const parsed = JSON.parse(decodedJson);
+      if (!parsed || typeof parsed !== 'object') return false;
+
+      const finalState: PostState = {
+        ...initialPostState,
+        ...parsed,
+        viewMode: 'editor',
+      };
+
+      set({
+        postState: finalState,
+        slides: [finalState],
+        activeSlideIndex: 0,
+        currentProjectId: null,
+        currentProjectName: null,
+        lastSavedSnapshot: null,
+      });
+
+      sonnerToast.success('¡Publicación cargada en el lienzo desde Aleric Hub!');
+      return true;
+    } catch (err) {
+      console.error('Error al importar payload externo:', err);
+      return false;
+    }
   },
 
   templatesModalOpen: false,

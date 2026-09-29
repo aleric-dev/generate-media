@@ -12,6 +12,7 @@ import { ProjectsModal } from '../components/ProjectsModal';
 import { ExportSuccessModal } from '../components/ExportSuccessModal';
 import { Button } from '../components/ui';
 import { useStudioStore, extractSavableState } from '../store/useStudioStore';
+import { useEditorSession } from '../hooks/useEditorSession';
 import { 
   saveOrUpdateProject, 
   getProjectById, 
@@ -52,23 +53,8 @@ export const EditorPage: React.FC = () => {
     savedBrands.find((b) => b.name?.toLowerCase() === postState.companyName?.toLowerCase()) ||
     null;
 
-  // Carga reactiva de proyecto por UUID en URL
-  useEffect(() => {
-    if (projectId) {
-      if (currentProjectId === projectId) return;
-      const proj = getProjectById(projectId);
-      if (proj) {
-        loadProjectState(proj.postState, proj.id, proj.name);
-      } else {
-        showToast('El proyecto solicitado no existe o fue eliminado.', 'error');
-        navigate('/editor', { replace: true });
-      }
-    } else {
-      if (currentProjectId) {
-        resetToScratch();
-      }
-    }
-  }, [projectId]);
+  // Sincronización orgánica de sesión (carga de proyectos UUID e importaciones externas)
+  useEditorSession(projectId);
 
   const hasUnsavedChanges = React.useMemo(() => {
     if (!currentProjectId) return true;
