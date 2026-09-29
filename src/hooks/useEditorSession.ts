@@ -31,11 +31,9 @@ export function useEditorSession(projectId?: string) {
       lastProcessedRef.current = rawPayload;
 
       const success = importExternalPayload(rawPayload);
-      if (success) {
-        // Limpieza transparente de la URL sin disparar re-render de React Router
-        const cleanUrl = window.location.pathname;
-        window.history.replaceState({}, '', cleanUrl);
-      }
+      // Limpieza transparente de la URL sin disparar re-render de React Router
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
       return;
     }
 

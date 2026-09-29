@@ -523,9 +523,22 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
 
   importExternalPayload: (encodedPayload: string) => {
     try {
-      const decodedJson = decodeURIComponent(escape(atob(encodedPayload)));
+      // Normalizar caracteres alterados por query params (ej. '+' convertido a espacio por URLSearchParams)
+      const normalized = encodedPayload.trim().replace(/ /g, '+').replace(/-/g, '+').replace(/_/g, '/');
+      const binary = atob(normalized);
+      const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+
+      let decodedJson: string;
+      try {
+        decodedJson = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+      } catch {
+        decodedJson = decodeURIComponent(escape(binary));
+      }
+
       const parsed = JSON.parse(decodedJson);
-      if (!parsed || typeof parsed !== 'object') return false;
+      if (!parsed || typeof parsed !== 'object') {
+        throw new Error('El payload no es un objeto JSON válido');
+      }
 
       const finalState: PostState = {
         ...initialPostState,
@@ -544,8 +557,9 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
 
       sonnerToast.success('¡Publicación cargada en el lienzo desde Aleric Hub!');
       return true;
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error al importar payload externo:', err);
+      sonnerToast.error('No se pudo cargar la publicación: el enlace de importación está dañado o incompleto.');
       return false;
     }
   },
